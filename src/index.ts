@@ -17,8 +17,14 @@ app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
+if (process.env.SKIP_AUTH === 'false' && !process.env.ISSUER && !process.env.CLIENT_ID && !process.env.CLIENT_SECRET && !process.env.BASE_URL) {
+  throw new Error('ISSUER must be set when auth is required');
+} else if (!process.env.LLAMA_PATH) {
+  throw new Error('LLAMA_PATH must be set');
+}
+
 const config = {
-  authRequired: true,
+  authRequired: process.env.SKIP_AUTH === 'false',
   issuerBaseURL: process.env.ISSUER,
   clientID: process.env.CLIENT_ID,
   secret: process.env.CLIENT_SECRET,
