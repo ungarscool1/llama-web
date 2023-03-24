@@ -5,6 +5,7 @@ import path from 'path';
 import { auth } from 'express-openid-connect';
 
 const router = require('./routes');
+const chat = require('./routes/chat');
 
 dotenv.config();
 
@@ -45,6 +46,7 @@ app.use(function (req, res, next) {
 });
 
 app.use('/', router);
+app.use('/chat', chat);
 
 /*// Catch 404 and forward to error handler
 app.use(function (req, res, next) {
