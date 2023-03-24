@@ -1,0 +1,16 @@
+<div class="chat-container">
+  <div class="chat-messages">
+    <% messages.forEach(function (message) { %>
+      <%- include('message.ejs', { message: message }) -%>
+    <% }); %>
+  </div>
+  <div class="chat-input-container row">
+    <div class="col-10">
+      <input class="chat-input form-control form-control-lg" type="text" placeholder="Type your message...">
+    </div>
+    <div class="col">
+      <button class="chat-send btn btn-primary btn-lg">Send</button>
+    </div>
+    <small class="text-secondary">Free Preview. Your feedback will help us improve.</small>
+  </div>
+</div>

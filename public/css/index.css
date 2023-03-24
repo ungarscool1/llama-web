@@ -58,3 +58,30 @@ main {
 .scrollarea {
   overflow-y: auto;
 }
+
+.chat-container {
+  position: relative;
+  padding-bottom: 60px;
+  width: 50vw;
+}
+
+.chat-input-container {
+  position: absolute;
+  bottom: 0;
+  text-align: center;
+  width: 100%;
+}
+
+.chat-input {
+  width: 100%;
+}
+
+.chat-message  img {
+  width: 41px;
+  height: 41px;
+  border-radius: 5%;
+}
+
+.nav-item .nav-link.disabled {
+  color: #6c757d;
+}
