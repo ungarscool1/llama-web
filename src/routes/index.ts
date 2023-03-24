@@ -17,6 +17,25 @@ router.get('/', (req: Request, res: Response, next: NextFunction) => {
   });
 });
 
+router.post('/message', (req: Request, res: Response, next: NextFunction) => {
+  let payload: {message: string};
+  
+  if (!req.body.message) {
+    return res.status(400).send('Message is required');
+  }
+  payload = req.body;
+  res.set({
+    'Content-Type': 'text/plain',
+    'Transfer-Encoding': 'chunked',
+  });
+  const message = 'Hello world!';
+  for (let i = 0; i < message.length; i++) {
+    const chunk = message.charAt(i);
+    res.write(chunk);
+  }
+  res.end();
+});
+
 router.get('/profile', requiresAuth(), function (req: Request, res: Response, next: NextFunction) {
   res.send(JSON.stringify(req.oidc.user));
 });
