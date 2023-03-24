@@ -85,3 +85,8 @@ main {
 .nav-item .nav-link.disabled {
   color: #6c757d;
 }
+
+.chat-messages {
+  height: 95%;
+  overflow-y: auto;
+}

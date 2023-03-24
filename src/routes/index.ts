@@ -10,10 +10,7 @@ interface Message {
 }
 
 router.get('/', (req: Request, res: Response, next: NextFunction) => {
-  const messages: Message[] = [
-    { message: 'Your name is Blahblah', isBot: false },
-    { message: 'Hi my name is Blahblah. How can I help you ?', isBot: true }
-  ];
+  const messages: Message[] = [];
   res.render('index', {
     userProfile: {...req.oidc.user, gravatar: createHash('md5').update(req.oidc?.user?.email).digest('hex')},
     messages
