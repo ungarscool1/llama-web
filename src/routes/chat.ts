@@ -27,6 +27,9 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   if (!process.env.LLAMA_PATH || !process.env.LLAMA_MODEL) {
     throw new Error('LLAMA_PATH and LLAMA_MODEL must be set');
   }
+  if (chatsProcess.find((chat) => chat.user === req.oidc?.user?.preferred_username)) {
+    return res.status(400).send('Chat already started');
+  }
 
   payload = req.body;
   for (const message of payload.messages) {
