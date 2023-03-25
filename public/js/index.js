@@ -41,11 +41,11 @@ form.addEventListener('submit', (e) => {
     const lastMessage = chatMessages.lastElementChild
     const lastMessageP = lastMessage.querySelector('p')
     if (xhr.responseText.includes('[[END OF CONVERSATION]]')) {
+      const receivedMsg = xhr.responseText.replace('[[END OF CONVERSATION]]', '').trim()
       document.getElementById('send').style.display = 'block'
       cancelBtn.style.display = 'none'
-      lastMessageP.innerHTML = xhr.responseText.replace('[[END OF CONVERSATION]]', '')
-    } else {
-      lastMessageP.innerHTML = xhr.responseText.replace('Llama:', '').trim()
+      messages.push({ message: receivedMsg, isBot: true})
+      lastMessageP.innerHTML = receivedMsg
     }
   });
   xhr.addEventListener('load', () => {
