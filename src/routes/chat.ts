@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { spawn } from 'child_process';
+import { spawn, ChildProcessWithoutNullStreams } from 'child_process';
 import { requiresAuth } from 'express-openid-connect';
 
 var router = Router();
@@ -9,10 +9,17 @@ interface Message {
   isBot: boolean;
 }
 
+interface Chat {
+  user: string;
+  process: ChildProcessWithoutNullStreams;
+}
+
+const chatsProcess: Array<Chat> = [];
+
 // TODO: Take a chat ID as a parameter
 router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   let payload: {messages: Array<Message>};
-  let prompt = `Below is an instruction that describes a task. Write a response that appropriately completes the request. The response must be accurate, concise and evidence-based whenever possible. A complete answer is always ended by [[END OF CONVERSATION]].`;
+  let prompt = `Text transcript of a never ending dialog, where ${req.oidc?.user?.given_name} interacts with an AI assistant named LLaMa.\nLLaMa is helpful, kind, honest, friendly, good at writing and never fails to answer ${req.oidc?.user?.given_name}’s requests immediately and with details and precision.\nThere are no annotations like (30 seconds passed...) or (to himself), just what ${req.oidc?.user?.given_name} and LLaMa say aloud to each other.\nThe dialog lasts for years, the entirety of it is shared below. It's 10000 pages long.\nThe transcript only includes text, it can include markup like HTML but NO Markdown.\n\n${req.oidc?.user?.given_name}: Hello, LLaMA!\nLLaMA: Hello ${req.oidc?.user?.given_name}! How may I help you today?`;
   let index = 0;
   if (!req.body.messages) {
     return res.status(400).send('Messages is required');
@@ -23,21 +30,25 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
 
   payload = req.body;
   for (const message of payload.messages) {
-    prompt += `${message.isBot ? 'Llama' : req.oidc?.user?.given_name}: ${message.message}\n`;
+    prompt += `###${message.isBot ? 'Llama' : `${req.oidc?.user?.given_name}`}:\n${message.message}\n`;
   }
   const child = spawn(process.env.LLAMA_PATH, [
     '-m', process.env.LLAMA_MODEL,
-    '--temp', '0.1',
-    '--top_k', '50',
-    '--top_p', '0.95',
-    '-n', '256',
-    '--repeat_last_n', '64',
-    '--repeat_penalty', '1.3',
+    '--ctx_size', '2048',
+    '--temp', '0.7',
+    '--top_k', '40',
+    '--top_p', '0.5',
+    '--repeat_last_n', '256',
+    '--batch_size', '1024',
+    '--repeat_penalty', '1.17647',
     '--threads', '4',
-    '--ctx_size', '512',
-    '-p', prompt,
-    '--n_parts', '1',
+    '--n_predict', '2048',
+    '--prompt', prompt,
   ]);
+  chatsProcess.push({
+    user: req.oidc?.user?.preferred_username,
+    process: child,
+  });
   res.set({
     'Content-Type': 'text/plain',
     'Transfer-Encoding': 'chunked',
@@ -50,6 +61,14 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
       index += data.toString().length;
     } else {
       console.log(`index: ${index} | data length: ${data.toString().length} | data: ${data.toString()}`);
+      // Hack to avoid autochatting part 2
+      if (data.toString().includes('###')) {
+        // cut last chunk between ### and [[EOM]]
+        const transformedData = data.toString().split('###')[0];
+        res.write(transformedData);
+        child.kill();
+        return;
+      }
       res.write(data.toString());
       res.flushHeaders();
     }
@@ -66,4 +85,12 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   });
 });
 
+router.get('/stop', (req: Request, res: Response, next: NextFunction) => {
+  const chatProcess = chatsProcess.find((chat) => chat.user === req.oidc?.user?.preferred_username);
+  if (chatProcess) {
+    chatProcess.process.kill();
+    chatsProcess.splice(chatsProcess.indexOf(chatProcess), 1);
+  }
+  res.status(200).send('Chat stopped');
+});
 module.exports = router;
