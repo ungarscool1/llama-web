@@ -41,6 +41,8 @@ form.addEventListener('submit', (e) => {
     const lastMessage = chatMessages.lastElementChild
     const lastMessageP = lastMessage.querySelector('p')
     if (xhr.responseText.includes('[[END OF CONVERSATION]]')) {
+      document.getElementById('send').style.display = 'block'
+      cancelBtn.style.display = 'none'
       lastMessageP.innerHTML = xhr.responseText.replace('[[END OF CONVERSATION]]', '')
     } else {
       lastMessageP.innerHTML = xhr.responseText.replace('Llama:', '').trim()

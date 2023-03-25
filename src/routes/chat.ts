@@ -19,7 +19,7 @@ const chatsProcess: Array<Chat> = [];
 // TODO: Take a chat ID as a parameter
 router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   let payload: {messages: Array<Message>};
-  let prompt = `Text transcript of a never ending dialog, where ${req.oidc?.user?.given_name} interacts with an AI assistant named LLaMa.\nLLaMa is helpful, kind, honest, friendly, good at writing and never fails to answer ${req.oidc?.user?.given_name}’s requests immediately and with details and precision.\nThere are no annotations like (30 seconds passed...) or (to himself), just what ${req.oidc?.user?.given_name} and LLaMa say aloud to each other.\nThe dialog lasts for years, the entirety of it is shared below. It's 10000 pages long.\nThe transcript only includes text, it can include markup like HTML but NO Markdown.\n\n${req.oidc?.user?.given_name}: Hello, LLaMA!\nLLaMA: Hello ${req.oidc?.user?.given_name}! How may I help you today?`;
+  let prompt = `Text transcript of a never ending dialog, where ${req.oidc?.user?.given_name} interacts with an AI assistant named LLaMa.\nLLaMa is helpful, kind, honest, friendly, good at writing and never fails to answer ${req.oidc?.user?.given_name}’s requests immediately and with details and precision.\nThere are no annotations like (30 seconds passed...) or (to himself), just what ${req.oidc?.user?.given_name} and LLaMa say aloud to each other.\nThe dialog lasts for years, the entirety of it is shared below. It's 10000 pages long.\nThe transcript only includes text, it can include markup like HTML but NO Markdown. Finish your message by [[EOM]].\n\n${req.oidc?.user?.given_name}: Hello, LLaMA!\nLLaMA: Hello ${req.oidc?.user?.given_name}! How may I help you today?\n`;
   let index = 0;
   if (!req.body.messages) {
     return res.status(400).send('Messages is required');
@@ -30,7 +30,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
 
   payload = req.body;
   for (const message of payload.messages) {
-    prompt += `###${message.isBot ? 'Llama' : `${req.oidc?.user?.given_name}`}:\n${message.message}\n`;
+    prompt += `${message.isBot ? 'Llama' : `${req.oidc?.user?.given_name}`}: ${message.message}\n`;
   }
   const child = spawn(process.env.LLAMA_PATH, [
     '-m', process.env.LLAMA_MODEL,
@@ -44,6 +44,8 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     '--threads', '4',
     '--n_predict', '2048',
     '--prompt', prompt,
+    //'--interactive',
+    '--reverse-prompt', `${req.oidc?.user?.given_name}:`
   ]);
   chatsProcess.push({
     user: req.oidc?.user?.preferred_username,
@@ -56,15 +58,14 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   res.flushHeaders();
 
   child.stdout.on('data', (data) => {
-    if (index < prompt.length) {
+    if (index < prompt.length + 7) {
       console.log(`index: ${index} | data length: ${data.toString().length} | data: ${data.toString()}`);
       index += data.toString().length;
     } else {
-      console.log(`index: ${index} | data length: ${data.toString().length} | data: ${data.toString()}`);
+      console.log(`index: ${index} | data length: ${data.toString().length} | data: ${encodeURIComponent(data.toString())}`);
       // Hack to avoid autochatting part 2
-      if (data.toString().includes('###')) {
-        // cut last chunk between ### and [[EOM]]
-        const transformedData = data.toString().split('###')[0];
+      if (data.toString() == '\n') {
+        const transformedData = data.toString().replace('\n', '');
         res.write(transformedData);
         child.kill();
         return;
