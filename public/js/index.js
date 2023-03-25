@@ -27,7 +27,7 @@ form.addEventListener('submit', (e) => {
     if (xhr.responseText.includes('[[END OF CONVERSATION]]')) {
       lastMessageP.innerHTML = xhr.responseText.replace('[[END OF CONVERSATION]]', '')
     } else {
-      lastMessageP.innerHTML = xhr.responseText
+      lastMessageP.innerHTML = xhr.responseText.replace('Llama:', '').trim()
     }
   });
   xhr.addEventListener('load', () => {
