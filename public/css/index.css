@@ -86,6 +86,10 @@ main {
   color: #6c757d;
 }
 
+.nav-item .nav-link {
+  color: #eee;
+}
+
 .chat-messages {
   height: 95%;
   overflow-y: auto;

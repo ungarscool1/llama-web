@@ -5,16 +5,20 @@
   <hr>
   <ul class="nav nav-pills flex-column mb-auto">
     <li class="nav-item">
-      <a href="#" class="nav-link active" aria-current="page">
+      <a href="/" class="nav-link <%= chatId === null ? 'active' : '' %>" aria-current="page">
         <i class="bi bi-plus-lg"></i>
         New chat
       </a>
     </li>
-    <li class="nav-item">
-      <a href="#" class="nav-link disabled" aria-current="page">
-        Chat history feature is not implemented yet
-      </a>
-    </li>
+    <br/>
+    <% for (const chat of chats) { %>
+      <li class="nav-item">
+        <a href="/<%= chat._id %>" class="nav-link <%= chatId === chat._id ? 'active' : '' %>">
+          <i class="bi bi-chat-left-text"></i>
+          <%= chat._id %>
+        </a>
+      </li>
+    <% } %>
   </ul>
   <hr>
   <div class="dropdown">

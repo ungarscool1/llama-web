@@ -1,8 +1,10 @@
 <div class="chat-container">
   <div class="chat-messages" id="chat-messages">
-    <% messages.forEach(function (message) { %>
-      <%- include('message.ejs', { message: message }) -%>
-    <% }); %>
+    <% if (messages) { %>
+      <% messages.forEach(function (message) { %>
+        <%- include('message.ejs', { message: message }) -%>
+      <% }); %>
+    <% } %>
   </div>
   <div class="chat-input-container row">
     <form action="#" id="chat-form">

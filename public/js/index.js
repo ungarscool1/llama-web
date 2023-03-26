@@ -9,7 +9,6 @@
 const form = document.getElementById('chat-form')
 const chatMessages = document.querySelector('.chat-messages')
 const cancelBtn = document.getElementById('cancel-btn')
-const messages = []
 cancelBtn.addEventListener('click', () => {
   const xhr = new XMLHttpRequest()
   xhr.open('GET', '/chat/stop')

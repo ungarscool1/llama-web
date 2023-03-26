@@ -3,6 +3,7 @@ import express from 'express';
 import morgan from 'morgan';
 import path from 'path';
 import { auth } from 'express-openid-connect';
+import ORM from './models/init';
 
 const router = require('./routes');
 const chat = require('./routes/chat');
@@ -22,7 +23,11 @@ if (process.env.SKIP_AUTH === 'false' && !process.env.ISSUER && !process.env.CLI
   throw new Error('ISSUER must be set when auth is required');
 } else if (!process.env.LLAMA_PATH) {
   throw new Error('LLAMA_PATH must be set');
+} else if (!process.env.DB) {
+  throw new Error('DB must be set');
 }
+
+ORM();
 
 const config = {
   authRequired: process.env.SKIP_AUTH === 'false',

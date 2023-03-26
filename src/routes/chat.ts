@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { spawn, ChildProcessWithoutNullStreams } from 'child_process';
+import mongoose from 'mongoose';
 
 var router = Router();
 
@@ -14,6 +15,12 @@ interface Chat {
 }
 
 const chatsProcess: Array<Chat> = [];
+
+router.get('/', async (req: Request, res: Response, next: NextFunction) => {
+  await mongoose.connect(`${process.env.DB}`);
+  const chats = await mongoose.model('Chats').find({ user: req.oidc?.user?.preferred_username });
+  res.json(chats);
+});
 
 // TODO: Take a chat ID as a parameter
 router.post('/', async (req: Request, res: Response, next: NextFunction) => {

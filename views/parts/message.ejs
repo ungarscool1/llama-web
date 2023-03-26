@@ -1,9 +1,9 @@
 <div class="chat-message d-flex mb-2">
   <div class="d-flex">
     <% if (message.isBot) { %>
-      <img src="https://via.placeholder.com/50x50" alt="User avatar" class="me-2">
+      <img src="/svg/robot.svg" alt="Robot" class="me-2">
     <% } else { %>
-      <img src="https://1.gravatar.com/avatar/<%= userProfile.gravatar %>?size=128" alt="<%= userProfile.preferred_username %>" class="me-2">
+      <img src="/svg/person.svg" alt="User" class="me-2">
     <% } %>
   </div>
   <p class="mb-0"><%= message.message %></p>
