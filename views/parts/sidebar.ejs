@@ -13,7 +13,7 @@
     <br/>
     <% for (const chat of chats) { %>
       <li class="nav-item">
-        <a href="/<%= chat._id %>" class="nav-link <%= chatId === chat._id ? 'active' : '' %>">
+        <a href="/<%= chat._id %>" class="nav-link <%= chatId == chat._id ? 'active' : '' %>">
           <i class="bi bi-chat-left-text"></i>
           <%= chat._id %>
         </a>
