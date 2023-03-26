@@ -69,8 +69,10 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
       // Hack to avoid autochatting part 2
       if (data.toString() == '\n') {
         const transformedData = data.toString().replace('\n', '');
+        const chatProcess = chatsProcess.find((chat) => chat.user === req.oidc?.user?.preferred_username);
         res.write(transformedData);
         child.kill();
+        chatsProcess.splice(chatsProcess.indexOf(chatProcess), 1);
         return;
       }
       res.write(data.toString());
