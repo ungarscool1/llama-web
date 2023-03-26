@@ -22,11 +22,11 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   res.json(chats);
 });
 
-// TODO: Take a chat ID as a parameter
 router.post('/', async (req: Request, res: Response, next: NextFunction) => {
-  let payload: {messages: Array<Message>};
+  let payload: {messages: Array<Message>, id?: string};
   let prompt = `Text transcript of a never ending dialog, where ${req.oidc?.user?.given_name} interacts with an AI assistant named LLaMa.\nLLaMa is helpful, kind, honest, friendly, good at writing and never fails to answer ${req.oidc?.user?.given_name}’s requests immediately and with details and precision.\nThere are no annotations like (30 seconds passed...) or (to himself), just what ${req.oidc?.user?.given_name} and LLaMa say aloud to each other.\nThe dialog lasts for years, the entirety of it is shared below. It's 10000 pages long.\nThe transcript only includes text, it can include markup like HTML but NO Markdown. Finish your message by [[EOM]].\n\n${req.oidc?.user?.given_name}: Hello, LLaMA!\nLLaMA: Hello ${req.oidc?.user?.given_name}! How may I help you today?\n`;
   let index = 0;
+  let response = '';
   if (!req.body.messages) {
     return res.status(400).send('Messages is required');
   }
@@ -37,6 +37,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     return res.status(400).send('Chat already started');
   }
 
+  await mongoose.connect(`${process.env.DB}`);
   payload = req.body;
   for (const message of payload.messages) {
     prompt += `${message.isBot ? 'LLaMa' : `${req.oidc?.user?.given_name}`}: ${message.message}\n`;
@@ -80,6 +81,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
         child.kill();
         return;
       }
+      response += data.toString();
       res.write(data.toString());
       res.flushHeaders();
     }
@@ -89,9 +91,25 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     console.error(`stderr: ${data}`);
   });
 
-  child.on('close', (code) => {
+  child.on('close', async (code) => {
+    let id = '';
+    const Chat = mongoose.model('Chats');
     console.log(`child process exited with code ${code}`);
-    res.write('[[END OF CONVERSATION]]');
+    if (!payload.id) {
+      const newChat = new Chat({
+        user: req.oidc?.user?.preferred_username,
+        messages: [...payload.messages, { message: response, isBot: true }],
+        time: new Date(),
+      });
+      await newChat.save();
+      id = newChat._id;
+    } else {
+      console.log('payload.id', payload.id)
+      const aa = await Chat.findByIdAndUpdate(payload.id, { $push: { messages: { message: payload.messages.pop()?.message, isBot: false } } });
+      const ab = await Chat.findByIdAndUpdate(payload.id, { $push: { messages: { message: response.trim(), isBot: true } } });
+      console.log(aa, ab)
+    }
+    res.write(`[[END OF CONVERSATION${id ? `|${id}` : ''}]]`);
     res.end();
     chatsProcess.splice(chatsProcess.indexOf(chatProcess), 1);
   });

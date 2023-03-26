@@ -24,7 +24,7 @@ router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
     userProfile: {...req.oidc.user, gravatar: createHash('md5').update(req.oidc?.user?.email).digest('hex')},
     chats,
     chatId: req.params.id,
-    messages
+    messages: messages || []
   });
 });
 
