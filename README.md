@@ -8,6 +8,7 @@ The LLaMa Web is a web interface to create a chat with a bot based on META LLaMa
 
 - NodeJS 18
 - Yarn
+- MongoDB (for saving chats)
 - llama.cpp
 - a model of llama
 
@@ -28,3 +29,7 @@ Copy the `example.env` file to `.env` and edit it.
 ```bash
 yarn start
 ```
+
+## Known issues
+
+- Any user can send a message to any chat, even if he is not the owner of the chat. (But you can share it 😅)
