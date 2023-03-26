@@ -70,7 +70,6 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
 
   child.stdout.on('data', (data) => {
     if (index < prompt.length + 7) {
-      console.log(`index: ${index} | data length: ${data.toString().length} | data: ${data.toString()}`);
       index += data.toString().length;
     } else {
       console.log(`index: ${index} | data length: ${data.toString().length} | data: ${encodeURIComponent(data.toString())}`);
@@ -104,10 +103,8 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
       await newChat.save();
       id = newChat._id;
     } else {
-      console.log('payload.id', payload.id)
-      const aa = await Chat.findByIdAndUpdate(payload.id, { $push: { messages: { message: payload.messages.pop()?.message, isBot: false } } });
-      const ab = await Chat.findByIdAndUpdate(payload.id, { $push: { messages: { message: response.trim(), isBot: true } } });
-      console.log(aa, ab)
+      await Chat.findByIdAndUpdate(payload.id, { $push: { messages: { message: payload.messages.pop()?.message, isBot: false } } });
+      await Chat.findByIdAndUpdate(payload.id, { $push: { messages: { message: response.trim(), isBot: true } } });
     }
     res.write(`[[END OF CONVERSATION${id ? `|${id}` : ''}]]`);
     res.end();
