@@ -1,6 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { spawn, ChildProcessWithoutNullStreams } from 'child_process';
-import { requiresAuth } from 'express-openid-connect';
 
 var router = Router();
 
