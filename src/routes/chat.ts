@@ -50,10 +50,11 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     //'--interactive',
     '--reverse-prompt', `${req.oidc?.user?.given_name}:`
   ]);
-  chatsProcess.push({
+  const chatProcess: Chat = {
     user: req.oidc?.user?.preferred_username,
     process: child,
-  });
+  };
+  chatsProcess.push(chatProcess);
   res.set({
     'Content-Type': 'text/plain',
     'Transfer-Encoding': 'chunked',
@@ -66,10 +67,9 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
       index += data.toString().length;
     } else {
       console.log(`index: ${index} | data length: ${data.toString().length} | data: ${encodeURIComponent(data.toString())}`);
-      // Hack to avoid autochatting part 2
+      // Hack to avoid autochatting
       if (data.toString() == '\n') {
         const transformedData = data.toString().replace('\n', '');
-        const chatProcess = chatsProcess.find((chat) => chat.user === req.oidc?.user?.preferred_username);
         res.write(transformedData);
         child.kill();
         chatsProcess.splice(chatsProcess.indexOf(chatProcess), 1);
