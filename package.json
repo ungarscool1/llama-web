@@ -24,7 +24,7 @@
     "typescript": "^5.0.2"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp -r views dist/ && cp -r public dist/",
     "start": "node dist/index.js",
     "dev": "concurrently \"tsc --watch\" \"nodemon -q dist/index.js\""
   }
