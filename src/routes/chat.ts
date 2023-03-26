@@ -72,7 +72,6 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
         const transformedData = data.toString().replace('\n', '');
         res.write(transformedData);
         child.kill();
-        chatsProcess.splice(chatsProcess.indexOf(chatProcess), 1);
         return;
       }
       res.write(data.toString());
@@ -88,6 +87,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     console.log(`child process exited with code ${code}`);
     res.write('[[END OF CONVERSATION]]');
     res.end();
+    chatsProcess.splice(chatsProcess.indexOf(chatProcess), 1);
   });
 });
 
