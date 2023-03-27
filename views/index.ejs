@@ -5,7 +5,11 @@
     <main class="d-flex flex-nowrap">
       <%- include('parts/sidebar.ejs') -%>
       <div class="container mt-2 d-flex justify-content-center w-100 mx-auto">
-        <%- include('parts/chat.ejs') -%>
+        <% if (chatId !== null && messages.length === 0) { %>
+          <%- include('parts/404.ejs') -%>
+        <% } else { %>
+          <%- include('parts/chat.ejs') -%>
+        <% } %>
       </div>
     </div>
     </main>

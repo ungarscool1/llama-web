@@ -19,7 +19,7 @@ router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
   await mongoose.connect(`${process.env.DB}`);
   const chats = await mongoose.model('Chats').find({ user: req.oidc?.user?.preferred_username });
   const messages = chats.find((chat) => chat._id.toString() === req.params.id)?.messages.map((message: any) => ({ message: message.message, isBot: message.isBot}));
-  console.log(messages);
+  if (!messages) res.status(404);
   res.render('index', {
     userProfile: {...req.oidc.user, gravatar: createHash('md5').update(req.oidc?.user?.email).digest('hex')},
     chats,

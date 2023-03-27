@@ -53,13 +53,12 @@ app.use(function (req, res, next) {
 app.use('/', router);
 app.use('/chat', chat);
 
-/*// Catch 404 and forward to error handler
+// Catch 404 and forward to error handler
 app.use(function (req, res, next) {
-  const err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+  res.status(404).send('Not found');
 });
 
+/*
 // Error handlers
 app.use(function (err, req, res, next) {
   res.status(err.status || 500);
