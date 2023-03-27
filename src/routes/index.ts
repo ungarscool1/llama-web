@@ -9,7 +9,7 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   const chats = await mongoose.model('Chats').find({ user: req.oidc?.user?.preferred_username });
   res.render('index', {
     userProfile: {...req.oidc.user, gravatar: createHash('md5').update(req.oidc?.user?.email).digest('hex')},
-    chats,
+    chats: chats.reverse(),
     chatId: null,
     messages: []
   });
@@ -22,7 +22,7 @@ router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
   if (!messages) res.status(404);
   res.render('index', {
     userProfile: {...req.oidc.user, gravatar: createHash('md5').update(req.oidc?.user?.email).digest('hex')},
-    chats,
+    chats: chats.reverse(),
     chatId: req.params.id,
     messages: messages || []
   });
