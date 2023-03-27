@@ -94,3 +94,11 @@ main {
   height: 95%;
   overflow-y: auto;
 }
+
+.nav-link.active p {
+  width: 150px;
+}
+
+li.nav-item {
+  width: 259px;
+}

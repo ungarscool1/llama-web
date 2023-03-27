@@ -9,6 +9,7 @@
 const form = document.getElementById('chat-form')
 const chatMessages = document.querySelector('.chat-messages')
 const cancelBtn = document.getElementById('cancel-btn')
+const deleteChatBtn = document.getElementById('delete-chat')
 cancelBtn.addEventListener('click', () => {
   const xhr = new XMLHttpRequest()
   xhr.open('GET', '/chat/stop')
@@ -22,6 +23,18 @@ cancelBtn.addEventListener('click', () => {
     }
   });
 });
+deleteChatBtn.addEventListener('click', () => {
+  const xhr = new XMLHttpRequest()
+  const id = window.location.pathname.substring(1)
+  xhr.open('DELETE', `/chat/${id}`);
+  xhr.send()
+  xhr.addEventListener('load', () => {
+    if (xhr.status === 200) {
+      window.location.href = '/'
+    }
+  });
+});
+
 form.addEventListener('submit', (e) => {
   e.preventDefault()
   const msg = e.target.elements.msg.value

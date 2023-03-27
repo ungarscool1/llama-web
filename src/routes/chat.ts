@@ -120,4 +120,15 @@ router.get('/stop', (req: Request, res: Response, next: NextFunction) => {
   }
   res.status(200).send('Chat stopped');
 });
+
+router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
+  await mongoose.connect(`${process.env.DB}`);
+  const chat = await mongoose.model('Chats').findById(req.params.id);
+  if (chat.user !== req.oidc?.user?.preferred_username) {
+    return res.status(403).send('Forbidden');
+  }
+  await mongoose.model('Chats').findByIdAndDelete(req.params.id);
+  res.status(200).send('Chat deleted');
+});
+
 module.exports = router;
