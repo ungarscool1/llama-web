@@ -1,0 +1,21 @@
+services:
+  db:
+    image: mongo
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+  web:
+    build: .
+    command: yarn start
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DB=mongodb://db:27017
+    env_file:
+      - .env
+    depends_on:
+      - db
+volumes:
+  mongo_data:
