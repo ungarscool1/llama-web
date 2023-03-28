@@ -23,17 +23,20 @@ cancelBtn.addEventListener('click', () => {
     }
   });
 });
-deleteChatBtn.addEventListener('click', () => {
-  const xhr = new XMLHttpRequest()
-  const id = window.location.pathname.substring(1)
-  xhr.open('DELETE', `/chat/${id}`);
-  xhr.send()
-  xhr.addEventListener('load', () => {
-    if (xhr.status === 200) {
-      window.location.href = '/'
-    }
+
+if(deleteChatBtn) {
+  deleteChatBtn.addEventListener('click', () => {
+    const xhr = new XMLHttpRequest()
+    const id = window.location.pathname.substring(1)
+    xhr.open('DELETE', `/chat/${id}`);
+    xhr.send()
+    xhr.addEventListener('load', () => {
+      if (xhr.status === 200) {
+        window.location.href = '/'
+      }
+    });
   });
-});
+}
 
 form.addEventListener('submit', (e) => {
   e.preventDefault()
