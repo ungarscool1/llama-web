@@ -6,6 +6,7 @@ COPY . .
 RUN yarn install
 RUN git clone https://github.com/ggerganov/llama.cpp && \
     cd llama.cpp && \
+    git checkout 5a5f8b1 && \
     make -j && \
     mkdir -p /app/llama.cpp/models/7B
 RUN wget https://cloud.legodard.fr/s/TAfTAG3NmAS6Cjt/download -O /app/llama.cpp/models/7B/ggml-model-q4_0.bin
