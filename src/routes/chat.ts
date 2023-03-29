@@ -63,8 +63,9 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   };
   chatsProcess.push(chatProcess);
   res.set({
-    'Content-Type': 'text/plain',
-    'Transfer-Encoding': 'chunked',
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
   });
   res.flushHeaders();
 
