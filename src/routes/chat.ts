@@ -62,12 +62,12 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     process: child,
   };
   chatsProcess.push(chatProcess);
-  res.set({
+  res.writeHead(200, {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
     'Connection': 'keep-alive',
+    'X-Accel-Buffering': 'no'
   });
-  res.flushHeaders();
 
   child.stdout.on('data', (data) => {
     if (index < prompt.length + 7) {
@@ -87,9 +87,11 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     }
   });
 
-  child.stderr.on('data', (data) => {
-    console.error(`stderr: ${data}`);
-  });
+  if (process.env.NODE_ENV === 'development') {
+    child.stderr.on('data', (data) => {
+      console.error(`stderr: ${data}`);
+    });
+  }
 
   child.on('close', async (code) => {
     let id = '';
