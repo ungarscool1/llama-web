@@ -62,12 +62,14 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     process: child,
   };
   chatsProcess.push(chatProcess);
-  res.writeHead(200, {
+  res.set({
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
     'Connection': 'keep-alive',
     'X-Accel-Buffering': 'no'
   });
+  res.status(200);
+  res.flushHeaders();
 
   child.stdout.on('data', (data) => {
     if (index < prompt.length + 7) {

@@ -75,7 +75,7 @@ form.addEventListener('submit', (e) => {
   xhr.addEventListener('load', () => {
     if (xhr.status !== 200) {
       const lastMessage = chatMessages.lastElementChild
-      lastMessage.innerHTML = `<div class="alert alert-danger" role="alert">Something went wrong, please reload the page (The conversation will be lost)</div>`
+      lastMessage.innerHTML = `<div class="alert alert-danger" role="alert">Something went wrong, please reload the page</div>`
     }
   });
   e.target.elements.msg.value = ''
