@@ -1,7 +1,16 @@
-#stages:
-#- build
-#- test
-#
+stages:
+- build
+- test
+
+build-app:
+  image: node:lts
+  stage: build
+  script:
+    - yarn install --frozen-lockfile
+    - yarn build
+  artifacts:
+    paths:
+      - dist
 #build:
 #  image: docker:latest
 #  stage: build
