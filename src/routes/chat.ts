@@ -24,7 +24,9 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
 
 router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   let payload: {messages: Array<Message>, id?: string};
-  let prompt = `Text transcript of a never ending dialog, where ${req.oidc?.user?.given_name} interacts with an AI assistant named LLaMa.\nLLaMa is helpful, kind, honest, friendly, good at writing and never fails to answer ${req.oidc?.user?.given_name}’s requests immediately and with details and precision.\nThere are no annotations like (30 seconds passed...) or (to himself), just what ${req.oidc?.user?.given_name} and LLaMa say aloud to each other.\nThe dialog lasts for years, the entirety of it is shared below. It's 10000 pages long.\nThe transcript only includes text, it can include markup like HTML but NO Markdown. Finish your message by [[EOM]].\n\n${req.oidc?.user?.given_name}: Hello, LLaMA!\nLLaMA: Hello ${req.oidc?.user?.given_name}! How may I help you today?\n`;
+  //let prompt = `Text transcript of a dialog, where ${req.oidc?.user?.given_name} interacts with an AI assistant named LLaMa.\nLLaMa is helpful, kind, honest, friendly, good at writing and never fails to answer ${req.oidc?.user?.given_name}’s requests immediately and with details and precision.\nThere are no annotations like (30 seconds passed...) or (to himself), just what ${req.oidc?.user?.given_name} and LLaMa say aloud to each other.\nThe dialog lasts for years, the entirety of it is shared below. It's 10000 pages long.\nThe transcript only includes text, it can include markup like HTML but NO Markdown. A complete answer is always ended by [end of text].\n\n${req.oidc?.user?.given_name}: Hello, LLaMA!\nLLaMA: Hello ${req.oidc?.user?.given_name}! How may I help you today?\n`;
+  //let prompt = `You are an AI assistant called LLaMa. You are helpful, kind, honest, friendly. You will interact with a human called ${req.oidc?.user?.given_name}. You must never pretend to be ${req.oidc?.user?.given_name}.\nA complete answer is always ended by [end of text].\n\n`
+  let prompt = `Below is an instruction that describes a task. Write a response that appropriately completes the request. The response must be accurate, concise and evidence-based whenever possible. Here some information that can you help, the user name is ${req.oidc?.user?.given_name}. A complete answer is always ended by [end of text].`;
   let index = 0;
   let response = '';
   if (!req.body.messages) {
@@ -40,7 +42,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   await mongoose.connect(`${process.env.DB}`);
   payload = req.body;
   for (const message of payload.messages) {
-    prompt += `${message.isBot ? 'LLaMa' : `${req.oidc?.user?.given_name}`}: ${message.message}\n`;
+    prompt += `${message.isBot ? '### Response:\n' : `### Instruction:\n`}: ${message.message}\n`;
   }
   const child = spawn(process.env.LLAMA_PATH, [
     '-m', process.env.LLAMA_MODEL,
@@ -55,7 +57,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     '--n_predict', '2048',
     '--prompt', prompt,
     //'--interactive',
-    '--reverse-prompt', `${req.oidc?.user?.given_name}:`
+    //'--reverse-prompt', `${req.oidc?.user?.given_name}:`
   ]);
   const chatProcess: Chat = {
     user: req.oidc?.user?.preferred_username,
@@ -72,28 +74,22 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   res.flushHeaders();
 
   child.stdout.on('data', (data) => {
-    if (index < prompt.length + 7) {
+    if (index < prompt.length + 4) {
       index += data.toString().length;
     } else {
       console.log(`index: ${index} | data length: ${data.toString().length} | data: ${encodeURIComponent(data.toString())}`);
-      // Hack to avoid autochatting
-      if (data.toString() == '\n') {
-        const transformedData = data.toString().replace('\n', '');
-        res.write(transformedData);
-        child.kill();
-        return;
-      }
       response += data.toString();
       res.write(data.toString());
       res.flushHeaders();
     }
   });
 
-  if (process.env.NODE_ENV === 'development') {
-    child.stderr.on('data', (data) => {
+  child.stderr.on('data', (data) => {
+    if (process.env.NODE_ENV === 'development')
       console.error(`stderr: ${data}`);
-    });
-  }
+    if (data.toString().includes('[end of text]'))
+      child.kill();
+  });
 
   child.on('close', async (code) => {
     let id = '';

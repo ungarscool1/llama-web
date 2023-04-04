@@ -57,6 +57,9 @@ form.addEventListener('submit', (e) => {
   xhr.addEventListener('progress', (event) => {
     const lastMessage = chatMessages.lastElementChild
     const lastMessageP = lastMessage.querySelector('p')
+    
+    console.log(xhr.responseText)
+    lastMessageP.innerHTML = xhr.responseText
     if (xhr.responseText.includes('[[END OF CONVERSATION')) {
       // if [[END OF CONVERSATION]] include | it's mean that an id has been sent
       // so we can redirect the user to the conversation page
