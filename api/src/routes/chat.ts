@@ -45,8 +45,9 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
 
   payload = req.body;
   for (const message of payload.messages) {
-    prompt += `${message.isBot ? '### Response:\n' : `### Instruction:\n`}: ${message.message}\n`;
+    prompt += `${message.isBot ? '### Assistant:\n' : `### Human:\n`}: ${message.message}\n`;
   }
+  prompt += '### Assistant:\n';
   const child = spawn(process.env.LLAMA_PATH, [
     '-m', process.env.LLAMA_MODEL,
     '--ctx_size', '2048',
