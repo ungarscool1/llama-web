@@ -4,6 +4,7 @@
   import { goto } from '$app/navigation';
   import { env } from '$env/dynamic/public';
   import { Sidebar, SidebarGroup, SidebarItem, SidebarWrapper, SidebarCta, DarkMode, Spinner } from 'flowbite-svelte';
+  import SvelteMarkdown from 'svelte-markdown'
 
   $: activeUrl = $page.url.pathname;
   $: chats = undefined;
@@ -206,7 +207,9 @@
           <div class="flex">
             <img src="{message.isBot ? '/robot.svg' : '/person.svg'}" alt="{message.isBot ? 'Robot' : 'User'}" class="me-2 rounded-sm w-[50px] h-[50px]">
           </div>
-          <p class="flex-1 mb-0 ml-1 dark:text-white text-black">{message.message}</p>
+          <p class="flex-1 mb-0 ml-1 dark:text-white text-black">
+            <SvelteMarkdown {message.message} />
+          </p>
         </div>
       {/each}
     {/if}
