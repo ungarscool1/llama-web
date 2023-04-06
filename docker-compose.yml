@@ -5,17 +5,24 @@ services:
       - mongo_data:/data/db
     ports:
       - "27017:27017"
-  web:
-    build: .
-    command: yarn start
+  api:
+    build: ./api
     ports:
       - "3000:3000"
     environment:
       - PORT=3000
       - DB=mongodb://db:27017
     env_file:
-      - .env
+      - ./api/.env
     depends_on:
       - db
+  client:
+    build: ./client
+    ports:
+      - "4000:3000"
+    environment:
+      - PORT=3000
+    env_file:
+      - ./client/.env
 volumes:
   mongo_data:

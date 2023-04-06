@@ -15,21 +15,23 @@ The LLaMa Web is a web interface to create a chat with a bot based on META LLaMa
 ### Building
 
 ```bash
-yarn && yarn build
+cd client && yarn install --frozen-lockfile && yarn build
+cd ..
+cd api && yarn install --frozen-lockfile && yarn build
 ```
 
 ### Configuration
 
-Copy the `example.env` file to `.env` and edit it.
+Copy the `example.env` file from the both folder to `.env` and edit it.
 
-> Disclaimer: `SKIP_AUTH` is not fully implemented yet. It can cause crashes.
+```bash
+cp client/example.env client/.env && nano client/.env
+cp api/example.env api/.env && nano api/.env
+```
 
 ### Running
 
+In the both folder run the following command:
 ```bash
 yarn start
 ```
-
-## Known issues
-
-- Any user can send a message to any chat, even if he is not the owner of the chat. (But you can share it 😅)
