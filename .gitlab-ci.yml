@@ -36,7 +36,7 @@ build_container_api:
     - cd api
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
-        tag="api"
+        tag=":api"
         echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'latest'"
       else
         tag=":api-$CI_COMMIT_REF_SLUG"
@@ -58,7 +58,7 @@ build_container_app:
     - cd client
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
-        tag="client"
+        tag=":client"
         echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'latest'"
       else
         tag=":client-$CI_COMMIT_REF_SLUG"
