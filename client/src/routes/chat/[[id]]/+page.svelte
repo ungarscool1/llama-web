@@ -208,7 +208,7 @@
             <img src="{message.isBot ? '/robot.svg' : '/person.svg'}" alt="{message.isBot ? 'Robot' : 'User'}" class="me-2 rounded-sm w-[50px] h-[50px]">
           </div>
           <p class="flex-1 mb-0 ml-1 dark:text-white text-black">
-            <SvelteMarkdown {message.message} />
+            <SvelteMarkdown source={message.message} />
           </p>
         </div>
       {/each}
