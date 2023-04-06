@@ -79,6 +79,8 @@
         'Authorization': `Bearer ${userInfo.token}`
       }
     });
+    await fetchChats();
+    goto('/chat');
   }
   
   async function sendRequest() {
