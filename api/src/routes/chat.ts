@@ -84,13 +84,15 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
       index += data.toString().length;
     } else {
       console.log(`index: ${index} | data length: ${data.toString().length} | data: ${encodeURIComponent(data.toString())}`);
-      response += data.toString();
+      if (data.toString() === ':' && response.length === 0) {
+        return;
+      } else {
+        response += data.toString();
+      }
       if (data.toString().includes('#')) {
-        console.log('Probably detecting end of text', response)
         detecting = true;
         detectionIndex = response.length;
       } else if (detecting && data.toString().includes(':')) {
-        console.log('Is the end?', response)
         if (response.includes('Human')) {
           response = response.replace('### Human:', '');
           child.kill();
@@ -102,8 +104,6 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
       } else if (!detecting) {
         res.write(data.toString());
         res.flushHeaders();
-      } else {
-        console.log('Probably detecting end of text', response)
       }
     }
   });
