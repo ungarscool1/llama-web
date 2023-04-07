@@ -4,7 +4,7 @@
   import { goto } from '$app/navigation';
   import { env } from '$env/dynamic/public';
   import { Sidebar, SidebarGroup, SidebarItem, SidebarWrapper, SidebarCta, DarkMode, Spinner } from 'flowbite-svelte';
-  import SvelteMarkdown from 'svelte-markdown'
+  import Markdown,{ marked, highlightCode, getHljs, getLang } from 'markdown-hljs';
 
   $: activeUrl = $page.url.pathname;
   $: chats = undefined;
@@ -68,6 +68,8 @@
   function handleKeyDown(event: KeyboardEvent) {
     if (event.key === "Enter" && event.ctrlKey) {
       sendRequest();
+    } else if (event.key === "Enter" && event.metaKey) {
+      sendRequest();
     }
   }
   
@@ -115,7 +117,7 @@
         }
         isRequesting = false;
         const receivedMsg = xhr.responseText.substring(0, xhr.responseText.indexOf('[[END OF CONVERSATION')).trim()
-        messages[messages.length - 1].message = receivedMsg
+        messages[messages.length - 1].message = receivedMsg;
       }
     });
   }
@@ -208,7 +210,7 @@
             <img src="{message.isBot ? '/robot.svg' : '/person.svg'}" alt="{message.isBot ? 'Robot' : 'User'}" class="me-2 rounded-sm w-[50px] h-[50px]">
           </div>
           <p class="flex-1 mb-0 ml-1 dark:text-white text-black">
-            <SvelteMarkdown source={message.message} />
+            {@html Markdown(message.message)}
           </p>
         </div>
       {/each}
@@ -228,3 +230,7 @@
   </div>
 </div>
 </main>
+
+<style lang="scss">
+  @import 'https://unpkg.com/@highlightjs/cdn-assets@10.6.0/styles/night-owl.min.css';
+</style>
