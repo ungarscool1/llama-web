@@ -30,9 +30,11 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
 
 router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   let payload: {messages: Array<Message>, id?: string};
-  let prompt = `Below is an instruction that describes a task. Write a response that appropriately completes the request. The response must be accurate, concise and evidence-based whenever possible. Here some information that can you help, the user name is ${req.user?.given_name}. A complete answer is always ended by [end of text].`;
+  let prompt = `Below is an instruction that describes a task. Write a response that appropriately completes the request. The response must be accurate, concise and evidence-based whenever possible. Here some information that can you help, the user name is ${req.user?.given_name}.`;
   let index = 0;
   let response = '';
+  let detecting = false;
+  let detectionIndex = 0;
   if (!req.body.messages) {
     return res.status(400).send('Messages is required');
   }
@@ -60,8 +62,8 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     '--threads', '4',
     '--n_predict', '2048',
     '--prompt', prompt,
-    //'--interactive',
-    //'--reverse-prompt', `${req.oidc?.user?.given_name}:`
+    '--interactive',
+    '--reverse-prompt', `### Human:`
   ]);
   const chatProcess: Chat = {
     user: `${req.user?.preferred_username}`,
@@ -83,8 +85,26 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     } else {
       console.log(`index: ${index} | data length: ${data.toString().length} | data: ${encodeURIComponent(data.toString())}`);
       response += data.toString();
-      res.write(data.toString());
-      res.flushHeaders();
+      if (data.toString().includes('#')) {
+        console.log('Probably detecting end of text', response)
+        detecting = true;
+        detectionIndex = response.length;
+      } else if (detecting && data.toString().includes(':')) {
+        console.log('Is the end?', response)
+        if (response.includes('Human')) {
+          response = response.replace('### Human:', '');
+          child.kill();
+        } else {
+          res.write(response.substring(detectionIndex, response.length));
+          res.flushHeaders();
+          detecting = false;
+        }
+      } else if (!detecting) {
+        res.write(data.toString());
+        res.flushHeaders();
+      } else {
+        console.log('Probably detecting end of text', response)
+      }
     }
   });
 
