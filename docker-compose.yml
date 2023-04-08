@@ -1,25 +1,31 @@
 services:
   db:
     image: mongo
+    restart: always
     volumes:
       - mongo_data:/data/db
     ports:
       - "27017:27017"
   api:
     build: ./api
+    restart: always
     ports:
       - "3000:3000"
     environment:
-      - PORT=3000
       - DB=mongodb://db:27017
     env_file:
       - ./api/.env
     depends_on:
       - db
+    volumes:
+      - /path/to/models/:/models
+      - /path/to/jwt/folder:/key
+    user: "1000:1000"
   client:
     build: ./client
+    restart: always
     ports:
-      - "4000:3000"
+      - "4173:3000"
     environment:
       - PORT=3000
     env_file:
