@@ -83,7 +83,6 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     if (index < prompt.length) {
       index += data.toString().length;
     } else {
-      console.log(`index: ${index} | data length: ${data.toString().length} | data: ${encodeURIComponent(data.toString())}`);
       if (data.toString() === ':' && response.length === 0) {
         return;
       } else {
