@@ -29,14 +29,15 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
 });
 
 router.post('/', async (req: Request, res: Response, next: NextFunction) => {
-  let payload: {messages: Array<Message>, id?: string};
+  await mongoose.connect(`${process.env.DB}`);
+  let payload: {message: string, id?: string};
   let prompt = `Below is an instruction that describes a task. Write a response that appropriately completes the request. The response must be accurate, concise and evidence-based whenever possible. Here some information that can you help, the user name is ${req.user?.given_name}.`;
   let index = 0;
   let response = '';
   let detecting = false;
   let detectionIndex = 0;
-  if (!req.body.messages) {
-    return res.status(400).send('Messages is required');
+  if (!req.body.message) {
+    return res.status(400).send('Message is required');
   }
   if (!process.env.LLAMA_PATH || !process.env.LLAMA_MODEL) {
     throw new Error('LLAMA_PATH and LLAMA_MODEL must be set');
@@ -46,9 +47,19 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   }
 
   payload = req.body;
-  for (const message of payload.messages) {
-    prompt += `${message.isBot ? '### Assistant:\n' : `### Human:\n`}: ${message.message}\n`;
+  if (payload.id) {
+    const chat = await mongoose.model('Chats').findById(payload.id);
+    if (!chat) {
+      return res.status(400).json({ message: 'Chat not found' });
+    }
+    if (chat.user !== req.user?.preferred_username) {
+      return res.status(400).json({ message: 'Chat not found' });
+    }
+    for (const message of chat.messages) {
+      prompt += `${message.isBot ? '### Assistant' : `### Human`}:\n ${message.message}\n`;
+    }
   }
+  prompt += `### Human:\n${payload.message}\n`;
   prompt += '### Assistant:\n';
   const child = spawn(process.env.LLAMA_PATH, [
     '-m', process.env.LLAMA_MODEL,
@@ -116,13 +127,12 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
 
   child.on('close', async (code) => {
     let id = '';
-    await mongoose.connect(`${process.env.DB}`);
     const Chat = mongoose.model('Chats');
     console.log(`child process exited with code ${code}`);
     if (!payload.id && response) {
       const newChat = new Chat({
         user: req.user?.preferred_username,
-        messages: [...payload.messages, { message: response, isBot: true }],
+        messages: [{message: payload.message, isBot: false}, { message: response, isBot: true }],
         time: new Date(),
       });
       await newChat.save();
@@ -134,7 +144,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
         $push: {
           messages: {
             $each: [
-              { message: payload.messages.pop()?.message, isBot: false },
+              { message: payload.message, isBot: false },
               { message: response.trim(), isBot: true }
             ]
           }

@@ -100,7 +100,7 @@
     xhr.open('POST', `${env.PUBLIC_API_URL}/chat`);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.setRequestHeader('Authorization', `Bearer ${userInfo.token}`);
-    xhr.send(JSON.stringify({ messages: messages, id }));
+    xhr.send(JSON.stringify({ message: prompt, id }));
     isRequesting = true;
     prompt = "";
     messages = [...messages, {
