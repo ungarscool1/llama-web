@@ -4,6 +4,8 @@ import morgan from 'morgan';
 import ORM from './models/init';
 import {middleware} from './middleware';
 import cors from 'cors';
+import * as Sentry from "@sentry/node";
+import { ProfilingIntegration } from "@sentry/profiling-node";
 
 const router = require('./routes');
 const chat = require('./routes/chat');
@@ -11,6 +13,26 @@ const chat = require('./routes/chat');
 dotenv.config();
 
 const app = express();
+
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    integrations: [
+      new Sentry.Integrations.Http({ tracing: true }),
+      ...Sentry.autoDiscoverNodePerformanceMonitoringIntegrations(),
+      new ProfilingIntegration()
+    ],
+    tracesSampleRate: 1.0,
+    profilesSampleRate: 1.0,
+    environment: process.env.NODE_ENV || 'production',
+    beforeSend: (event, hint) => {
+      console.log('request:', event.request, 'hint:', hint)
+      return event;
+    }
+  });
+  app.use(Sentry.Handlers.requestHandler());
+  app.use(Sentry.Handlers.tracingHandler());
+}
 
 app.use(morgan('dev'));
 app.use(express.json());
@@ -32,6 +54,10 @@ app.use(middleware);
 
 app.use('/', router);
 app.use('/chat', chat);
+
+if (process.env.SENTRY_DSN) {
+  app.use(Sentry.Handlers.errorHandler());
+}
 
 // Catch 404 and forward to error handler
 app.use(function (req, res, next) {

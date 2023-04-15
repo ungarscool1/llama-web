@@ -4,11 +4,6 @@ import mongoose from 'mongoose';
 
 let router = Router();
 
-interface Message {
-  message: string;
-  isBot: boolean;
-}
-
 interface Chat {
   user: string;
   process: ChildProcessWithoutNullStreams;
