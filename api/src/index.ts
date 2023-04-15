@@ -31,6 +31,7 @@ if (process.env.SENTRY_DSN) {
       delete event.request?.data;
       return event;
     });
+  });
   app.use(Sentry.Handlers.requestHandler());
   app.use(Sentry.Handlers.tracingHandler());
 }
