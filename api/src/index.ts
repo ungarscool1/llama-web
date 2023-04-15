@@ -24,12 +24,13 @@ if (process.env.SENTRY_DSN) {
     ],
     tracesSampleRate: 1.0,
     profilesSampleRate: 1.0,
-    environment: process.env.NODE_ENV || 'production',
-    beforeSend: (event, hint) => {
-      console.log('request:', event.request, 'hint:', hint)
-      return event;
-    }
+    environment: process.env.NODE_ENV || 'production'
   });
+  Sentry.configureScope((scope) => {
+    scope.addEventProcessor((event) => {
+      delete event.request?.data;
+      return event;
+    });
   app.use(Sentry.Handlers.requestHandler());
   app.use(Sentry.Handlers.tracingHandler());
 }
