@@ -27,7 +27,10 @@
     }
     fetchChats();
     fetchMessage();
-    // Do things
+    setInterval(() => {
+      pingApi();
+    }, 1800);
+    pingApi();
   });
   
   function onChange(...args) {
@@ -38,6 +41,15 @@
     }
     fetchChats();
     fetchMessage();
+  }
+  
+  async function pingApi() {
+    const req = await fetch(`${env.PUBLIC_API_URL}/`, {
+      headers: {
+        'Authorization': `Bearer ${userInfo.token}`
+      }
+    });
+    if (!req.ok) return goto('/');
   }
   
   async function fetchChats() {
