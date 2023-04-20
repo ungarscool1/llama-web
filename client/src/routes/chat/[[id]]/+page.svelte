@@ -27,9 +27,6 @@
     }
     fetchChats();
     fetchMessage();
-    setInterval(() => {
-      pingApi();
-    }, 1800);
     pingApi();
   });
   
