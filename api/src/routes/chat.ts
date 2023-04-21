@@ -94,18 +94,9 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
       } else {
         response += data.toString();
       }
-      if (data.toString().includes('#')) {
-        detecting = true;
-        detectionIndex = response.length;
-      } else if (detecting && data.toString().includes(':')) {
-        if (response.includes('Human')) {
-          response = response.replace('### Human:', '');
-          child.kill();
-        } else {
-          res.write(response.substring(detectionIndex, response.length));
-          res.flushHeaders();
-          detecting = false;
-        }
+      if (data.toString().includes('### Human:')) {
+        response = response.replace('### Human:', '');
+        child.kill();
       } else if (!detecting) {
         res.write(data.toString());
         res.flushHeaders();
