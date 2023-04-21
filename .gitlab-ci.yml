@@ -17,7 +17,6 @@ build-client:
   stage: build
   script:
     - cd client
-    - rm .npmrc
     - yarn install --frozen-lockfile
     - yarn build
   artifacts:
