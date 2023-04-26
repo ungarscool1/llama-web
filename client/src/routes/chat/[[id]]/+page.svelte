@@ -140,8 +140,6 @@
     xhr.addEventListener('progress', (event) => {
       let id: string | undefined;
       messages[messages.length - 1].message = xhr.responseText;
-      console.log(xhr.responseText);
-      console.log('fds', xhr.responseText.match(/\[\[(\w{24})\]\]/));
       if ((id = xhr.responseText.match(/\[\[(\w{24})\]\]/)?.[1]) !== undefined) {
         goto(`/chat/${id}`);
       }
