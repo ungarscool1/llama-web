@@ -1,7 +1,8 @@
 {
-	"name": "@legodard/llama-client",
+	"name": "@ungarscool1/llama-client",
 	"version": "0.0.1",
-	"private": true,
+	"author": "Léo Godard <leo@legodard.fr>",
+	"license": "MIT",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
