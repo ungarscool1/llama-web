@@ -3,9 +3,10 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { env } from '$env/dynamic/public';
-  import { Sidebar, SidebarGroup, SidebarItem, SidebarWrapper, DarkMode, Spinner } from 'flowbite-svelte';
+  import { Sidebar, SidebarGroup, SidebarItem, SidebarWrapper, DarkMode, Spinner, Navbar, NavHamburger } from 'flowbite-svelte';
   export let chats: any;
   $: activeUrl = $page.url.pathname;
+  $: toggle = false;
   let userInfo = {
     authenticated: false,
     token: null,
@@ -15,6 +16,7 @@
     if (localStorage.getItem('userInfo')) {
       userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
     }
+    fetchChats();
   });
   async function fetchChats() {
     if (!userInfo.token) return;
@@ -53,16 +55,44 @@
     await fetchChats();
     goto('/chat');
   }
+  
+  const toggleSidebar = () => {
+    toggle = !toggle;
+  };
+  function getCurrentTitle() {
+    console.log(chats)
+    if (!chats) return 'New Chat';
+    const id = $page.params.id;
+    if (!id) return 'New Chat';
+    const chat = chats.find((chat: any) => chat._id === id);
+    if (!chat) return 'New Chat';
+    return chat.message || 'New Chat';
+  }
 </script>
-
-<Sidebar asideClass="fixed top-0 left-0 z-40 w-64 h-screen max-h-screen min-h-screen transition-transform">
+<div class="block lg:hidden">
+  <Navbar color="dark">
+    <NavHamburger on:click={toggleSidebar} />
+    <p class="items-center justify-center">{getCurrentTitle()}</p>
+    <button class="focus:outline-none whitespace-normal m-0.5 rounded-lg focus:ring-2 p-1.5 focus:ring-gray-400  hover:bg-gray-100 dark:hover:bg-gray-600 ml-3 md:hidden">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+      </svg>
+    </button>
+  </Navbar>
+</div>
+<Sidebar asideClass="fixed top-0 left-0 z-40 {toggle ? 'block' : 'hidden'} w-full lg:block lg:w-64 h-full max-h-screen min-h-screen transition-transform">
   <SidebarWrapper divClass="flex flex-col justify-between py-4 px-3 bg-gray-50 rounded dark:bg-gray-800 h-full max-h-full">
     <div class="flex flew-row justify-between">
-      <a href="/playground" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5 flex flex-col self-center">
+      <a href="/playground" class="hidden lg:block text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5 flex flex-col self-center">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-left-fill" viewBox="0 0 16 16">
           <path d="m3.86 8.753 5.482 4.796c.646.566 1.658.106 1.658-.753V3.204a1 1 0 0 0-1.659-.753l-5.48 4.796a1 1 0 0 0 0 1.506z"/>
         </svg>
       </a>
+      <button on:click={toggleSidebar} class="block lg:hidden text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5 flex flex-col self-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-left-fill" viewBox="0 0 16 16">
+          <path d="m3.86 8.753 5.482 4.796c.646.566 1.658.106 1.658-.753V3.204a1 1 0 0 0-1.659-.753l-5.48 4.796a1 1 0 0 0 0 1.506z"/>
+        </svg>
+      </button>
       <a href="/chat" class="text-2xl dark:text-white m-2">LLaMa AI</a>
       <DarkMode btnClass="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5"/>
     </div>

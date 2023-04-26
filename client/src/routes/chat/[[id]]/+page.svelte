@@ -4,7 +4,7 @@
   import { goto } from '$app/navigation';
   import { env } from '$env/dynamic/public';
   import Sidebar from '../../../components/chat/sidebar.svelte';
-    import Message from '../../../components/chat/message.svelte';
+  import Message from '../../../components/chat/message.svelte';
 
   $: activeUrl = $page.url.pathname;
   $: chats = undefined;
@@ -132,10 +132,10 @@
 </script>
 
 
-<main class="h-full w-screen overflow-y-none" on:keydown={handleKeyDown}>
+<main class="h-screen w-screen overflow-y-none" on:keydown={handleKeyDown}>
 <Sidebar {chats} />
-<div id="content" class="p-4 sm:ml-64 flex mt-2 flex-col justify-between w-100 mx-auto overflow-y-none">
-  <div id="chat-messages" class="overflow-y-auto px-10 mb-6 h-[calc(100vh-9rem)]" bind:this={chatBox}>
+<div id="content" class="p-4 lg:ml-64 flex mt-2 flex-col justify-between w-100 mx-auto overflow-y-none">
+  <div id="chat-messages" class="overflow-y-auto lg:px-10 mb-6 h-[calc(100vh-12rem)] lg:h-[calc(100vh-9rem)]" bind:this={chatBox}>
     {#if messages}
       {#each messages as message}
         <Message {message} />
