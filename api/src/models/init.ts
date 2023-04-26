@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Chat from "./chat";
+import apiToken from "./apiToken";
 
 async function main() {
   if (!process.env.DB)
@@ -7,6 +8,7 @@ async function main() {
   mongoose.set('strictQuery', true);
   await mongoose.connect(process.env.DB);
   mongoose.model('Chats', Chat);
+  mongoose.model('ApiTokens', apiToken);
 }
 
 export default main;

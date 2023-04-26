@@ -1,14 +1,19 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { spawn, ChildProcessWithoutNullStreams } from 'child_process';
+import type { ChildProcessWithoutNullStreams } from 'child_process';
+import { Generation } from '../utils/generation';
 import mongoose from 'mongoose';
-
-let router = Router();
+import * as Sentry from '@sentry/node';
 
 interface Chat {
   user: string;
   process: ChildProcessWithoutNullStreams;
 }
 
+let router = Router();
+const generation = new Generation({
+  executablePath: `${process.env.LLAMA_PATH}`,
+  modelPath: `${process.env.LLAMA_MODEL}`
+});
 const chatsProcess: Array<Chat> = [];
 
 router.get('/', async (req: Request, res: Response, next: NextFunction) => {
@@ -27,10 +32,13 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   await mongoose.connect(`${process.env.DB}`);
   let payload: {message: string, id?: string};
   let prompt = `Below is an instruction that describes a task. Write a response that appropriately completes the request. The response must be accurate, concise and evidence-based whenever possible. Here some information that can you help, the user name is ${req.user?.given_name}.`;
-  let index = 0;
+  let ignoreIndex = 0;
   let response = '';
   let detecting = false;
   let detectionIndex = 0;
+  let child: ChildProcessWithoutNullStreams;
+  const transaction = Sentry.getActiveTransaction();
+  let span: Sentry.Span|undefined;
   if (!req.body.message) {
     return res.status(400).send('Message is required');
   }
@@ -42,6 +50,8 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   }
 
   payload = req.body;
+  if (transaction)
+    span = transaction.startChild({ op: 'parsing', description: 'Parse request body' });
   if (payload.id) {
     const chat = await mongoose.model('Chats').findById(payload.id);
     if (!chat) {
@@ -54,28 +64,34 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
       prompt += `${message.isBot ? '### Assistant' : `### Human`}:\n ${message.message}\n`;
     }
   }
+  if (span)
+    span.finish();
   prompt += `### Human:\n${payload.message}\n`;
   prompt += '### Assistant:\n';
-  const child = spawn(process.env.LLAMA_PATH, [
-    '-m', process.env.LLAMA_MODEL,
-    '--ctx_size', '2048',
-    '--temp', '0.7',
-    '--top_k', '40',
-    '--top_p', '0.5',
-    '--repeat_last_n', '256',
-    '--batch_size', '1024',
-    '--repeat_penalty', '1.17647',
-    '--threads', '4',
-    '--n_predict', '2048',
-    '--prompt', prompt,
-    '--interactive',
-    '--reverse-prompt', `### Human:`
-  ]);
-  const chatProcess: Chat = {
+  try {
+    if (transaction)
+      span = transaction.startChild({ op: 'generation', description: 'Generate response' });
+    child = generation.launch({
+      contextSize: 2048,
+      temperature: 0.7,
+      topK: 40,
+      topP: 0.5,
+      repeatLastN: 256,
+      batchSize: 1024,
+      repeatPenalty: 1.17647,
+      threads: 4,
+      nPredict: 2048,
+      prompt: prompt,
+      interactive: true,
+      reversePrompt: '### Human:'
+    });
+  } catch (e) {
+    return res.status(500).json({ message: 'Something went wrong' });
+  }
+  chatsProcess.push({
     user: `${req.user?.preferred_username}`,
-    process: child,
-  };
-  chatsProcess.push(chatProcess);
+    process: child
+  });
   res.set({
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
@@ -86,8 +102,8 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   res.flushHeaders();
 
   child.stdout.on('data', (data) => {
-    if (index < prompt.length) {
-      index += data.toString().length;
+    if (ignoreIndex < prompt.length) {
+      ignoreIndex += data.toString().length;
     } else {
       if (data.toString() === ':' && response.length === 0) {
         return;
@@ -112,20 +128,10 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   });
 
   child.on('close', async (code) => {
-    let id = '';
     const Chat = mongoose.model('Chats');
-    console.log(`child process exited with code ${code}`);
-    if (!payload.id && response) {
-      const newChat = new Chat({
-        user: req.user?.preferred_username,
-        messages: [{message: payload.message, isBot: false}, { message: response, isBot: true }],
-        time: new Date(),
-      });
-      await newChat.save();
-      id = newChat._id;
-    } else if (response.length === 0 || !response) {
-      return res.end();
-    } else {
+    if (span)
+      span.finish();
+    if (response && payload.id) {
       await Chat.findByIdAndUpdate(payload.id, {
         $push: {
           messages: {
@@ -136,10 +142,18 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
           }
         }
       });
+      res.write(`[[END OF CONVERSATION]]`);
+    } else if (response) {
+      const newChat = new Chat({
+        user: req.user?.preferred_username,
+        messages: [{message: payload.message, isBot: false}, { message: response, isBot: true }],
+        time: new Date(),
+      });
+      await newChat.save();
+      res.write(`[[END OF CONVERSATION|${newChat._id}]]`);
     }
-    res.write(`[[END OF CONVERSATION${id ? `|${id}` : ''}]]`);
     res.end();
-    chatsProcess.splice(chatsProcess.indexOf(chatProcess), 1);
+    chatsProcess.splice(chatsProcess.findIndex(c => c.user === req.user?.preferred_username), 1);
   });
 });
 
@@ -178,6 +192,9 @@ router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
 });
 
 router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
+  if (req.params.id.length < 24) {
+    return res.status(400).json({ message: 'Invalid chat id' });
+  }
   await mongoose.connect(`${process.env.DB}`);
   const chat = await mongoose.model('Chats').findById(req.params.id);
   if (chat.user !== req.user?.preferred_username) {
@@ -187,4 +204,4 @@ router.delete('/:id', async (req: Request, res: Response, next: NextFunction) =>
   res.status(200).json({ message: 'Chat deleted' });
 });
 
-module.exports = router;
+export default router;

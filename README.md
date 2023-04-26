@@ -11,7 +11,7 @@ The LLaMa Web is a web interface to create a chat with a bot based on META LLaMa
 - MongoDB (for saving chats)
 - llama.cpp
 - a model of llama
-- Keycloak server (for authentication)
+- Keycloak server (for authentication / OPTIONAL)
 
 ### Getting the model
 
