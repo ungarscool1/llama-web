@@ -138,19 +138,18 @@
     }];
     chatBox.scroll({ top: chatBox.scrollHeight, behavior: 'smooth' });
     xhr.addEventListener('progress', (event) => {
-      chatBox.scroll({ top: chatBox.scrollHeight, behavior: 'smooth' });
+      let id: string | undefined;
       messages[messages.length - 1].message = xhr.responseText;
-      if (xhr.responseText.includes('[[END OF CONVERSATION')) {
-        const tmp = xhr.responseText.substring(xhr.responseText.indexOf('[[END OF CONVERSATION')).split('|')
-        if (tmp.length === 2) {
-          const conversationId = tmp[1].replace(']]', '')
-          goto(`/chat/${conversationId}`)
-        }
-        isRequesting = false;
-        const receivedMsg = xhr.responseText.substring(0, xhr.responseText.indexOf('[[END OF CONVERSATION')).trim()
-        messages[messages.length - 1].message = receivedMsg;
+      console.log(xhr.responseText);
+      console.log('fds', xhr.responseText.match(/\[\[(\w{24})\]\]/));
+      if ((id = xhr.responseText.match(/\[\[(\w{24})\]\]/)?.[1]) !== undefined) {
+        goto(`/chat/${id}`);
       }
     });
+    
+    xhr.onloadend = () => {
+      isRequesting = false;
+    };
   }
   
   async function stopChat() {

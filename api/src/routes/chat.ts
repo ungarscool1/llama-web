@@ -142,7 +142,6 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
           }
         }
       });
-      res.write(`[[END OF CONVERSATION]]`);
     } else if (response) {
       const newChat = new Chat({
         user: req.user?.preferred_username,
@@ -150,7 +149,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
         time: new Date(),
       });
       await newChat.save();
-      res.write(`[[END OF CONVERSATION|${newChat._id}]]`);
+      res.write(`[[${newChat._id}]]`);
     }
     res.end();
     chatsProcess.splice(chatsProcess.findIndex(c => c.user === req.user?.preferred_username), 1);
