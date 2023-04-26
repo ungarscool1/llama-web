@@ -3,8 +3,8 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { env } from '$env/dynamic/public';
-  import { Sidebar, SidebarGroup, SidebarItem, SidebarWrapper, SidebarCta, DarkMode, Spinner } from 'flowbite-svelte';
-  import Markdown,{ marked, highlightCode, getHljs, getLang } from 'markdown-hljs';
+  import Sidebar from '../../../components/chat/sidebar.svelte';
+    import Message from '../../../components/chat/message.svelte';
 
   $: activeUrl = $page.url.pathname;
   $: chats = undefined;
@@ -65,7 +65,6 @@
     const res = await req.json();
     chats = res;
   }
-  
   async function fetchMessage() {
     const id = $page.params.id;
     if (!id || !userInfo.token) return;
@@ -81,38 +80,9 @@
   }
   
   function handleKeyDown(event: KeyboardEvent) {
-    if (event.key === "Enter" && event.ctrlKey) {
-      sendRequest();
-    } else if (event.key === "Enter" && event.metaKey) {
+    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
       sendRequest();
     }
-  }
-  
-  async function deleteChat() {
-    const id = $page.params.id;
-    if (!id) return;
-    await fetch(`${env.PUBLIC_API_URL}/chat/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${userInfo.token}`
-      }
-    });
-    await fetchChats();
-    goto('/chat');
-  }
-  
-  async function deleteChats() {
-    if (!chats) return;
-    for (const chat of chats) {
-      await fetch(`${env.PUBLIC_API_URL}/chat/${chat._id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${userInfo.token}`
-        }
-      });
-    }
-    await fetchChats();
-    goto('/chat');
   }
   
   async function sendRequest() {
@@ -163,77 +133,12 @@
 
 
 <main class="h-full w-screen overflow-y-none" on:keydown={handleKeyDown}>
-<Sidebar asideClass="fixed top-0 left-0 z-40 w-64 h-screen max-h-screen min-h-screen transition-transform">
-  <SidebarWrapper divClass="flex flex-col justify-between py-4 px-3 bg-gray-50 rounded dark:bg-gray-800 h-full max-h-full">
-    <div class="flex flew-row justify-between">
-      <a href="/playground" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5 flex flex-col self-center">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-left-fill" viewBox="0 0 16 16">
-          <path d="m3.86 8.753 5.482 4.796c.646.566 1.658.106 1.658-.753V3.204a1 1 0 0 0-1.659-.753l-5.48 4.796a1 1 0 0 0 0 1.506z"/>
-        </svg>
-      </a>
-      <a href="/chat" class="text-2xl dark:text-white m-2">LLaMa AI</a>
-      <DarkMode btnClass="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5"/>
-    </div>
-    <SidebarGroup border={true} class="flex-none">
-      <SidebarItem href="/chat" label="New chat" active={activeUrl === '/chat'}>
-        <svelte:fragment slot="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
-            <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/>
-          </svg>
-        </svelte:fragment>
-      </SidebarItem>
-    </SidebarGroup>
-    <SidebarGroup class="overflow-y-auto flex-1 mt-2 items-center justify-center">
-        {#if chats === undefined}
-        <div class="text-center"><Spinner /></div>
-        {:else if chats.length === 0}
-          <div class="text-center text-gray-500 dark:text-gray-400">No chats yet</div>
-        {:else}
-          {#each chats as chat}
-          <li>
-            <a href="/chat/{chat._id}" class="flex justify-between items-center p-2 text-base font-normal text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg whitespace-nowrap {activeUrl === `/chat/${chat._id}` ? 'bg-gray-200 dark:bg-gray-700' : ''}">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="flex bi bi-chat-left" viewBox="0 0 16 16">
-                <path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4.414A2 2 0 0 0 3 11.586l-2 2V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
-              </svg>
-              <span class="flex-1 overflow-hidden ml-3 mr-3">{chat.message}</span>
-              {#if activeUrl === `/chat/${chat._id}`}
-                <button class="flex btn btn-ghost btn-sm" on:click|preventDefault={deleteChat}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
-                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
-                  </svg>
-                </button>
-              {/if}
-            </a>
-          </li>
-          {/each}
-        {/if}
-    </SidebarGroup>
-    <SidebarGroup border={true}>
-      <SidebarItem on:click={deleteChats} label="Clear conversations" active={false}>
-        <svelte:fragment slot="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
-            <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
-          </svg>
-        </svelte:fragment>
-      </SidebarItem>
-    </SidebarGroup>
-  </SidebarWrapper>
-</Sidebar>
-
+<Sidebar {chats} />
 <div id="content" class="p-4 sm:ml-64 flex mt-2 flex-col justify-between w-100 mx-auto overflow-y-none">
   <div id="chat-messages" class="overflow-y-auto px-10 mb-6 h-[calc(100vh-9rem)]" bind:this={chatBox}>
     {#if messages}
       {#each messages as message}
-        <div class="flex mb-2 flex-row">
-          <div class="flex">
-            <img src="{message.isBot ? '/robot.svg' : '/person.svg'}" alt="{message.isBot ? 'Robot' : 'User'}" class="me-2 rounded-sm w-[50px] h-[50px]">
-          </div>
-          <p class="flex-1 mb-0 ml-1 dark:text-white text-black w-[95%]">
-            {@html Markdown(message.message)}
-          </p>
-        </div>
+        <Message {message} />
       {/each}
     {/if}
   </div>
