@@ -6,7 +6,7 @@ COPY . .
 RUN yarn install
 RUN git clone https://github.com/ggerganov/llama.cpp && \
     cd llama.cpp && \
-    git checkout 12b5900 && \
+    git checkout 0b2da20 && \
     make -j
 RUN yarn build
 
