@@ -7,6 +7,8 @@
   export let chats: any;
   $: activeUrl = $page.url.pathname;
   $: toggle = false;
+  $: navBarTitle = 'New chat';
+  $: onChange(activeUrl);
   let userInfo = {
     authenticated: false,
     token: null,
@@ -18,6 +20,10 @@
     }
     fetchChats();
   });
+  function onChange(...args) {
+    getCurrentTitle();
+    toggleSidebar();
+  }
   async function fetchChats() {
     if (!userInfo.token) return;
     const req = await fetch(`${env.PUBLIC_API_URL}/chat`, {
@@ -60,24 +66,32 @@
     toggle = !toggle;
   };
   function getCurrentTitle() {
-    console.log(chats)
-    if (!chats) return 'New Chat';
+    if (!chats) {
+      navBarTitle = 'New chat';
+      return;
+    };
     const id = $page.params.id;
-    if (!id) return 'New Chat';
+    if (!id) {
+      navBarTitle = 'New chat';
+      return;
+    }
     const chat = chats.find((chat: any) => chat._id === id);
-    if (!chat) return 'New Chat';
-    return chat.message || 'New Chat';
+    if (!chat) {
+      navBarTitle = 'New chat';
+      return;
+    }
+    navBarTitle = chat.name;
   }
 </script>
 <div class="block lg:hidden">
   <Navbar color="dark">
     <NavHamburger on:click={toggleSidebar} />
-    <p class="items-center justify-center">{getCurrentTitle()}</p>
-    <button class="focus:outline-none whitespace-normal m-0.5 rounded-lg focus:ring-2 p-1.5 focus:ring-gray-400  hover:bg-gray-100 dark:hover:bg-gray-600 ml-3 md:hidden">
+    <p class="items-center justify-center">{navBarTitle}</p>
+    <a href="/chat" class="focus:outline-none whitespace-normal m-0.5 rounded-lg focus:ring-2 p-1.5 focus:ring-gray-400  hover:bg-gray-100 dark:hover:bg-gray-600 ml-3 md:hidden">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
         <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
       </svg>
-    </button>
+    </a>
   </Navbar>
 </div>
 <Sidebar asideClass="fixed top-0 left-0 z-40 {toggle ? 'block' : 'hidden'} w-full lg:block lg:w-64 h-full max-h-screen min-h-screen transition-transform">
