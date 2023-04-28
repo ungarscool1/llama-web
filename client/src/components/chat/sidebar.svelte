@@ -22,7 +22,7 @@
   });
   function onChange(...args) {
     getCurrentTitle();
-    toggleSidebar();
+    if (toggle) toggleSidebar();
   }
   async function fetchChats() {
     if (!userInfo.token) return;
@@ -83,7 +83,7 @@
     navBarTitle = chat.name;
   }
 </script>
-<div class="block lg:hidden">
+<div class="block md:hidden">
   <Navbar color="dark">
     <NavHamburger on:click={toggleSidebar} />
     <p class="items-center justify-center">{navBarTitle}</p>
@@ -94,15 +94,15 @@
     </a>
   </Navbar>
 </div>
-<Sidebar asideClass="fixed top-0 left-0 z-40 {toggle ? 'block' : 'hidden'} w-full lg:block lg:w-64 h-full max-h-screen min-h-screen transition-transform">
+<Sidebar asideClass="fixed top-0 left-0 z-40 {toggle ? 'block' : 'hidden'} w-full md:block md:w-64 h-full max-h-screen min-h-screen transition-transform">
   <SidebarWrapper divClass="flex flex-col justify-between py-4 px-3 bg-gray-50 rounded dark:bg-gray-800 h-full max-h-full">
     <div class="flex flew-row justify-between">
-      <a href="/playground" class="hidden lg:block text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5 flex flex-col self-center">
+      <a href="/playground" class="hidden md:block text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5 flex flex-col self-center">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-left-fill" viewBox="0 0 16 16">
           <path d="m3.86 8.753 5.482 4.796c.646.566 1.658.106 1.658-.753V3.204a1 1 0 0 0-1.659-.753l-5.48 4.796a1 1 0 0 0 0 1.506z"/>
         </svg>
       </a>
-      <button on:click={toggleSidebar} class="block lg:hidden text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5 flex flex-col self-center">
+      <button on:click={toggleSidebar} class="block md:hidden text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5 flex flex-col self-center">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-left-fill" viewBox="0 0 16 16">
           <path d="m3.86 8.753 5.482 4.796c.646.566 1.658.106 1.658-.753V3.204a1 1 0 0 0-1.659-.753l-5.48 4.796a1 1 0 0 0 0 1.506z"/>
         </svg>
