@@ -13,6 +13,7 @@
   $: prompt = "";
   let isRequesting = false;
   let isPromptError = false;
+  let isError = false;
   let chatBox: HTMLDivElement;
   let userInfo = {
     authenticated: false,
@@ -88,24 +89,30 @@
   async function sendRequest() {
     const xhr = new XMLHttpRequest();
     const id = $page.params.id;
-    if (prompt.length === 0) {
+    if (!isError && prompt.length === 0) {
       isPromptError = true;
       return;
     }
-    messages = [...messages, {
-      message: prompt,
-      isBot: false
-    }];
+    if (!isError) {
+      messages = [...messages, {
+        message: prompt,
+        isBot: false
+      }];
+    }
     xhr.open('POST', `${env.PUBLIC_API_URL}/chat`);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.setRequestHeader('Authorization', `Bearer ${userInfo.token}`);
-    xhr.send(JSON.stringify({ message: prompt, id }));
+    xhr.send(JSON.stringify({ message: isError ? messages[messages.length - 2].message: prompt, id }));
     isRequesting = true;
     prompt = "";
-    messages = [...messages, {
-      message: 'Waiting for response...',
-      isBot: true
-    }];
+    if (!isError) {
+      messages = [...messages, {
+        message: 'Waiting for response...',
+        isBot: true
+      }];
+    } else {
+      messages[messages.length - 1].message = 'Retrying...';
+    }
     chatBox.scroll({ top: chatBox.scrollHeight, behavior: 'smooth' });
     xhr.addEventListener('progress', (event) => {
       let id: string | undefined;
@@ -116,6 +123,12 @@
     });
     
     xhr.onloadend = () => {
+      if (messages[messages.length - 1].message === 'Waiting for response...') {
+        messages[messages.length - 1].message = `<div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
+          An error occured while processing your request. Please try again later.
+        </div>`;
+        isError = true;
+      }
       isRequesting = false;
     };
   }
@@ -147,7 +160,7 @@
       <div class="flex">
         <textarea disabled={isRequesting} draggable="false" rows="2" class="m-0 w-full resize-none border-1 border-solid rounded-l-md p-2 bg-transparent p-0 pr-7 focus:ring-0 focus-visible:ring-0 dark:bg-transparent dark:text-white pl-2 md:pl-0 {isPromptError ? 'border-red-700' : ''}" style="max-height: 200px;" placeholder="Enter some text..." bind:value={prompt}></textarea>
         {#if !isRequesting}
-          <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-r-md" on:click|preventDefault={sendRequest}>Send</button>
+          <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-r-md" on:click|preventDefault={sendRequest}>{!isError ? 'Send' : 'Regenerate'}</button>
         {:else}
           <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-r-md" on:click|preventDefault={stopChat}>Stop</button>
         {/if}
