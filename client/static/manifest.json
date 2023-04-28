@@ -1,0 +1,33 @@
+{
+  "short_name": "LLaMa AI",
+  "name": "LLaMa AI",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "type": "image/png",
+      "sizes": "128x128"
+    }
+  ],
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#ffffff",
+  "shortcuts": [
+    {
+      "name": "Playground",
+      "short_name": "Playground",
+      "description": "Play with the API",
+      "url": "/playground",
+      "icons": [{ "src": "/icons/favicon.png", "sizes": "128x128" }]
+    },
+    {
+      "name": "Chat",
+      "short_name": "Chat",
+      "description": "Chat with LLaMa",
+      "url": "/chat",
+      "icons": [{ "src": "/icons/favicon.png", "sizes": "128x128" }]
+    }
+  ],
+  "description": "LLaMa AI"
+}
