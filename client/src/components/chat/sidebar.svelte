@@ -18,7 +18,9 @@
     if (localStorage.getItem('userInfo')) {
       userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
     }
-    fetchChats();
+    fetchChats().then(() => {
+      getCurrentTitle();
+    });
   });
   function onChange(...args) {
     getCurrentTitle();
@@ -80,13 +82,13 @@
       navBarTitle = 'New chat';
       return;
     }
-    navBarTitle = chat.name;
+    navBarTitle = chat.message;
   }
 </script>
 <div class="block md:hidden">
-  <Navbar color="dark">
+  <Navbar color="dark" navDivClass="mx-auto flex flex-row justify-between items-center container whitespace-nowrap text-base font-normal text-gray-900 dark:text-white whitespace-nowrap">
     <NavHamburger on:click={toggleSidebar} />
-    <p class="items-center justify-center">{navBarTitle}</p>
+    <p class="items-center justify-center overflow-hidden ml-3 mr-3">{navBarTitle}</p>
     <a href="/chat" class="focus:outline-none whitespace-normal m-0.5 rounded-lg focus:ring-2 p-1.5 focus:ring-gray-400  hover:bg-gray-100 dark:hover:bg-gray-600 ml-3 md:hidden">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
         <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
