@@ -1,0 +1,49 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-api:
+    name: Build API
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Install dependencies
+        working-directory: ./api
+        run: yarn install --frozen-lockfile
+      - name: Build
+        working-directory: ./api
+        run: yarn build
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: api
+          path: ./api/dist
+  build-client:
+    name: Build Client
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Install dependencies
+        working-directory: ./client
+        run: yarn install --frozen-lockfile
+      - name: Build
+        working-directory: ./client
+        run: yarn build
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: client
+          path: ./client/build
