@@ -24,7 +24,7 @@ jobs:
         working-directory: ./api
         run: yarn build
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: api
           path: ./api/dist
@@ -43,7 +43,7 @@ jobs:
         working-directory: ./client
         run: yarn build
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: client
           path: ./client/build
