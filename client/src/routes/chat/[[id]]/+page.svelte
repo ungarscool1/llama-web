@@ -128,6 +128,8 @@
           An error occured while processing your request. Please try again later.
         </div>`;
         isError = true;
+      } else {
+        isError = false;
       }
       isRequesting = false;
     };
