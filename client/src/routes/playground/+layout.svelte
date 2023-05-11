@@ -72,6 +72,6 @@
     <DropdownItem href="/logout">Sign out</DropdownItem>
   </Dropdown>
 {/if}
-<div class="overflow-scroll mt-16 sm:mt-16 md:mt-20 lg:mt-20 xl:mt-20 2xl:mt-20">
+<div class="mt-16 sm:mt-16 md:mt-20 lg:mt-20 xl:mt-20 2xl:mt-20">
   <slot />
 </div>
