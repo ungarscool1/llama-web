@@ -12,18 +12,23 @@
     TableHeadCell,
     Button,
     Modal,
-    Label
+    Label,
+    P,
+    Progressbar
   } from 'flowbite-svelte';
 
-  $: apiKeys = [];
+  $: models = [];
   let userInfo = {
     authenticated: false,
     token: null
   };
   let modalOpen = false;
-  let modalKeyName = '';
-  let modalKey = '';
-  let modalError = false;
+  let modalModelName = '';
+  let modalModelUri = '';
+  let modalModelPromptTemplate = '';
+  let modelDownload = false;
+  let modelDownloadProgress = 0;
+  let modalErrorMessage = '';
 
   onMount(() => {
     if (localStorage.getItem('userInfo')) {
@@ -34,7 +39,7 @@
     } else {
       pingApi();
     }
-    getKeys();
+    getModels();
   });
 
   async function pingApi() {
@@ -46,48 +51,56 @@
     if (!req.ok) return goto('/');
   }
 
-  async function getKeys() {
-    const req = await fetch(`${env.PUBLIC_API_URL}/settings/api`, {
+  async function getModels() {
+    const req = await fetch(`${env.PUBLIC_API_URL}/models`, {
       headers: {
         Authorization: `Bearer ${userInfo.token}`
       }
     });
     if (!req.ok) return goto('/');
-    apiKeys = await req.json();
+    models = await req.json();
   }
 
-  async function deleteKey(id: string) {
-    const req = await fetch(`${env.PUBLIC_API_URL}/settings/api/${id}`, {
+  async function deleteModel(id: string) {
+    const req = await fetch(`${env.PUBLIC_API_URL}/models/${id}`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${userInfo.token}`
       }
     });
     if (!req.ok) return goto('/');
-    getKeys();
+    getModels();
   }
 
-  async function createKey() {
-    if (modalKeyName.length === 0) return (modalError = true);
+  async function createModel() {
+    if (modalModelName.length === 0) {
+      modalErrorMessage = 'Please enter a name';
+      return;
+    }
     const req = await fetch(`${env.PUBLIC_API_URL}/settings/api`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${userInfo.token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ name: modalKeyName })
+      body: JSON.stringify({ name: modalModelName, uri: modalModelUri, promptTemplate: modalModelPromptTemplate })
     });
-    if (!req.ok) return goto('/');
-    modalKeyName = '';
-    modalKey = (await req.json()).token;
-    getKeys();
+    if (!req.ok) {
+      modalErrorMessage = (await req.json()).message;
+      return;
+    }
+    modalModelName = '';
+    modalModelUri = '';
+    modalModelPromptTemplate = '';
+    modelDownload = true;
+    getModels();
   }
 </script>
 
 <div class="flex flex-row justify-between p-6">
   <div>
-    <h1 class="text-xl font-semibold text-gray-900 dark:text-white">API Keys</h1>
-    <p class="text-sm text-gray-500 dark:text-gray-400">Manage your API keys</p>
+    <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Models</h1>
+    <p class="text-sm text-gray-500 dark:text-gray-400">Manage your Llama models</p>
   </div>
   <Button on:click={() => (modalOpen = true)}
     ><svg
@@ -101,7 +114,7 @@
       <path
         d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
       />
-    </svg>&nbsp; Add new key</Button
+    </svg>&nbsp; Install a new model</Button
   >
 </div>
 <div>
@@ -110,26 +123,24 @@
       class="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800"
     />
     <TableHead>
-      <TableHeadCell>Key name</TableHeadCell>
-      <TableHeadCell>Key</TableHeadCell>
+      <TableHeadCell>Model name</TableHeadCell>
+      <TableHeadCell>Path</TableHeadCell>
       <TableHeadCell>Created at</TableHeadCell>
-      <TableHeadCell>Last used at</TableHeadCell>
       <TableHeadCell>
         <span class="sr-only"> Edit </span>
       </TableHeadCell>
     </TableHead>
     <TableBody tableBodyClass="divide-y">
-      {#each apiKeys as key}
+      {#each models as model}
         <TableBodyRow>
-          <TableBodyCell>{key.name}</TableBodyCell>
-          <TableBodyCell>{key.token}</TableBodyCell>
-          <TableBodyCell>{new Date(key.createdAt).toLocaleString()}</TableBodyCell>
-          <TableBodyCell>{new Date(key.lastUsed).toLocaleString()}</TableBodyCell>
+          <TableBodyCell>{model.name}</TableBodyCell>
+          <TableBodyCell>{model.path}</TableBodyCell>
+          <TableBodyCell>{new Date(model.createdAt).toLocaleString()}</TableBodyCell>
           <TableBodyCell>
             <button
               class="flex btn btn-ghost btn-sm"
               on:click|preventDefault={() => {
-                deleteKey(key.id);
+                deleteModel(model.id);
               }}
             >
               <svg
@@ -158,20 +169,42 @@
 <Modal bind:open={modalOpen} size="xs" autoclose={false} class="w-full">
   <div class="flex flex-col space-y-6">
     <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Create new API key</h3>
-    {#if modalKey.length === 0}
-      {#if modalError}
+    {#if !modelDownload}
+      {#if modalErrorMessage.length > 0}
         <Alert color="red">
-          <span class="font-medium">Name is required</span>
-          The API Key name is required.
+          <span class="font-medium">An error occured</span>
+          {modalErrorMessage}
         </Alert>
       {/if}
       <Label class="space-y-2">
-        <span>Key name</span>
+        <span>Model name</span>
         <input
           name="name"
-          placeholder="My key name"
+          placeholder="Model name"
           required
-          bind:value={modalKeyName}
+          bind:value={modalModelName}
+          class="block w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg"
+          type="text"
+        />
+      </Label>
+      <Label class="space-y-2">
+        <span>Model download URI</span>
+        <input
+          name="repository"
+          placeholder="Model download URI"
+          required
+          bind:value={modalModelUri}
+          class="block w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg"
+          type="text"
+        />
+      </Label>
+      <Label class="space-y-2">
+        <span>Model prompt template</span>
+        <input
+          name="template"
+          placeholder="Model prompt template"
+          required
+          bind:value={modalModelPromptTemplate}
           class="block w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg"
           type="text"
         />
@@ -179,26 +212,11 @@
       <button
         type="submit"
         class="text-center font-medium focus:ring-4 focus:outline-none inline-flex items-center justify-center px-5 py-2.5 text-sm text-white bg-blue-700 hover:bg-blue-800 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 rounded-lg w-full1"
-        on:click|preventDefault={createKey}>Create</button
+        on:click|preventDefault={createModel}>Install the new model</button
       >
     {:else}
-      <Label class="space-y-2">
-        <span>Key</span>
-        <input
-          disabled
-          bind:value={modalKey}
-          class="block w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg"
-          type="text"
-        />
-      </Label>
-      <button
-        type="submit"
-        class="text-center font-medium focus:ring-4 focus:outline-none inline-flex items-center justify-center px-5 py-2.5 text-sm text-white bg-red-700 hover:bg-red-800 focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800 rounded-lg w-full1"
-        on:click|preventDefault={() => {
-          modalOpen = false;
-          modalKey = '';
-        }}>Close</button
-      >
+      <P size="base">Please wait while the model is being downloaded and installed.</P>
+      <P size="base">The model will appear in the list after the download complete.</P>
     {/if}
   </div>
 </Modal>

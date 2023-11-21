@@ -15,6 +15,7 @@ import textCompletionRouter from './routes/playground/completion';
 import embeddingsRouter from './routes/playground/embeddings';
 import customChatRouter from './routes/playground/chat';
 import settingsRouter from './routes/settings';
+import modelsRouter from './routes/models';
 
 const app = express();
 
@@ -49,7 +50,7 @@ app.use(cors());
 
 if ((process.env.SKIP_AUTH === 'false' || !process.env.SKIP_AUTH) && (!process.env.JWT_PUBLIC_KEY || process.env.JWT_PUBLIC_KEY.length === 0)) {
   throw new Error('JWT_PUBLIC_KEY must be set when auth is required');
-} else if (!process.env.LLAMA_PATH || !process.env.LLAMA_MODEL || !process.env.LLAMA_EMBEDDING_PATH) {
+} else if (!process.env.LLAMA_PATH || !process.env.MODELS_DIR || !process.env.LLAMA_EMBEDDING_PATH) {
   throw new Error('LLAMA environment variables must be set');
 } else if (!process.env.DB) {
   throw new Error('DB must be set');
@@ -72,6 +73,7 @@ app.use('/text-completion', textCompletionRouter);
 app.use('/embeddings', embeddingsRouter);
 app.use('/custom-chat', customChatRouter);
 app.use('/settings', settingsRouter);
+app.use('/models', modelsRouter);
 
 if (process.env.SENTRY_DSN) {
   app.use(Sentry.Handlers.errorHandler());
