@@ -22,6 +22,7 @@
   let modalOpen = false;
   let modalKeyName = '';
   let modalKey = '';
+  let modalError = false;
 
   onMount(() => {
     if (localStorage.getItem('userInfo')) {
@@ -66,6 +67,7 @@
   }
 
   async function createKey() {
+    if (modalKeyName.length === 0) return (modalError = true);
     const req = await fetch(`${env.PUBLIC_API_URL}/settings/api`, {
       method: 'POST',
       headers: {
@@ -156,6 +158,12 @@
   <div class="flex flex-col space-y-6">
     <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Create new API key</h3>
     {#if modalKey.length === 0}
+      {#if modalError}
+        <Alert color="red">
+          <span class="font-medium">Name is required</span>
+          The API Key name is required.
+        </Alert>
+      {/if}
       <Label class="space-y-2">
         <span>Key name</span>
         <input
