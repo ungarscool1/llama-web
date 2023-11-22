@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
-import fs from 'fs';
-import http from 'http';
+import file from '../../utils/file';
 
 var router = Router();
 
@@ -19,6 +18,7 @@ router.get('/', async (req, res) => {
   res.json(models.map((model) => ({
     id: model._id,
     name: model.name,
+    path: `${process.env.MODELS_DIR}/${model.path}`,
     createdAt: model.createdAt
   })));
 });
@@ -45,27 +45,18 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ message: 'Missing required fields' });
   }
   const ModelObj = mongoose.model('Models');
-  // download model files
   const fileName = encodeURI(req.body.name);
-  const file = fs.createWriteStream(`${process.env.MODELS_DIR}/${fileName}`);
-  const downloadRequest = http.get(req.body.uri, (response) => {
-    response.pipe(file);
-    file.on('finish', async function () {
-      file.close();
+  file.download(req.body.uri, `${process.env.MODELS_DIR}/${fileName}`)
+    .then(() => {
       const model = new ModelObj({
         name: req.body.name,
-        path: `${process.env.MODELS_DIR}/${fileName}`,
+        path: `${fileName}`,
         chatPromptTemplate: req.body.promptTemplate,
         parameters: req.body.parameters
       });
-      await model.save();
-      res.status(201).json({ message: 'Model created' });
-    });
-  });
-  downloadRequest.on('error', function (err) {
-    fs.unlink(`${process.env.MODELS_DIR}/${fileName}`, () => { });
-    res.status(500).json({ message: 'Failed to download model' });
-  });
+      model.save();
+    })
+    res.status(202).json({ message: 'Model download in progress.' });
 });
 
 export default router;

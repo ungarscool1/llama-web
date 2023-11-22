@@ -77,7 +77,7 @@
       modalErrorMessage = 'Please enter a name';
       return;
     }
-    const req = await fetch(`${env.PUBLIC_API_URL}/settings/api`, {
+    const req = await fetch(`${env.PUBLIC_API_URL}/models`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${userInfo.token}`,
@@ -168,7 +168,7 @@
 
 <Modal bind:open={modalOpen} size="xs" autoclose={false} class="w-full">
   <div class="flex flex-col space-y-6">
-    <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Create new API key</h3>
+    <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Install a new model</h3>
     {#if !modelDownload}
       {#if modalErrorMessage.length > 0}
         <Alert color="red">
