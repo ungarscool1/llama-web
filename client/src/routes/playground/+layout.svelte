@@ -32,6 +32,7 @@
       const userInfo = JSON.parse(decodeURIComponent(escape(atob(store.token.split('.')[1]))));
       userName = userInfo.name;
       userEmail = userInfo.email;
+    } else if (env.PUBLIC_SKIP_AUTH === 'true') {
     } else {
       goto('/login');
     }
