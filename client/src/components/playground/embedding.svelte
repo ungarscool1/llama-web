@@ -7,6 +7,8 @@
   $: isRequesting = false;
   $: errorMessage = '';
   $: embedResponse = '';
+  $: model = ''
+  $: models = [];
   let userInfo = {
     authenticated: false,
     token: null
@@ -15,14 +17,30 @@
   onMount(() => {
     if (localStorage.getItem('userInfo')) {
       userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      getModels();
     }
   });
+  
+  async function getModels() {
+    const req = await fetch(`${env.PUBLIC_API_URL}/models`, {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`
+      }
+    });
+    
+    if (!req.ok) return goto('/');
+    models = await req.json();
+  }
+
   async function generateEmbeddings() {
     if (prompt.length === 0) {
       errorMessage = 'Please enter a prompt';
       return;
     } else if (prompt.length > 128) {
       errorMessage = 'Prompt is too long. Max length is 128 characters';
+      return;
+    } else if (model.length === 0) {
+      errorMessage = 'Please select a model';
       return;
     } else {
       errorMessage = '';
@@ -34,7 +52,7 @@
         Authorization: `Bearer ${userInfo.token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ prompt })
+      body: JSON.stringify({ prompt, model })
     });
     if (res.ok) {
       const jsonRes: Array<number> = await res.json();
@@ -88,7 +106,18 @@
   <div class="w-[25%]">
     <div class="space-y-2 mb-4">
       <h3 class="text-xl font-medium text-gray-900 dark:text-white">Parameters</h3>
-      <p class="text-gray-500">Not available</p>
+      <div>
+        <p class="text-gray-500">Model</p>
+        <select
+          class="w-full rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:placeholder-gray-400 dark:text-white border border-gray-200 dark:border-gray-600 resize-none p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          bind:value={model}
+        >
+          <option disabled selected value="">Select a model</option>
+          {#each models as model}
+            <option selected value={model.id}>{model.name}</option>
+          {/each}
+        </select>
+      </div>
     </div>
     <div class="flex flex-col space-y-2">
       <h3 class="text-xl font-medium text-gray-900 dark:text-white">Launch</h3>
