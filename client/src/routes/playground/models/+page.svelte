@@ -200,14 +200,7 @@
       </Label>
       <Label class="space-y-2">
         <span>Model prompt template</span>
-        <input
-          name="template"
-          placeholder="Model prompt template"
-          required
-          bind:value={modalModelPromptTemplate}
-          class="block w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg"
-          type="text"
-        />
+        <textarea draggable="false" rows="2" class="block resize-none w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg" placeholder="Model prompt template" bind:value={modalModelPromptTemplate}></textarea>
       </Label>
       <button
         type="submit"

@@ -35,7 +35,8 @@ router.get('/:id', async (req, res) => {
 });
 
 router.delete('/:id', async (req, res) => {
-  // TODO: Delete model files
+  const model = await mongoose.model('Models').findById(req.params.id);
+  await file.delete(`${process.env.MODELS_DIR}/${model.path}`);
   await mongoose.model('Models').findByIdAndDelete(req.params.id);
   res.status(200).json({ message: 'Model deleted' });
 });
