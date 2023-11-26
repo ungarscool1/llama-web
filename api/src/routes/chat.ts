@@ -12,7 +12,6 @@ interface Chat {
 let router = Router();
 const generation = new Generation({
   executablePath: `${process.env.LLAMA_PATH}`,
-  modelPath: `${process.env.LLAMA_MODEL}`
 });
 const chatsProcess: Array<Chat> = [];
 
@@ -35,7 +34,6 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   let ignoreIndex = 0;
   let response = '';
   let detecting = false;
-  let detectionIndex = 0;
   let child: ChildProcessWithoutNullStreams;
   const transaction = Sentry.getActiveTransaction();
   let span: Sentry.Span|undefined;
@@ -72,6 +70,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     if (transaction)
       span = transaction.startChild({ op: 'generation', description: 'Generate response' });
     child = generation.launch({
+      modelPath: `${process.env.LLAMA_MODEL}`,
       contextSize: 2048,
       temperature: 0.7,
       topK: 40,

@@ -9,5 +9,10 @@ export default new mongoose.Schema({
       message: { type: String, required: true },
     },
   ],
+  model: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Models',
+    required: true,
+  }
 });
 

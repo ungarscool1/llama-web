@@ -2,16 +2,17 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Generation, GenerationLaunchOutput } from '../../utils/generation';
 import * as yup from 'yup';
 import * as Sentry from '@sentry/node';
+import mongoose from 'mongoose';
 
 const generation = new Generation({
   executablePath: `${process.env.LLAMA_PATH}`,
-  modelPath: `${process.env.LLAMA_MODEL}`
 });
 
 var router = Router();
 
 router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   const schema = yup.object().shape({
+    model: yup.string().required(),
     system: yup.string().required(),
     messages: yup.array().of(
       yup.object().shape({
@@ -25,12 +26,11 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   let ignoreIndex = 0;
   let response = '';
   let detecting = false;
-  let detectionIndex = 0;
   let child: GenerationLaunchOutput;
   const transaction = Sentry.getActiveTransaction();
   let span: Sentry.Span|undefined;
-  if (!process.env.LLAMA_PATH || !process.env.LLAMA_MODEL) {
-    throw new Error('LLAMA_PATH and LLAMA_MODEL must be set');
+  if (!process.env.LLAMA_PATH || !process.env.MODELS_DIR) {
+    throw new Error('LLAMA_PATH and MODELS_DIR must be set');
   }
 
   if (transaction)
@@ -43,6 +43,12 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
       span.finish();
     return res.status(400).json({ message: 'Bad request' });
   }
+  const model = await mongoose.model('Models').findOne({ name: payload.model });
+  if (!model) {
+    if (span)
+      span.finish();
+    return res.status(400).json({ message: 'Model not found' });
+  }
   prompt += `${payload.system}\n\n`;
   for (const message of payload.messages)
     prompt += `### ${message.role.charAt(0).toUpperCase()}${message.role.substring(1)}:\n${message.message}\n`;
@@ -54,6 +60,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     if (transaction)
       span = transaction.startChild({ op: 'generation', description: 'Generate response' });
     child = generation.launch({
+      modelPath: `${process.env.MODELS_DIR}/${model.path}`,
       contextSize: 2048,
       temperature: 0.7,
       topK: 40,

@@ -6,6 +6,10 @@ import mongoose from 'mongoose';
 
 var router = Router();
 
+const generation = new Generation({
+  executablePath: `${process.env.LLAMA_EMBEDDING_PATH}`,
+});
+
 router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   const schema = yup.object().shape({
     prompt: yup.string().required().min(1).max(2048),
@@ -30,12 +34,13 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (transaction)
       span = transaction.startChild({ op: 'generation', description: 'Generate response' });
-    const model = await mongoose.model('Models').findById(payload.model);
-    const generation = new Generation({
-      executablePath: `${process.env.LLAMA_EMBEDDING_PATH}`,
-      modelPath: `${process.env.MODELS_DIR}/${model.path}`
-    });
-    const response = generation.generateEmbeddings(payload.prompt);
+    const model = await mongoose.model('Models').findOne({ name: payload.model });
+    if (!model) {
+      if (span)
+        span.finish();
+      return res.status(400).json({ message: 'Model not found' });
+    }
+    const response = generation.generateEmbeddings(payload.prompt, `${process.env.MODELS_DIR}/${model.path}`);
     if (span)
       span.finish();
     return res.json(response);

@@ -109,7 +109,7 @@
         >
           <option disabled selected value="">Select a model</option>
           {#each models as model}
-            <option selected value={model.id}>{model.name}</option>
+            <option selected value={model.name}>{model.name}</option>
           {/each}
         </select>
         <p class="text-gray-500">Temperature</p>
