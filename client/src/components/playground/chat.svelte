@@ -6,7 +6,7 @@
   $: system = '';
   $: messages = [
     {
-      role: 'Human',
+      role: 'user',
       message: ''
     }
   ];
@@ -38,14 +38,14 @@
   }
 
   const switchPrompter = (i: number) =>
-    (messages[i].role = messages[i].role === 'Human' ? 'Assistant' : 'Human');
+    (messages[i].role = messages[i].role === 'user' ? 'assistant' : 'user');
 
   function addMessage() {
     const nextRole = () => {
       if (messages.length === 0) {
-        return 'Human';
+        return 'user';
       }
-      return messages[messages.length - 1].role === 'Human' ? 'Assistant' : 'Human';
+      return messages[messages.length - 1].role === 'user' ? 'assistant' : 'user';
     };
     messages = [
       ...messages,
@@ -69,7 +69,7 @@
     messages = [
       ...messages,
       {
-        role: 'Assistant',
+        role: 'assistant',
         message: ''
       }
     ];
@@ -123,7 +123,7 @@
               class="text-center font-medium inline-flex items-center justify-center px-5 py-2.5 text-sm text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 rounded-lg"
               on:click={() => {
                 switchPrompter(i);
-              }}>{message.role}</button
+              }}>{message.role.charAt(0).toUpperCase() + message.role.slice(1)}</button
             >
           </div>
           <div class="basis-1/2">

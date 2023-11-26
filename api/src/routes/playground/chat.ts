@@ -3,6 +3,8 @@ import { Generation, GenerationLaunchOutput } from '../../utils/generation';
 import * as yup from 'yup';
 import * as Sentry from '@sentry/node';
 import mongoose from 'mongoose';
+import compileTemplate from '../../utils/compileTemplate';
+import { Role } from '../../types/Message';
 
 const generation = new Generation({
   executablePath: `${process.env.LLAMA_PATH}`,
@@ -17,7 +19,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     messages: yup.array().of(
       yup.object().shape({
         message: yup.string().required(),
-        role: yup.string().ensure().oneOf(['assistant', 'human', 'Assistant', 'Human']).required()
+        role: yup.string().oneOf([Role.user, Role.assistant]).required()
       })
     ).required()
   });
@@ -49,10 +51,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
       span.finish();
     return res.status(400).json({ message: 'Model not found' });
   }
-  prompt += `${payload.system}\n\n`;
-  for (const message of payload.messages)
-    prompt += `### ${message.role.charAt(0).toUpperCase()}${message.role.substring(1)}:\n${message.message}\n`;
-  prompt += '### Assistant:\n';
+  prompt += compileTemplate(model.chatPromptTemplate, { system: payload.system, messages: payload.messages });
   console.log(prompt);
   if (span)
     span.finish();
@@ -61,18 +60,13 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
       span = transaction.startChild({ op: 'generation', description: 'Generate response' });
     child = generation.launch({
       modelPath: `${process.env.MODELS_DIR}/${model.path}`,
-      contextSize: 2048,
+      contextSize: 4096,
       temperature: 0.7,
-      topK: 40,
-      topP: 0.5,
-      repeatLastN: 256,
-      batchSize: 1024,
-      repeatPenalty: 1.17647,
+      repeatPenalty: 1.1,
       threads: 4,
-      nPredict: 2048,
+      nPredict: -1,
       prompt: prompt,
-      interactive: true,
-      reversePrompt: '### Human:',
+      interactive: false,
     });
   } catch (e) {
     return res.status(500).json({ message: 'Something went wrong' });
@@ -89,19 +83,13 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   child.stdout.on('data', (data) => {
     if (ignoreIndex < prompt.length) {
       ignoreIndex += data.toString().length;
+      if (process.env.NODE_ENV === 'development')
+        console.error(`stdout - IGNORED(${ignoreIndex} - ${prompt.trim().length}): ${data}`);
     } else {
-      if (data.toString() === ':' && response.length === 0) {
-        return;
-      } else {
-        response += data.toString();
-      }
-      if (data.toString().includes('### Human:')) {
-        response = response.replace('### Human:', '');
-        child.kill();
-      } else if (!detecting) {
-        res.write(data.toString());
-        res.flushHeaders();
-      }
+      if (process.env.NODE_ENV === 'development')
+        console.error(`stdout - PUSHED: ${encodeURI(data)}`);
+      res.write(data.toString());
+      res.flushHeaders();
     }
   });
 
