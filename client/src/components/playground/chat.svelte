@@ -12,6 +12,8 @@
   ];
   $: isRequesting = false;
   $: errorMessage = '';
+  $: model = ''
+  $: models = [];
   let userInfo = {
     authenticated: false,
     token: null
@@ -20,8 +22,20 @@
   onMount(() => {
     if (localStorage.getItem('userInfo')) {
       userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      getModels();
     }
   });
+  
+  async function getModels() {
+    const req = await fetch(`${env.PUBLIC_API_URL}/models`, {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`
+      }
+    });
+    
+    if (!req.ok) return goto('/');
+    models = await req.json();
+  }
 
   const switchPrompter = (i: number) =>
     (messages[i].role = messages[i].role === 'Human' ? 'Assistant' : 'Human');
@@ -51,7 +65,7 @@
     xhr.open('POST', `${env.PUBLIC_API_URL}/custom-chat`);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.setRequestHeader('Authorization', `Bearer ${userInfo.token}`);
-    xhr.send(JSON.stringify({ system, messages }));
+    xhr.send(JSON.stringify({ system, messages, model }));
     messages = [
       ...messages,
       {
@@ -163,10 +177,21 @@
       >
     </div>
   </div>
-  <div class="flex flex-col">
-    <br /><div class="space-y-2 mb-4">
+  <div class="flex-1 flex-col">
+    <div class="space-y-2 mb-4">
       <h3 class="text-xl font-medium text-gray-900 dark:text-white">Parameters</h3>
-      <p class="text-gray-500">Not available</p>
+      <div>
+        <p class="text-gray-500">Model</p>
+        <select
+          class="w-full rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:placeholder-gray-400 dark:text-white border border-gray-200 dark:border-gray-600 resize-none p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          bind:value={model}
+        >
+          <option disabled selected value="">Select a model</option>
+          {#each models as model}
+            <option selected value={model.name}>{model.name}</option>
+          {/each}
+        </select>
+      </div>
     </div>
     <div class="flex flex-col space-y-2">
       <h3 class="text-xl font-medium text-gray-900 dark:text-white">Launch</h3>
