@@ -3,6 +3,8 @@ import type { ChildProcessWithoutNullStreams } from 'child_process';
 import { Generation } from '../utils/generation';
 import mongoose from 'mongoose';
 import * as Sentry from '@sentry/node';
+import * as yup from 'yup';
+import { Role } from '../types/Message';
 
 interface Chat {
   user: string;
@@ -22,67 +24,67 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
     _id: chat._id,
     user: chat.user,
     message: chat.messages[0].message,
-    time: chat.time
+    time: chat.time,
+    model: chat.model
   })).reverse();
   res.json(chatsArray);
 });
 
 router.post('/', async (req: Request, res: Response, next: NextFunction) => {
-  await mongoose.connect(`${process.env.DB}`);
-  let payload: {message: string, id?: string};
-  let prompt = `Below is an instruction that describes a task. Write a response that appropriately completes the request. The response must be accurate, concise and evidence-based whenever possible. Here some information that can you help, the user name is ${req.user?.given_name}.`;
+  const schema = yup.object().shape({
+    id: yup.string().optional(),
+    model: yup.string().required(),
+    message: yup.string().required()
+  });
+  let payload: yup.InferType<typeof schema>;
+  let system = `Below is an instruction that describes a task. Write a response that appropriately completes the request. The response must be accurate, concise and evidence-based whenever possible. Here some information that can you help, the user name is ${req.user?.given_name}.`;
+  let prompt = ``;
   let ignoreIndex = 0;
   let response = '';
-  let detecting = false;
   let child: ChildProcessWithoutNullStreams;
   const transaction = Sentry.getActiveTransaction();
   let span: Sentry.Span|undefined;
-  if (!req.body.message) {
-    return res.status(400).send('Message is required');
-  }
-  if (!process.env.LLAMA_PATH || !process.env.LLAMA_MODEL) {
-    throw new Error('LLAMA_PATH and LLAMA_MODEL must be set');
-  }
   if (chatsProcess.find((chat) => chat.user === req.user?.preferred_username)) {
     return res.status(400).json({ message: 'There is already a chat in progress' });
   }
 
-  payload = req.body;
   if (transaction)
     span = transaction.startChild({ op: 'parsing', description: 'Parse request body' });
+  try {
+    payload = schema.validateSync(req.body);
+  } catch (err) {
+    console.error((err as Error).message);
+    if (span)
+      span.finish();
+    return res.status(400).json({ message: 'Bad request' });
+  }
   if (payload.id) {
     const chat = await mongoose.model('Chats').findById(payload.id);
-    if (!chat) {
+    if (!chat || chat.user !== req.user?.preferred_username) {
       return res.status(400).json({ message: 'Chat not found' });
     }
-    if (chat.user !== req.user?.preferred_username) {
-      return res.status(400).json({ message: 'Chat not found' });
+    if (chat.model !== payload.model) {
+      return res.status(400).json({ message: 'Model mismatch' });
     }
-    for (const message of chat.messages) {
-      prompt += `${message.isBot ? '### Assistant' : `### Human`}:\n ${message.message}\n`;
-    }
+    chat.messages.push({ message: payload.message, role: Role.user });
+    console.log(chat.model);
   }
+  const model = await mongoose.model('Models').findOne({ name: payload.model });
   if (span)
     span.finish();
-  prompt += `### Human:\n${payload.message}\n`;
-  prompt += '### Assistant:\n';
+  
   try {
     if (transaction)
       span = transaction.startChild({ op: 'generation', description: 'Generate response' });
     child = generation.launch({
-      modelPath: `${process.env.LLAMA_MODEL}`,
-      contextSize: 2048,
+      modelPath: `${process.env.MODELS_DIR}/${model.path}`,
+      contextSize: 4096,
       temperature: 0.7,
-      topK: 40,
-      topP: 0.5,
-      repeatLastN: 256,
-      batchSize: 1024,
-      repeatPenalty: 1.17647,
+      repeatPenalty: 1.1,
       threads: 4,
-      nPredict: 2048,
+      nPredict: -1,
       prompt: prompt,
-      interactive: true,
-      reversePrompt: '### Human:'
+      interactive: false,
     });
   } catch (e) {
     return res.status(500).json({ message: 'Something went wrong' });
@@ -103,19 +105,14 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   child.stdout.on('data', (data) => {
     if (ignoreIndex < prompt.length) {
       ignoreIndex += data.toString().length;
+      if (process.env.NODE_ENV === 'development')
+        console.error(`stdout - IGNORED(${ignoreIndex} - ${prompt.trim().length}): ${data}`);
     } else {
-      if (data.toString() === ':' && response.length === 0) {
-        return;
-      } else {
-        response += data.toString();
-      }
-      if (data.toString().includes('### Human:')) {
-        response = response.replace('### Human:', '');
-        child.kill();
-      } else if (!detecting) {
-        res.write(data.toString());
-        res.flushHeaders();
-      }
+      if (process.env.NODE_ENV === 'development')
+        console.error(`stdout - PUSHED: ${encodeURI(data)}`);
+      response += data.toString();
+      res.write(data.toString());
+      res.flushHeaders();
     }
   });
 
@@ -130,13 +127,13 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     const Chat = mongoose.model('Chats');
     if (span)
       span.finish();
-    if (response && payload.id) {
+    if (payload.id) {
       await Chat.findByIdAndUpdate(payload.id, {
         $push: {
           messages: {
             $each: [
-              { message: payload.message, isBot: false },
-              { message: response.trim(), isBot: true }
+              { message: payload.message, role: Role.user },
+              { message: response.trim(), role: Role.assistant }
             ]
           }
         }
@@ -144,8 +141,9 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     } else if (response) {
       const newChat = new Chat({
         user: req.user?.preferred_username,
-        messages: [{message: payload.message, isBot: false}, { message: response, isBot: true }],
+        messages: [{message: payload.message, role: Role.user}, { message: response, role: Role.assistant }],
         time: new Date(),
+        model: model
       });
       await newChat.save();
       res.write(`[[${newChat._id}]]`);
@@ -185,7 +183,8 @@ router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
     _id: chat._id,
     user: chat.user,
     messages: chat.messages,
-    time: chat.time
+    time: chat.time,
+    model: chat.model
   });
 });
 

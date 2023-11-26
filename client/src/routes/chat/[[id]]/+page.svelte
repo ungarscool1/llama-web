@@ -5,12 +5,14 @@
   import { env } from '$env/dynamic/public';
   import Sidebar from '../../../components/chat/sidebar.svelte';
   import Message from '../../../components/chat/message.svelte';
+  import Welcome from '../../../components/chat/welcome.svelte';
 
   $: activeUrl = $page.url.pathname;
   $: chats = undefined;
   $: messages = [];
   $: onChange(activeUrl);
   $: prompt = "";
+  $: model = "";
   let isRequesting = false;
   let isPromptError = false;
   let isError = false;
@@ -76,6 +78,7 @@
     });
     if (!req.ok) return console.log("Error");
     const res = await req.json();
+    model = res.model;
     messages = res.messages;
     chatBox.scroll({ top: chatBox.scrollHeight, behavior: 'smooth' });
   }
@@ -96,19 +99,19 @@
     if (!isError) {
       messages = [...messages, {
         message: prompt,
-        isBot: false
+        role: 'user'
       }];
     }
     xhr.open('POST', `${env.PUBLIC_API_URL}/chat`);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.setRequestHeader('Authorization', `Bearer ${userInfo.token}`);
-    xhr.send(JSON.stringify({ message: isError ? messages[messages.length - 2].message: prompt, id }));
+    xhr.send(JSON.stringify({ message: isError ? messages[messages.length - 2].message : prompt, id, model }));
     isRequesting = true;
     prompt = "";
     if (!isError) {
       messages = [...messages, {
         message: 'Waiting for response...',
-        isBot: true
+        role: 'assistant'
       }];
     } else {
       messages[messages.length - 1].message = 'Retrying...';
@@ -151,10 +154,12 @@
 <Sidebar {chats} />
 <div id="content" class="p-4 md:ml-64 flex mt-2 flex-col justify-between w-100 mx-auto overflow-y-none">
   <div id="chat-messages" class="overflow-y-auto md:px-10 mb-6 h-[calc(100vh-12rem)] md:h-[calc(100vh-9rem)]" bind:this={chatBox}>
-    {#if messages}
+    {#if messages.length > 0}
       {#each messages as message}
         <Message {message} />
       {/each}
+    {:else}
+      <Welcome bind:model={model} />
     {/if}
   </div>
   <div class="flex justify-center items-center">
