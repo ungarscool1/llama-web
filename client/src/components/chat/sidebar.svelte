@@ -53,7 +53,7 @@
   async function deleteChats() {
     if (!chats) return;
     for (const chat of chats) {
-      await fetch(`${env.PUBLIC_API_URL}/chat/${chat._id}`, {
+      await fetch(`${env.PUBLIC_API_URL}/chat/${chat.id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${userInfo.token}`
@@ -77,7 +77,7 @@
       navBarTitle = 'New chat';
       return;
     }
-    const chat = chats.find((chat: any) => chat._id === id);
+    const chat = chats.find((chat: any) => chat.id === id);
     if (!chat) {
       navBarTitle = 'New chat';
       return;
@@ -129,12 +129,12 @@
         {:else}
           {#each chats as chat}
           <li>
-            <a href="/chat/{chat._id}" class="flex justify-between items-center p-2 text-base font-normal text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg whitespace-nowrap {activeUrl === `/chat/${chat._id}` ? 'bg-gray-200 dark:bg-gray-700' : ''}">
+            <a href="/chat/{chat.id}" class="flex justify-between items-center p-2 text-base font-normal text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg whitespace-nowrap {activeUrl === `/chat/${chat.id}` ? 'bg-gray-200 dark:bg-gray-700' : ''}">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="flex bi bi-chat-left" viewBox="0 0 16 16">
                 <path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4.414A2 2 0 0 0 3 11.586l-2 2V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
               </svg>
               <span class="flex-1 overflow-hidden ml-3 mr-3">{chat.message}</span>
-              {#if activeUrl === `/chat/${chat._id}`}
+              {#if activeUrl === `/chat/${chat.id}`}
                 <button class="flex btn btn-ghost btn-sm" on:click|preventDefault={deleteChat}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
                     <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>

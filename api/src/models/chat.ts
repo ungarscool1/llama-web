@@ -5,7 +5,7 @@ export default new mongoose.Schema({
   user: { type: String, required: true },
   messages: [
     {
-      isBot: { type: Boolean, default: false },
+      role: { type: String, required: true },
       message: { type: String, required: true },
     },
   ],

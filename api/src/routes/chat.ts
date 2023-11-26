@@ -4,7 +4,8 @@ import { Generation } from '../utils/generation';
 import mongoose from 'mongoose';
 import * as Sentry from '@sentry/node';
 import * as yup from 'yup';
-import { Role } from '../types/Message';
+import { Message, Role } from '../types/Message';
+import compileTemplate from '../utils/compileTemplate';
 
 interface Chat {
   user: string;
@@ -21,11 +22,11 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   await mongoose.connect(`${process.env.DB}`);
   const chats = await mongoose.model('Chats').find({ user: req.user?.preferred_username }, '-__v');
   const chatsArray = chats.map((chat: any) => ({
-    _id: chat._id,
+    id: chat._id,
     user: chat.user,
     message: chat.messages[0].message,
     time: chat.time,
-    model: chat.model
+    model: chat.model.name
   })).reverse();
   res.json(chatsArray);
 });
@@ -39,6 +40,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   let payload: yup.InferType<typeof schema>;
   let system = `Below is an instruction that describes a task. Write a response that appropriately completes the request. The response must be accurate, concise and evidence-based whenever possible. Here some information that can you help, the user name is ${req.user?.given_name}.`;
   let prompt = ``;
+  let messages: Array<Message> = [];
   let ignoreIndex = 0;
   let response = '';
   let child: ChildProcessWithoutNullStreams;
@@ -66,13 +68,14 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     if (chat.model !== payload.model) {
       return res.status(400).json({ message: 'Model mismatch' });
     }
-    chat.messages.push({ message: payload.message, role: Role.user });
-    console.log(chat.model);
+    messages = chat.messages;
   }
   const model = await mongoose.model('Models').findOne({ name: payload.model });
   if (span)
     span.finish();
-  
+    messages.push({ message: payload.message, role: Role.user });
+  prompt += compileTemplate(model.chatPromptTemplate, { system: system, messages: messages });
+  console.log(prompt);
   try {
     if (transaction)
       span = transaction.startChild({ op: 'generation', description: 'Generate response' });
@@ -165,8 +168,8 @@ router.get('/stop', (req: Request, res: Response, next: NextFunction) => {
 
 
 router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
-  await mongoose.connect(`${process.env.DB}`);
   let chat;
+  let model;
   if (req.params.id.length < 24) {
     return res.status(400).json({ message: 'Invalid chat id' });
   }
@@ -179,12 +182,18 @@ router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
   if (!chat) {
     return res.status(404).json({ message: 'Chat not found' });
   }
+  try {
+    model = await mongoose.model('Models').findOne({ _id: chat.model });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
   res.json({
-    _id: chat._id,
+    id: chat._id,
     user: chat.user,
     messages: chat.messages,
     time: chat.time,
-    model: chat.model
+    model: model.name
   });
 });
 
