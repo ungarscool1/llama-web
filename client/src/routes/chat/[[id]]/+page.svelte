@@ -58,7 +58,7 @@
   }
   
   async function fetchChats() {
-    if (!userInfo.token) return;
+    if (!userInfo.authenticated) return;
     const req = await fetch(`${env.PUBLIC_API_URL}/chat`, {
       headers: {
         'Authorization': `Bearer ${userInfo.token}`
@@ -70,7 +70,7 @@
   }
   async function fetchMessage() {
     const id = $page.params.id;
-    if (!id || !userInfo.token) return;
+    if (!id || !userInfo.authenticated) return;
     const req = await fetch(`${env.PUBLIC_API_URL}/chat/${id}`, {
       headers: {
         'Authorization': `Bearer ${userInfo.token}`
