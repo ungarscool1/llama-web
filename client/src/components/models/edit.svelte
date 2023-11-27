@@ -43,9 +43,12 @@
     const req = await fetch(`${env.PUBLIC_API_URL}/models/${id}`, {
       method: 'PATCH',
       headers: {
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${userInfo.token}`
       },
-      body: JSON.stringify(model)
+      body: JSON.stringify({
+        promptTemplate: model.promptTemplate
+      })
     });
     if (!req.ok) {
       let res = await req.json()

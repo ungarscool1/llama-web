@@ -1,7 +1,8 @@
-import { Router } from 'express';
+import e, { Router } from 'express';
 import mongoose from 'mongoose';
 import * as yup from 'yup';
 import file from '../../utils/file';
+import compileTemplate from '../../utils/compileTemplate';
 
 var router = Router();
 
@@ -60,6 +61,11 @@ router.post('/', async (req, res) => {
   } catch (e) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
+  try {
+    compileTemplate(payload.promptTemplate, { system: 'system', messages: [{role: 'user', message: ''}] });
+  } catch (e) {
+    return res.status(400).json({ message: 'Invalid prompt template' });
+  }
   const ModelObj = mongoose.model('Models');
   const fileName = encodeURI(payload.name);
   file.download(payload.uri, `${process.env.MODELS_DIR}/${fileName}`)
@@ -84,14 +90,21 @@ router.patch('/:id', async (req, res) => {
   try {
     payload = schema.validateSync(req.body);
   } catch (e) {
+    console.error(e, req.body)
     return res.status(400).json({ message: 'Bad request' });
   }
   try {
-    await mongoose.model('ApiTokens').findOneAndUpdate({ _id: req.params.id, user: req.user?.preferred_username }, { name: req.body.name });
+    compileTemplate(payload.promptTemplate, { system: 'system', messages: [{role: 'user', message: ''}] });
+  } catch (e) {
+    return res.status(400).json({ message: 'Invalid prompt template' });
+  }
+  try {
+    await mongoose.model('Models').findOneAndUpdate({ _id: req.params.id }, { chatPromptTemplate: payload.promptTemplate });
   } catch (e) {
     console.error(e)
     return res.status(500).json({ message: 'Internal Server Error' })
   }
+  res.status(200).json({ message: 'Model updated' });
 })
 
 export default router;
