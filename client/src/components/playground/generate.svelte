@@ -35,6 +35,7 @@
     
     if (!req.ok) return goto('/');
     models = await req.json();
+    model = models[0].name;
   }
 
   async function textCompletion() {
@@ -107,9 +108,8 @@
           class="w-full rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:placeholder-gray-400 dark:text-white border border-gray-200 dark:border-gray-600 resize-none p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
           bind:value={model}
         >
-          <option disabled selected value="">Select a model</option>
           {#each models as model}
-            <option selected value={model.name}>{model.name}</option>
+            <option value={model.name}>{model.name}</option>
           {/each}
         </select>
         <p class="text-gray-500">Temperature</p>

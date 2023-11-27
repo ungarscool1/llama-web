@@ -81,7 +81,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   res.flushHeaders();
 
   child.stdout.on('data', (data) => {
-    if (ignoreIndex < prompt.length) {
+    if (ignoreIndex < prompt.replaceAll(/<\/?s>/g, '').trim().length) {
       ignoreIndex += data.toString().length;
       if (process.env.NODE_ENV === 'development')
         console.error(`stdout - IGNORED(${ignoreIndex} - ${prompt.trim().length}): ${data}`);
