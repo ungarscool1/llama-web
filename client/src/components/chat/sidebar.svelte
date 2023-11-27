@@ -27,7 +27,7 @@
     if (toggle) toggleSidebar();
   }
   async function fetchChats() {
-    if (!userInfo.token) return;
+    if (!userInfo.authenticated) return;
     const req = await fetch(`${env.PUBLIC_API_URL}/chat`, {
       headers: {
         'Authorization': `Bearer ${userInfo.token}`
