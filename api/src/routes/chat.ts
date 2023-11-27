@@ -68,6 +68,9 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     messages = chat.messages;
   }
   const model = await mongoose.model('Models').findOne({ name: payload.model });
+  if (!model) {
+    return res.status(400).json({ message: 'Model not found' });
+  }
   if (span)
     span.finish();
     messages.push({ message: payload.message, role: Role.user });

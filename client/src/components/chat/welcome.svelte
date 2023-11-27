@@ -37,7 +37,7 @@
   <P size="2xl">How can I assist you today ?</P>
 
   <div class="overflow-hidden absolute top-0 left-0">
-    <Select bind:value={model}>
+    <Select bind:value={model} placeholder=''>
       {#each models as model}
         <option value={model.name}>{model.name}</option>
       {/each}
