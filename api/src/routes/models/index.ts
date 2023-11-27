@@ -1,6 +1,8 @@
-import { Router } from 'express';
+import e, { Router } from 'express';
 import mongoose from 'mongoose';
+import * as yup from 'yup';
 import file from '../../utils/file';
+import compileTemplate from '../../utils/compileTemplate';
 
 var router = Router();
 
@@ -33,7 +35,7 @@ router.get('/:id', async (req, res) => {
     name: model.name,
     createdAt: model.createdAt,
     parameters: model.parameters,
-    chatPromptTemplate: model.chatPromptTemplate
+    promptTemplate: model.chatPromptTemplate
   });
 });
 
@@ -48,22 +50,61 @@ router.delete('/:id', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-  if (!req.body.name || !req.body.uri || !req.body.promptTemplate) {
+  const schema = yup.object().shape({
+    name: yup.string().required(),
+    uri: yup.string().required(),
+    promptTemplate: yup.string().required()
+  })
+  let payload: yup.InferType<typeof schema>;
+  try {
+    payload = schema.validateSync(req.body)
+  } catch (e) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
+  try {
+    compileTemplate(payload.promptTemplate, { system: 'system', messages: [{role: 'user', message: ''}] });
+  } catch (e) {
+    return res.status(400).json({ message: 'Invalid prompt template' });
+  }
   const ModelObj = mongoose.model('Models');
-  const fileName = encodeURI(req.body.name);
-  file.download(req.body.uri, `${process.env.MODELS_DIR}/${fileName}`)
+  const fileName = encodeURI(payload.name);
+  file.download(payload.uri, `${process.env.MODELS_DIR}/${fileName}`)
     .then(() => {
       const model = new ModelObj({
-        name: req.body.name,
+        name: payload.name,
         path: `${fileName}`,
-        chatPromptTemplate: req.body.promptTemplate,
+        chatPromptTemplate: payload.promptTemplate,
         parameters: req.body.parameters
       });
       model.save();
     })
     res.status(202).json({ message: 'Model download in progress.' });
 });
+
+router.patch('/:id', async (req, res) => {
+  const schema = yup.object().shape({
+    promptTemplate: yup.string().required()
+  })
+  let payload: yup.InferType<typeof schema>
+
+  try {
+    payload = schema.validateSync(req.body);
+  } catch (e) {
+    console.error(e, req.body)
+    return res.status(400).json({ message: 'Bad request' });
+  }
+  try {
+    compileTemplate(payload.promptTemplate, { system: 'system', messages: [{role: 'user', message: ''}] });
+  } catch (e) {
+    return res.status(400).json({ message: 'Invalid prompt template' });
+  }
+  try {
+    await mongoose.model('Models').findOneAndUpdate({ _id: req.params.id }, { chatPromptTemplate: payload.promptTemplate });
+  } catch (e) {
+    console.error(e)
+    return res.status(500).json({ message: 'Internal Server Error' })
+  }
+  res.status(200).json({ message: 'Model updated' });
+})
 
 export default router;
