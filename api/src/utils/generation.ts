@@ -2,10 +2,10 @@ import { spawn, spawnSync, ChildProcessWithoutNullStreams } from 'child_process'
 
 type GenerationOptions = {
   executablePath: string;
-  modelPath: string;
 };
 
 type LaunchOptions = {
+  modelPath: string;
   contextSize?: number;
   temperature?: number;
   topK?: number;
@@ -36,7 +36,7 @@ export class Generation {
    */
   launch(options: LaunchOptions): ChildProcessWithoutNullStreams {
     const args = [
-      '-m', this.options.modelPath,
+      '-m', options.modelPath,
       '--threads', `${options.threads}`,
       '--prompt', options.prompt,
       ...(options.contextSize ? ['--ctx_size', `${options.contextSize}`] : []),
@@ -61,7 +61,7 @@ export class Generation {
    */
   launchSync(options: LaunchOptions): string {
     const args = [
-      '-m', this.options.modelPath,
+      '-m', options.modelPath,
       '--threads', `${options.threads}`,
       '--prompt', options.prompt,
       ...(options.contextSize ? ['--ctx_size', `${options.contextSize}`] : []),
@@ -88,6 +88,7 @@ export class Generation {
    */
   generateCompletion(prompt: string, options: LaunchOptionsLow): ChildProcessWithoutNullStreams {
     return this.launch({
+      modelPath: options.modelPath,
       threads: 4,
       prompt,
       interactive: false,
@@ -103,8 +104,9 @@ export class Generation {
    * @param prompt The user's input
    * @returns Embeddings of the prompt
    */
-  generateEmbeddings(prompt: string): Array<number> {
+  generateEmbeddings(prompt: string, modelPath: string): Array<number> {
     return this.launchSync({
+      modelPath,
       threads: 4,
       prompt: prompt,
       interactive: false,

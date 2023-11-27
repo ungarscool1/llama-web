@@ -6,8 +6,10 @@
 
   let keycloak: Keycloak;
   onMount(() => {
-    if (env.PUBLIC_SKIP_AUTH === 'true')
+    if (env.PUBLIC_SKIP_AUTH === 'true') {
+      localStorage.setItem('userInfo', JSON.stringify({ authenticated: true, token: '' }));
       return goto('/playground');
+    }
     keycloak = new Keycloak({
       url: env.PUBLIC_SSO_SERVER,
       realm: env.PUBLIC_SSO_REALM,

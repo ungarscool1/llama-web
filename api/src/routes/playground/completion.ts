@@ -2,8 +2,13 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Generation, GenerationLaunchOutput } from '../../utils/generation';
 import * as Sentry from '@sentry/node';
 import * as yup from 'yup';
+import mongoose from 'mongoose';
 
 var router = Router();
+
+const generation = new Generation({
+  executablePath: `${process.env.LLAMA_PATH}`,
+});
 
 router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   const schema = yup.object().shape({
@@ -13,13 +18,10 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
       topK: yup.number().min(0).required(),
       topP: yup.number().min(0).max(1).required(),
       nPredict: yup.number().min(0).max(2048).required()
-    })
+    }),
+    model: yup.string().required()
   });
   let payload: yup.InferType<typeof schema>;
-  const generation = new Generation({
-    executablePath: `${process.env.LLAMA_PATH}`,
-    modelPath: `${process.env.LLAMA_MODEL}`
-  });
   const transaction = Sentry.getActiveTransaction();
   let span: Sentry.Span;
   let child: GenerationLaunchOutput;
@@ -28,10 +30,14 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   } catch (err) {
     return res.status(400).json({ message: 'Bad Request' });
   }
+  const model = await mongoose.model('Models').findOne({ name: payload.model });
+  if (!model) {
+    return res.status(400).json({ message: 'Model not found' });
+  }
   try {
     if (transaction)
       span = transaction.startChild({ op: 'generation', description: 'Text completion' });
-    child = generation.generateCompletion(payload.prompt, payload.parameters);
+    child = generation.generateCompletion(payload.prompt, {...payload.parameters, modelPath: `${process.env.MODELS_DIR}/${model.path}`});
   } catch (err) {
     console.log((err as Error).message);
     return res.status(500).json({ message: 'Internal Server Error' });

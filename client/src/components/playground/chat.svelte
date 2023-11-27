@@ -6,12 +6,14 @@
   $: system = '';
   $: messages = [
     {
-      role: 'Human',
+      role: 'user',
       message: ''
     }
   ];
   $: isRequesting = false;
   $: errorMessage = '';
+  $: model = ''
+  $: models = [];
   let userInfo = {
     authenticated: false,
     token: null
@@ -20,18 +22,31 @@
   onMount(() => {
     if (localStorage.getItem('userInfo')) {
       userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      getModels();
     }
   });
+  
+  async function getModels() {
+    const req = await fetch(`${env.PUBLIC_API_URL}/models`, {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`
+      }
+    });
+    
+    if (!req.ok) return goto('/');
+    models = await req.json();
+    model = models[0].name;
+  }
 
   const switchPrompter = (i: number) =>
-    (messages[i].role = messages[i].role === 'Human' ? 'Assistant' : 'Human');
+    (messages[i].role = messages[i].role === 'user' ? 'assistant' : 'user');
 
   function addMessage() {
     const nextRole = () => {
       if (messages.length === 0) {
-        return 'Human';
+        return 'user';
       }
-      return messages[messages.length - 1].role === 'Human' ? 'Assistant' : 'Human';
+      return messages[messages.length - 1].role === 'user' ? 'assistant' : 'user';
     };
     messages = [
       ...messages,
@@ -51,11 +66,11 @@
     xhr.open('POST', `${env.PUBLIC_API_URL}/custom-chat`);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.setRequestHeader('Authorization', `Bearer ${userInfo.token}`);
-    xhr.send(JSON.stringify({ system, messages }));
+    xhr.send(JSON.stringify({ system, messages, model }));
     messages = [
       ...messages,
       {
-        role: 'Assistant',
+        role: 'assistant',
         message: ''
       }
     ];
@@ -109,7 +124,7 @@
               class="text-center font-medium inline-flex items-center justify-center px-5 py-2.5 text-sm text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 rounded-lg"
               on:click={() => {
                 switchPrompter(i);
-              }}>{message.role}</button
+              }}>{message.role.charAt(0).toUpperCase() + message.role.slice(1)}</button
             >
           </div>
           <div class="basis-1/2">
@@ -163,10 +178,20 @@
       >
     </div>
   </div>
-  <div class="flex flex-col">
-    <br /><div class="space-y-2 mb-4">
+  <div class="flex-1 flex-col">
+    <div class="space-y-2 mb-4">
       <h3 class="text-xl font-medium text-gray-900 dark:text-white">Parameters</h3>
-      <p class="text-gray-500">Not available</p>
+      <div>
+        <p class="text-gray-500">Model</p>
+        <select
+          class="w-full rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:placeholder-gray-400 dark:text-white border border-gray-200 dark:border-gray-600 resize-none p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          bind:value={model}
+        >
+          {#each models as model}
+            <option value={model.name}>{model.name}</option>
+          {/each}
+        </select>
+      </div>
     </div>
     <div class="flex flex-col space-y-2">
       <h3 class="text-xl font-medium text-gray-900 dark:text-white">Launch</h3>

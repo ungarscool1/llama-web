@@ -12,6 +12,8 @@
     topP: 0.9,
     nPredict: 512
   };
+  $: model = ''
+  $: models = [];
   let userInfo = {
     authenticated: false,
     token: null
@@ -20,8 +22,21 @@
   onMount(() => {
     if (localStorage.getItem('userInfo')) {
       userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      getModels();
     }
   });
+  
+  async function getModels() {
+    const req = await fetch(`${env.PUBLIC_API_URL}/models`, {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`
+      }
+    });
+    
+    if (!req.ok) return goto('/');
+    models = await req.json();
+    model = models[0].name;
+  }
 
   async function textCompletion() {
     const xhr = new XMLHttpRequest();
@@ -31,13 +46,16 @@
     } else if (prompt.length > 2048) {
       errorMessage = 'Prompt is too long. Max length is 2048 characters';
       return;
+    } else if (model.length === 0)  {
+      errorMessage = 'Please select a model';
+      return;
     } else {
       errorMessage = '';
     }
     xhr.open('POST', `${env.PUBLIC_API_URL}/text-completion`);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.setRequestHeader('Authorization', `Bearer ${userInfo.token}`);
-    xhr.send(JSON.stringify({ prompt, parameters }));
+    xhr.send(JSON.stringify({ prompt, parameters, model }));
     isRequesting = true;
     xhr.addEventListener('progress', (event) => {
       const resText = xhr.responseText.trim();
@@ -85,6 +103,15 @@
     <div class="space-y-2 mb-4">
       <h3 class="text-xl font-medium text-gray-900 dark:text-white">Parameters</h3>
       <div>
+        <p class="text-gray-500">Model</p>
+        <select
+          class="w-full rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:placeholder-gray-400 dark:text-white border border-gray-200 dark:border-gray-600 resize-none p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          bind:value={model}
+        >
+          {#each models as model}
+            <option value={model.name}>{model.name}</option>
+          {/each}
+        </select>
         <p class="text-gray-500">Temperature</p>
         <div class="flex items-center space-x-2">
           <input

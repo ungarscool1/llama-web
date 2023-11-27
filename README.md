@@ -1,6 +1,6 @@
 # LLaMa Web
 
-The LLaMa Web is a web interface to create a chat with a bot based on META LLaMa model.
+The LLaMa Web is a web interface to chat or play with LLaMa based models.
 
 ## Installation
 
@@ -10,15 +10,7 @@ The LLaMa Web is a web interface to create a chat with a bot based on META LLaMa
 - Yarn
 - MongoDB (for saving chats)
 - llama.cpp
-- a model of llama
 - Keycloak server (for authentication / OPTIONAL)
-
-### Getting the model
-
-Here, we getting vicuna model, more performant than llama model, alpaca or gpt4all.
-
-- [Vicuna 7B](https://huggingface.co/eachadea/ggml-vicuna-7b-4bit)
-- [Vicuna 13B](https://huggingface.co/eachadea/ggml-vicuna-13b-4bit)
 
 ### Building
 
@@ -65,3 +57,21 @@ cp api/example.env api/.env && nano api/.env
 ```bash
 docker-compose up -d
 ```
+
+## Adding a model
+
+> [!NOTE]
+> We assume you want to use [TheBloke/Llama-2-7B-Chat-GGUF](https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF).
+> Good to know: This project is tested by using [TheBloke](https://huggingface.co/TheBloke)'s GGUF model.
+
+> [!NOTE]
+> On Docker or without docker, the steps are the same.
+
+1. Go to the playground
+2. Then go to the `Models` tab
+3. Click on `Install a new model`
+4. Enter the name of the model (e.g. `llama-2-7b-chat`)
+5. Enter the download link (e.g. `https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/main/llama-2-7b-chat.Q4_K_M.gguf`)
+6. Enter the model chat template (can be found [here](PROMPTS.md))
+7. Click on `Install the new model`
+8. Wait until the model is installed, you can refresh the page to see when it is done.
