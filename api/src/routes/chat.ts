@@ -193,7 +193,7 @@ router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
     user: chat.user,
     messages: chat.messages,
     time: chat.time,
-    model: model.name
+    model: model ? model.name : 'Unknown'
   });
 });
 
