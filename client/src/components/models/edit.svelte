@@ -16,6 +16,7 @@
     authenticated: false,
     token: null
   };
+  $: onChange(id);
 
   onMount(() => {
     if (localStorage.getItem('userInfo')) {

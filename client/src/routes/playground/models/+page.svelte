@@ -138,9 +138,9 @@
           <TableBodyCell>{model.name}</TableBodyCell>
           <TableBodyCell>{model.path}</TableBodyCell>
           <TableBodyCell>{new Date(model.createdAt).toLocaleString()}</TableBodyCell>
-          <TableBodyCell>
+          <TableBodyCell tdClass="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white flex">
             <button
-              class="flex btn btn-ghost btn-sm"
+              class="flex btn btn-ghost btn-sm mr-2"
               on:click|preventDefault={() => {
                 editId = model.id;
                 editModel = true;
