@@ -119,16 +119,19 @@
     chatBox.scroll({ top: chatBox.scrollHeight, behavior: 'smooth' });
     xhr.addEventListener('progress', (event) => {
       let id: string | undefined;
-      messages[messages.length - 1].message = xhr.responseText;
-      if ((id = xhr.responseText.match(/\[\[(\w{24})\]\]/)?.[1]) !== undefined) {
-        goto(`/chat/${id}`);
+      if (xhr.status === 200) {
+        messages[messages.length - 1].message = xhr.responseText;
+        if ((id = xhr.responseText.match(/\[\[(\w{24})\]\]/)?.[1]) !== undefined) {
+          goto(`/chat/${id}`);
+        }
       }
     });
     
     xhr.onloadend = () => {
-      if (messages[messages.length - 1].message === 'Waiting for response...') {
+      if (xhr.status !== 200) {
+        const error = JSON.parse(xhr.responseText);
         messages[messages.length - 1].message = `<div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
-          An error occured while processing your request. Please try again later.
+          ${error.message}
         </div>`;
         isError = true;
       } else {
