@@ -8,6 +8,7 @@
       description: 'Generate text completion from prompt',
       body: {
         prompt: 'string',
+        model: 'string',
         parameters: {
           temperature: 'number',
           topK: 'number',
@@ -25,7 +26,8 @@
       method: 'POST',
       description: 'Generate embeddings from prompt',
       body: {
-        prompt: 'string'
+        prompt: 'string',
+        model: 'string',
       },
       headers: [
         'Content-Type: application/json',
@@ -38,6 +40,7 @@
       description: 'Generate chat response from custom messages',
       body: {
         system: 'string',
+        model: 'string',
         messages: [
           {
             message: 'string',
@@ -46,6 +49,30 @@
       },
       headers: [
         'Content-Type: application/json',
+        'Authorization: Bearer <YOUR API KEY>'
+      ]
+    },
+    {
+      path: '/models',
+      method: 'GET',
+      description: 'Get all models',
+      headers: [
+        'Authorization: Bearer <YOUR API KEY>'
+      ]
+    },
+    {
+      path: '/models/:id',
+      method: 'GET',
+      description: 'Get model by id (not by name)',
+      headers: [
+        'Authorization: Bearer <YOUR API KEY>'
+      ]
+    },
+    {
+      path: '/models/:id',
+      method: 'DELETE',
+      description: 'Delete model by id (not by name)',
+      headers: [
         'Authorization: Bearer <YOUR API KEY>'
       ]
     }
@@ -75,8 +102,10 @@
             if (env.PUBLIC_SKIP_AUTH === 'true' && v.startsWith('Authorization')) return false;
             return true;
           }).join('\n')}</pre>
-          <h3 class="text-lg">Body</h3>
-          <pre class="bg-gray-200 text-gray-900 dark:bg-gray-800 dark:text-gray-200 w-fit p-6">{JSON.stringify(ep.body, null, 2)}</pre>
+          {#if ep.body}
+            <h3 class="text-lg">Body</h3>
+            <pre class="bg-gray-200 text-gray-900 dark:bg-gray-800 dark:text-gray-200 w-fit p-6">{JSON.stringify(ep.body, null, 2)}</pre>
+          {/if}
         </div>
       </div>
     {/each}
