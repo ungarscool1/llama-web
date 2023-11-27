@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
+import * as yup from 'yup';
 import file from '../../utils/file';
 
 var router = Router();
@@ -33,7 +34,7 @@ router.get('/:id', async (req, res) => {
     name: model.name,
     createdAt: model.createdAt,
     parameters: model.parameters,
-    chatPromptTemplate: model.chatPromptTemplate
+    promptTemplate: model.chatPromptTemplate
   });
 });
 
@@ -48,22 +49,49 @@ router.delete('/:id', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-  if (!req.body.name || !req.body.uri || !req.body.promptTemplate) {
+  const schema = yup.object().shape({
+    name: yup.string().required(),
+    uri: yup.string().required(),
+    promptTemplate: yup.string().required()
+  })
+  let payload: yup.InferType<typeof schema>;
+  try {
+    payload = schema.validateSync(req.body)
+  } catch (e) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
   const ModelObj = mongoose.model('Models');
-  const fileName = encodeURI(req.body.name);
-  file.download(req.body.uri, `${process.env.MODELS_DIR}/${fileName}`)
+  const fileName = encodeURI(payload.name);
+  file.download(payload.uri, `${process.env.MODELS_DIR}/${fileName}`)
     .then(() => {
       const model = new ModelObj({
-        name: req.body.name,
+        name: payload.name,
         path: `${fileName}`,
-        chatPromptTemplate: req.body.promptTemplate,
+        chatPromptTemplate: payload.promptTemplate,
         parameters: req.body.parameters
       });
       model.save();
     })
     res.status(202).json({ message: 'Model download in progress.' });
 });
+
+router.patch('/:id', async (req, res) => {
+  const schema = yup.object().shape({
+    promptTemplate: yup.string().required()
+  })
+  let payload: yup.InferType<typeof schema>
+
+  try {
+    payload = schema.validateSync(req.body);
+  } catch (e) {
+    return res.status(400).json({ message: 'Bad request' });
+  }
+  try {
+    await mongoose.model('ApiTokens').findOneAndUpdate({ _id: req.params.id, user: req.user?.preferred_username }, { name: req.body.name });
+  } catch (e) {
+    console.error(e)
+    return res.status(500).json({ message: 'Internal Server Error' })
+  }
+})
 
 export default router;
