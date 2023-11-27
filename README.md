@@ -63,6 +63,7 @@ docker-compose up -d
 
 > [!NOTE]
 > We assume you want to use [TheBloke/Llama-2-7B-Chat-GGUF](https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF).
+> Good to know: This project is tested by using [TheBloke](https://huggingface.co/TheBloke)'s GGUF model.
 
 > [!NOTE]
 > On Docker or without docker, the steps are the same.
