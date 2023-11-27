@@ -10,7 +10,6 @@ The LLaMa Web is a web interface to chat or play with LLaMa based models.
 - Yarn
 - MongoDB (for saving chats)
 - llama.cpp
-- a model of llama
 - Keycloak server (for authentication / OPTIONAL)
 
 ### Building
