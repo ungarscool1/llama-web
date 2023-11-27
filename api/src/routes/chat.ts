@@ -65,9 +65,6 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     if (!chat || chat.user !== req.user?.preferred_username) {
       return res.status(400).json({ message: 'Chat not found' });
     }
-    if (chat.model !== payload.model) {
-      return res.status(400).json({ message: 'Model mismatch' });
-    }
     messages = chat.messages;
   }
   const model = await mongoose.model('Models').findOne({ name: payload.model });
@@ -106,10 +103,10 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   res.flushHeaders();
 
   child.stdout.on('data', (data) => {
-    if (ignoreIndex < prompt.length) {
+    if (ignoreIndex < prompt.replaceAll(/<\/?s>/g, '').trim().length) {
       ignoreIndex += data.toString().length;
       if (process.env.NODE_ENV === 'development')
-        console.error(`stdout - IGNORED(${ignoreIndex} - ${prompt.trim().length}): ${data}`);
+        console.error(`stdout - IGNORED(${ignoreIndex} - ${prompt.trim().length}): ${data} | ${prompt}`);
     } else {
       if (process.env.NODE_ENV === 'development')
         console.error(`stdout - PUSHED: ${encodeURI(data)}`);
