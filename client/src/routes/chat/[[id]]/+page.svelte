@@ -168,7 +168,7 @@
   <div class="flex justify-center items-center">
     <div class="w-full ml-5 mr-5">
       <div class="flex">
-        <textarea disabled={isRequesting} draggable="false" rows="2" class="m-0 w-full resize-none border-1 border-solid rounded-l-md p-2 bg-transparent p-0 pr-7 focus:ring-0 focus-visible:ring-0 dark:bg-transparent dark:text-white pl-2 md:pl-0 {isPromptError ? 'border-red-700' : ''}" style="max-height: 200px;" placeholder="Enter some text..." bind:value={prompt}></textarea>
+        <textarea disabled={isRequesting} draggable="false" rows="2" class="m-0 w-full resize-none border-1 border-solid rounded-l-md p-2 bg-transparent focus:ring-0 focus-visible:ring-0 dark:bg-transparent dark:text-white {isPromptError ? 'border-red-700' : ''}" style="max-height: 200px;" placeholder="Enter some text..." bind:value={prompt}></textarea>
         {#if !isRequesting}
           <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-r-md" on:click|preventDefault={sendRequest}>{!isError ? 'Send' : 'Regenerate'}</button>
         {:else}
