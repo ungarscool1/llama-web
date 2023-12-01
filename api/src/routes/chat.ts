@@ -63,7 +63,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   if (process.env.SKIP_AUTH === 'false')
     system += ` Here some information that can you help, the user name is ${req.user?.given_name}.`;
   if (payload.id) {
-    const chat = await mongoose.model('Chats').findById(payload.id);
+    const chat = await mongoose.model('Chats').findById(payload.id).lean();
     if (!chat || chat.user !== req.user?.preferred_username) {
       return res.status(400).json({ message: 'Chat not found' });
     }
@@ -75,7 +75,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   }
   if (span)
     span.finish();
-    messages.push({ message: payload.message, role: Role.user });
+  messages.push({ message: payload.message, role: Role.user });
   prompt += compileTemplate(model.chatPromptTemplate, { system: system, messages: messages });
   console.log(prompt);
   try {
@@ -122,8 +122,8 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   });
 
   child.stderr.on('data', (data) => {
-    if (process.env.NODE_ENV === 'development')
-      console.error(`stderr: ${data}`);
+    //if (process.env.NODE_ENV === 'development')
+    //  console.error(`stderr: ${data}`);
     if (data.toString().includes('[end of text]'))
       child.kill();
   });
