@@ -2,8 +2,8 @@
   import hljs from 'highlight.js';
   
   export let code: string;
-  $: result = hljs.highlightAuto(code);
-  $: highlighted = result.value.trim();
+  export let language: string;
+  $: highlightedCode = hljs.highlightAuto(code).value.trim();
   function copyToClipboard() {
     navigator.clipboard.writeText(code);
   }
@@ -11,7 +11,7 @@
 
 <div class="bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md">
   <div class="flex flex-row justify-between my-2 mx-4">
-    <p>{result.language}</p>
+    <p>{language}</p>
     <button on:click={copyToClipboard}>
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-copy" viewBox="0 0 16 16">
         <path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
@@ -19,6 +19,6 @@
     </button>
   </div>
   <div class="bg-black rounded-b-lg overflow-x-auto p-4">
-    <pre><code>{@html highlighted}</code></pre>
+    <pre><code>{@html highlightedCode}</code></pre>
   </div>
 </div>
