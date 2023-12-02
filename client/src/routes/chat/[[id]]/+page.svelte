@@ -166,7 +166,7 @@
     {/if}
   </div>
   <div class="flex justify-center items-center">
-    <div class="w-full ml-5 mr-5">
+    <div class="w-full mx-5">
       <div class="flex">
         <textarea disabled={isRequesting} draggable="false" rows="2" class="m-0 w-full resize-none border-1 border-solid rounded-l-md p-2 bg-transparent focus:ring-0 focus-visible:ring-0 dark:bg-transparent dark:text-white {isPromptError ? 'border-red-700' : ''}" style="max-height: 200px;" placeholder="Enter some text..." bind:value={prompt}></textarea>
         {#if !isRequesting}
@@ -181,5 +181,5 @@
 </main>
 
 <style lang="scss">
-  @import 'https://unpkg.com/@highlightjs/cdn-assets@10.6.0/styles/night-owl.min.css';
+  @import 'https://unpkg.com/@highlightjs/cdn-assets/styles/github-dark.min.css';
 </style>
