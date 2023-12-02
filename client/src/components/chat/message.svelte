@@ -1,6 +1,7 @@
 <script lang="ts">
   import * as marked from 'marked';
-  import Codeblock from './codeblock.svelte';
+  import Codeblock from './messageComponent/codeblock.svelte';
+  import Table from './messageComponent/table.svelte';
 
   export let message: {
     message: string;
@@ -17,6 +18,8 @@
     {#each tokens as token}
       {#if token.type === "code"}
         <Codeblock code={token.text} language={token.lang} />
+      {:else if token.type === "table"}
+        <Table rows={token.rows} header={token.header} />
       {:else}
         {@html marked.parse(token.raw)}
       {/if}
