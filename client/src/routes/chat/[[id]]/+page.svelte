@@ -155,8 +155,8 @@
 
 <main class="h-screen w-screen overflow-y-none" on:keydown={handleKeyDown}>
 <Sidebar {chats} />
-<div id="content" class="p-4 md:ml-64 flex mt-2 flex-col justify-between w-100 mx-auto overflow-y-none">
-  <div id="chat-messages" class="overflow-y-auto md:px-10 mb-6 h-[calc(100vh-12rem)] md:h-[calc(100vh-9rem)]" bind:this={chatBox}>
+<div id="content" class="p-4 md:ml-64 flex flex-col justify-between w-100 mx-auto overflow-y-none">
+  <div id="chat-messages" class="overflow-y-auto md:px-10 mb-1 h-[calc(100vh-12rem)] md:h-[calc(100vh-6rem)]" bind:this={chatBox}>
     {#if messages.length > 0}
       {#each messages as message}
         <Message {message} />
