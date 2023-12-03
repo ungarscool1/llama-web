@@ -167,12 +167,14 @@
   </div>
   <div class="flex justify-center items-center">
     <div class="w-full mx-5">
-      <div class="flex">
-        <textarea disabled={isRequesting} draggable="false" rows="2" class="m-0 w-full resize-none border-1 border-solid rounded-l-md p-2 bg-transparent focus:ring-0 focus-visible:ring-0 dark:bg-transparent dark:text-white {isPromptError ? 'border-red-700' : ''}" style="max-height: 200px;" placeholder="Enter some text..." bind:value={prompt}></textarea>
+      <div class="flex flex-col w-full flex-grow relative">
+        <textarea disabled={isRequesting} draggable="false" rows="1" class="m-0 w-full resize-none border-1 border-solid rounded-md py-[10px] pr-10 pl-3 md:py-3.5 md:pr-12 md:pl-4 bg-transparent focus:ring-0 focus-visible:ring-0 dark:bg-transparent dark:text-white {isPromptError ? 'border-red-700' : ''}" style="max-height: 200px;" placeholder="Enter some text..." bind:value={prompt}></textarea>
         {#if !isRequesting}
-          <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-r-md" on:click|preventDefault={sendRequest}>{!isError ? 'Send' : 'Regenerate'}</button>
+          <button class="absolute md:right-3 md:bottom-[0.6875rem] right-2 bottom-[0.4375rem] bg-blue-500 hover:bg-blue-600 disabled:opacity-10 text-white font-bold py-2 px-2 rounded-md" on:click|preventDefault={sendRequest} disabled={prompt.length === 0}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5"/>
+          </svg></button>
         {:else}
-          <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-r-md" on:click|preventDefault={stopChat}>Stop</button>
+          <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md" on:click|preventDefault={stopChat}>Stop</button>
         {/if}
       </div>
     </div>
