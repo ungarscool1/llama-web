@@ -153,7 +153,7 @@
 </script>
 
 
-<main class="h-screen w-screen overflow-y-none" on:keydown={handleKeyDown}>
+<main class="h-[100dvh] w-screen overflow-y-none" on:keydown={handleKeyDown}>
 <Sidebar {chats} />
 <div id="content" class="px-4 pt-4 md:ml-64 flex flex-col justify-between w-100 mx-auto overflow-y-none">
   <div id="chat-messages" class="overflow-y-auto md:px-10 mb-1 h-[calc(100dvh-10rem)] md:h-[calc(100dvh-6rem)]" bind:this={chatBox}>
