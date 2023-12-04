@@ -96,7 +96,7 @@
     </a>
   </Navbar>
 </div>
-<Sidebar asideClass="fixed top-0 left-0 z-40 {toggle ? 'block' : 'hidden'} w-full md:block md:w-64 h-[100dvh] max-h-screen min-h-screen transition-transform">
+<Sidebar asideClass="flex flex-shrink-0 overflow-x-hidden {toggle ? 'block' : 'hidden'} w-full md:block md:w-64 h-[100dvh] max-h-screen min-h-screen transition-transform">
   <SidebarWrapper divClass="flex flex-col justify-between py-4 px-3 bg-gray-50 rounded dark:bg-gray-800 h-[100dvh] max-h-[100dvh]">
     <div class="flex flew-row justify-between">
       <a href="/playground" class="hidden md:block text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5 flex flex-col self-center">
