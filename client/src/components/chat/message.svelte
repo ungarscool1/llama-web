@@ -10,7 +10,7 @@
   $: tokens = marked.lexer(message.message);
 </script>
 
-<div class="flex mb-2 flex-row">
+<div class="flex mb-2 flex-row w-full lg:w-[75%]">
   <div class="flex w-12 h-12 me-1">
     <img src="{message.role === 'assistant' ? '/robot.svg' : '/person.svg'}" alt="{message.role === 'assistant' ? 'Robot' : 'User'}" class="rounded-sm w-full h-full object-cover">
   </div>
