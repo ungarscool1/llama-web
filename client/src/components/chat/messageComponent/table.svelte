@@ -3,10 +3,9 @@
 
   export let header: any;
   export let rows: any;
-  console.log(header, rows)
 </script>
 
-<Table divClass="overflow-x-auto rounded-lg w-[75%] border dark:border-gray-700">
+<Table divClass="overflow-x-auto rounded-lg w-full md:w-[75%] border dark:border-gray-700">
   <TableHead>
     {#each header as head}
       <TableHeadCell>{head.text}</TableHeadCell>
