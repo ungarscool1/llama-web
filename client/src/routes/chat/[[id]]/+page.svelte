@@ -49,16 +49,21 @@
     checkScroll();
   });
   
-  function onChange(...args) {
+  async function onChange(...args) {
     const id = $page.params.id;
     if (!id) {
       messages = [];
       return;
     }
-    fetchChats();
-    fetchMessage();
-    if (chatBox)
+    await fetchChats();
+    await fetchMessage();
+    if (chatBox){
       checkScroll();
+      chatBox.scroll({
+        top: 0,
+        behavior: 'instant',
+      })
+    }
   }
   
   async function pingApi() {
