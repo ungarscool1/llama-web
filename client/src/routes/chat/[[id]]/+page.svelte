@@ -6,7 +6,6 @@
   import Sidebar from '../../../components/chat/sidebar.svelte';
   import Message from '../../../components/chat/message.svelte';
   import Welcome from '../../../components/chat/welcome.svelte';
-  import GoDown from '../../../components/chat/goDown.svelte';
 
   $: activeUrl = $page.url.pathname;
   $: chats = undefined;
@@ -22,6 +21,18 @@
     authenticated: false,
     token: null,
   };
+  let atBottom = true;
+  
+  function goDown() {
+    chatBox.scroll({
+      top: chatBox.scrollHeight,
+      behavior: 'smooth',
+    })
+  }
+  function checkScroll() {
+    console.log(chatBox.scrollTop, chatBox.scrollHeight - chatBox.clientHeight - 1)
+    atBottom = chatBox.scrollTop >= chatBox.scrollHeight - chatBox.clientHeight - 1;
+  }
 
   onMount(() => {
     if (localStorage.getItem('userInfo')) {
@@ -34,6 +45,8 @@
     fetchChats();
     fetchMessage();
     pingApi();
+    chatBox.addEventListener('scroll', checkScroll);
+    checkScroll();
   });
   
   function onChange(...args) {
@@ -44,6 +57,8 @@
     }
     fetchChats();
     fetchMessage();
+    if (chatBox)
+      checkScroll();
   }
   
   async function pingApi() {
@@ -185,6 +200,13 @@
       </div>
     </div>
   </div>
+  {#if messages.length > 0}
+    <button class="absolute z-10 text-gray-600 right-[46dvw] bottom-36 md:right-[40dvw] lg:right-[44.5dvw] md:bottom-28 {atBottom ? 'hidden' : 'block'} bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-600 hover:bg-blue-600 text-white font-bold py-2 px-2 rounded-full" on:click={goDown}>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-bar-down text-black dark:text-white" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M3.646 4.146a.5.5 0 0 1 .708 0L8 7.793l3.646-3.647a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 0-.708zM1 11.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13a.5.5 0 0 1-.5-.5"/>
+      </svg>
+    </button>
+  {/if}
 </div>
 </main>
 

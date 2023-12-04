@@ -85,7 +85,7 @@
     navBarTitle = chat.message;
   }
 </script>
-<div class="block md:hidden">
+<div class="block md:hidden {!toggle ? 'block' : 'hidden'}">
   <Navbar color="dark" navDivClass="mx-auto flex flex-row justify-between items-center container whitespace-nowrap text-base font-normal text-gray-900 dark:text-white whitespace-nowrap">
     <NavHamburger on:click={toggleSidebar} />
     <p class="items-center justify-center overflow-hidden ml-3 mr-3">{navBarTitle}</p>
