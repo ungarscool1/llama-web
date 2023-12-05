@@ -236,7 +236,7 @@
           />
           {#if !isRequesting}
             <button
-              class="absolute md:right-3 md:bottom-[0.6875rem] right-2 bottom-[0.6rem] bg-blue-500 hover:bg-blue-600 dark:hover:bg-gray-900 dark:bg-white disabled:opacity-10 text-white font-bold py-2 px-2 rounded-md"
+              class="absolute md:right-3 md:bottom-[0.6875rem] right-2 bottom-[0.6rem] bg-blue-500 hover:bg-blue-600 dark:hover:bg-gray-200 dark:bg-white disabled:opacity-10 text-white font-bold py-2 px-2 rounded-md"
               on:click|preventDefault={sendRequest}
               disabled={prompt.length === 0}
             >
