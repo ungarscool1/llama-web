@@ -5,7 +5,6 @@
     Alert,
     Modal,
     Label,
-    P,
   } from 'flowbite-svelte';
 
   export let id: string

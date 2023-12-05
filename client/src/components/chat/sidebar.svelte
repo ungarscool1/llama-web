@@ -85,7 +85,7 @@
     navBarTitle = chat.message;
   }
 </script>
-<div class="block md:hidden">
+<div class="block md:hidden {!toggle ? 'block' : 'hidden'}">
   <Navbar color="dark" navDivClass="mx-auto flex flex-row justify-between items-center container whitespace-nowrap text-base font-normal text-gray-900 dark:text-white whitespace-nowrap">
     <NavHamburger on:click={toggleSidebar} />
     <p class="items-center justify-center overflow-hidden ml-3 mr-3">{navBarTitle}</p>
@@ -96,8 +96,8 @@
     </a>
   </Navbar>
 </div>
-<Sidebar asideClass="fixed top-0 left-0 z-40 {toggle ? 'block' : 'hidden'} w-full md:block md:w-64 h-full max-h-screen min-h-screen transition-transform">
-  <SidebarWrapper divClass="flex flex-col justify-between py-4 px-3 bg-gray-50 rounded dark:bg-gray-800 h-full max-h-full">
+<Sidebar asideClass="flex overflow-x-hidden {toggle ? 'block' : 'hidden'} w-screen md:block md:w-64 h-[100dvh] max-h-screen min-h-screen transition-transform">
+  <SidebarWrapper divClass="flex flex-col justify-between py-4 px-3 bg-gray-50 rounded dark:bg-gray-800 h-[100dvh] max-h-[100dvh] w-screen md:w-auto">
     <div class="flex flew-row justify-between">
       <a href="/playground" class="hidden md:block text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5 flex flex-col self-center">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-left-fill" viewBox="0 0 16 16">
