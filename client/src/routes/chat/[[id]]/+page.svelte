@@ -144,6 +144,7 @@
     );
     isRequesting = true;
     prompt = '';
+    textArea.style.height = 'auto';
     if (!isError) {
       messages = [
         ...messages,
