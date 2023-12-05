@@ -278,7 +278,7 @@
     </div>
     {#if messages.length > 0}
       <button
-        class="absolute z-10 text-gray-600 right-[46dvw] bottom-36 md:right-[40dvw] lg:right-[44.5dvw] md:bottom-28 {atBottom
+        class="absolute z-10 text-gray-600 right-[46dvw] bottom-32 md:right-[40dvw] lg:right-[44.5dvw] md:bottom-20 {atBottom
           ? 'hidden'
           : 'block'} bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-600 hover:bg-blue-600 text-white font-bold py-2 px-2 rounded-full"
         on:click={goDown}
