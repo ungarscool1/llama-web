@@ -225,7 +225,7 @@
             disabled={isRequesting}
             draggable="false"
             rows="1"
-            class="m-0 w-full resize-none border-1 border-solid rounded-md py-[10px] pr-10 pl-3 md:py-3.5 md:pr-12 md:pl-4 bg-transparent focus:ring-0 focus-visible:ring-0 dark:bg-transparent dark:text-white {isPromptError
+            class="m-0 w-full resize-none border-1 border-solid rounded-md py-[10px] min-h-[52px] md:min-h-[54px] pr-10 pl-3 md:py-3.5 md:pr-12 md:pl-4 bg-transparent focus:ring-0 focus-visible:ring-0 dark:bg-transparent dark:text-white {isPromptError
               ? 'border-red-700'
               : ''}"
             style="max-height: 200px;"
