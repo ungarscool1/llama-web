@@ -1,6 +1,7 @@
 <script lang="ts">
   export let username: string = '';
   function getInitials(name: string) {
+    if (name.toLowerCase() === 'llama-robot-assistant') return 'AI';
     return `${name.substring(0, 2)}`.toUpperCase();
   }
   function generateBackground(name: string) {
