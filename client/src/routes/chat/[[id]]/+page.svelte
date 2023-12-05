@@ -230,7 +230,7 @@
               ? 'border-red-700'
               : ''}"
             style="max-height: 200px;"
-            placeholder="Enter some text..."
+            placeholder="Ask me anything..."
             bind:value={prompt}
             on:input={onTextAreaInput}
           />
