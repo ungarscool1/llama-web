@@ -176,7 +176,7 @@
 <main class="h-[100dvh] w-screen overflow-hidden relative z-0 md:flex" on:keydown={handleKeyDown}>
 <Sidebar {chats} />
 <div id="content" class="relative px-2 md:px-0 flex pt-1 h-full max-w-full flex-1 flex-col overflow-hidden">
-  <div id="chat-messages" class="overflow-y-auto md:px-10 mb-1 h-[calc(100dvh-8rem)] md:h-[calc(100dvh-6rem)] w-full lg:flex lg:flex-col lg:items-center" bind:this={chatBox}>
+  <div id="chat-messages" class="overflow-y-auto md:px-10 mb-1 h-[calc(100dvh-8rem)] md:h-[calc(100dvh-4.5rem)] w-full lg:flex lg:flex-col lg:items-center" bind:this={chatBox}>
     {#if messages.length > 0}
       {#each messages as message}
         <Message {message} />
