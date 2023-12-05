@@ -161,6 +161,11 @@
       let id: string | undefined;
       if (xhr.status === 200) {
         messages[messages.length - 1].message = xhr.responseText;
+        if (atBottom) {
+          chatBox.scroll({ top: chatBox.scrollHeight, behavior: 'instant' });
+        } else {
+          checkScroll();
+        }
         if ((id = xhr.responseText.match(/\[\[(\w{24})\]\]/)?.[1]) !== undefined) {
           goto(`/chat/${id}`);
         }
