@@ -206,7 +206,7 @@
   >
     <div
       id="chat-messages"
-      class="overflow-y-auto md:px-10 mb-1 h-[calc(100dvh-8rem)] md:h-[calc(100dvh-4.5rem)] w-full lg:flex lg:flex-col lg:items-center"
+      class="overflow-y-auto md:px-10 mb-1 flex-grow w-full lg:flex lg:flex-col lg:items-center"
       bind:this={chatBox}
     >
       {#if messages.length > 0}
@@ -217,9 +217,9 @@
         <Welcome bind:model />
       {/if}
     </div>
-    <div class="flex justify-center items-center">
+    <div class="flex justify-center items-center mb-2">
       <div class="w-full mx-5">
-        <div class="flex flex-col w-full flex-grow relative items-start">
+        <div class="flex flex-col w-full relative items-start">
           <textarea
             bind:this={textArea}
             disabled={isRequesting}
