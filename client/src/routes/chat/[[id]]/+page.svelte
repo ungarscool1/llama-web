@@ -37,9 +37,9 @@
   onMount(() => {
     if (localStorage.getItem('userInfo')) {
       userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
-      if (userInfo.token)
-        userInfo = JSON.parse(decodeURIComponent(escape(atob(userInfo.token.split('.')[1]))));
-      else
+      if (userInfo.token) {
+        userInfo.name = JSON.parse(decodeURIComponent(escape(atob(userInfo.token.split('.')[1]))))['name'];
+      } else
         userInfo.name = 'Anonymous';
     }
     if (!userInfo.authenticated) {
