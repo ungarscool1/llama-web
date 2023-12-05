@@ -3,6 +3,7 @@
   import Codeblock from './messageComponent/codeblock.svelte';
   import Table from './messageComponent/table.svelte';
   import Avatar from './avatar.svelte';
+  import List from './messageComponent/list.svelte';
 
   export let username: string;
   export let message: {
@@ -26,6 +27,8 @@
         <Codeblock code={token.text} language={token.lang} />
       {:else if token.type === "table"}
         <Table rows={token.rows} header={token.header} />
+      {:else if token.type === "list"}
+        <List ordered={token.ordered} items={token.items} />
       {:else}
         {@html marked.parse(token.raw)}
       {/if}
