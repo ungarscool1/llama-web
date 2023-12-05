@@ -20,7 +20,7 @@
       <Avatar {username} />
     {/if}
   </div>
-  <p class="flex-1 mb-0 ml-1 dark:text-white text-black w-[75%]">
+  <p class="flex-1 mb-0 ml-1 dark:text-white text-black whitespace-pre-line w-3/4">
     {#each tokens as token}
       {#if token.type === "code"}
         <Codeblock code={token.text} language={token.lang} />
