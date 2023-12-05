@@ -20,6 +20,7 @@
   let userInfo = {
     authenticated: false,
     token: null,
+    name: '',
   };
   let atBottom = true;
   
@@ -36,6 +37,10 @@
   onMount(() => {
     if (localStorage.getItem('userInfo')) {
       userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      if (userInfo.token)
+        userInfo = JSON.parse(decodeURIComponent(escape(atob(userInfo.token.split('.')[1]))));
+      else
+        userInfo.name = 'Anonymous';
     }
     if (!userInfo.authenticated) {
       localStorage.setItem('previousPage', $page.url.pathname);
@@ -179,7 +184,7 @@
   <div id="chat-messages" class="overflow-y-auto md:px-10 mb-1 h-[calc(100dvh-8rem)] md:h-[calc(100dvh-4.5rem)] w-full lg:flex lg:flex-col lg:items-center" bind:this={chatBox}>
     {#if messages.length > 0}
       {#each messages as message}
-        <Message {message} />
+        <Message {message} username={userInfo.name} />
       {/each}
     {:else}
       <Welcome bind:model={model} />

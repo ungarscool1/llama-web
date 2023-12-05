@@ -2,7 +2,9 @@
   import * as marked from 'marked';
   import Codeblock from './messageComponent/codeblock.svelte';
   import Table from './messageComponent/table.svelte';
+  import Avatar from './avatar.svelte';
 
+  export let username: string;
   export let message: {
     message: string;
     role: string;
@@ -12,7 +14,11 @@
 
 <div class="flex mb-2 flex-row w-full lg:w-[75%]">
   <div class="flex w-12 h-12 me-1">
-    <img src="{message.role === 'assistant' ? '/robot.svg' : '/person.svg'}" alt="{message.role === 'assistant' ? 'Robot' : 'User'}" class="rounded-sm w-full h-full object-cover">
+    {#if message.role === 'assistant'}
+      <Avatar username="Robot" />
+    {:else}
+      <Avatar {username} />
+    {/if}
   </div>
   <p class="flex-1 mb-0 ml-1 dark:text-white text-black w-[75%]">
     {#each tokens as token}
