@@ -13,7 +13,7 @@
   $: onChange(activeUrl);
   $: prompt = "";
   $: model = "";
-  let isRequesting = true;
+  let isRequesting = false;
   let isPromptError = false;
   let isError = false;
   let chatBox: HTMLDivElement;
