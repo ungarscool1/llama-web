@@ -66,7 +66,7 @@
     if (chatBox) {
       checkScroll();
       chatBox.scroll({
-        top: 0,
+        top: chatBox.scrollHeight,
         behavior: 'instant'
       });
     }
@@ -107,7 +107,6 @@
     const res = await req.json();
     model = res.model;
     messages = res.messages;
-    chatBox.scroll({ top: chatBox.scrollHeight, behavior: 'smooth' });
   }
 
   function handleKeyDown(event: KeyboardEvent) {
