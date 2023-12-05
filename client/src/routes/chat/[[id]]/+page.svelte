@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { onMount } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import { goto } from '$app/navigation';
   import { env } from '$env/dynamic/public';
   import Sidebar from '../../../components/chat/sidebar.svelte';
@@ -155,6 +155,7 @@
     } else {
       messages[messages.length - 1].message = 'Retrying...';
     }
+    await tick();
     chatBox.scroll({ top: chatBox.scrollHeight, behavior: 'smooth' });
     xhr.addEventListener('progress', (event) => {
       let id: string | undefined;
