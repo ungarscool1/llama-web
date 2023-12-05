@@ -30,7 +30,6 @@
     })
   }
   function checkScroll() {
-    console.log(chatBox.scrollTop, chatBox.scrollHeight - chatBox.clientHeight - 1)
     atBottom = chatBox.scrollTop >= chatBox.scrollHeight - chatBox.clientHeight - 1;
   }
 
