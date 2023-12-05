@@ -31,13 +31,13 @@
     model = models[0].name;
   }
 </script>
+<div class="relative flex flex-col h-full justify-center items-center">
+  <P size="2xl">How can I assist you today ?</P>
+</div>
 <div class="overflow-hidden absolute top-4 left-4">
   <Select bind:value={model} placeholder=''>
     {#each models as model}
       <option value={model.name}>{model.name}</option>
     {/each}
   </Select>
-</div>
-<div class="relative flex flex-col h-full justify-center items-center">
-  <P size="2xl">How can I assist you today ?</P>
 </div>
