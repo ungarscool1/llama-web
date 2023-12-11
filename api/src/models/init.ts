@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Chat from "./chat";
 import apiToken from "./apiToken";
 import model from "./model";
+import plugin from "./plugin";
 
 async function main() {
   if (!process.env.DB)
@@ -11,6 +12,7 @@ async function main() {
   mongoose.model('Chats', Chat);
   mongoose.model('ApiTokens', apiToken);
   mongoose.model('Models', model);
+  mongoose.model('Plugins', plugin);
 }
 
 export default main;
