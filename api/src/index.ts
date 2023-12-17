@@ -16,6 +16,7 @@ import embeddingsRouter from './routes/playground/embeddings';
 import customChatRouter from './routes/playground/chat';
 import settingsRouter from './routes/settings';
 import modelsRouter from './routes/models';
+import pluginsRouter from './routes/plugins';
 
 const app = express();
 
@@ -74,6 +75,7 @@ app.use('/embeddings', embeddingsRouter);
 app.use('/custom-chat', customChatRouter);
 app.use('/settings', settingsRouter);
 app.use('/models', modelsRouter);
+app.use('/plugins', pluginsRouter);
 
 if (process.env.SENTRY_DSN) {
   app.use(Sentry.Handlers.errorHandler());

@@ -17,8 +17,11 @@ router.get('/', async (req, res) => {
   });
   res.json(plugins.map((plugin) => ({
     id: plugin._id,
-    name: plugin.name,
-    createdAt: plugin.createdAt
+    name: plugin.metadata.name,
+    version: plugin.metadata.version,
+    author: plugin.metadata.author,
+    createdAt: plugin.createdAt,
+    updatedAt: plugin.updatedAt
   })));
 });
 
@@ -30,9 +33,11 @@ router.get('/:id', async (req, res) => {
   res.json({
     id: plugin._id,
     name: plugin.name,
-    definition: plugin.definition,
+    piepline: plugin.pipeline,
     parameters: plugin.parameters,
-    createdAt: plugin.createdAt
+    configuration: plugin.configuration,
+    createdAt: plugin.createdAt,
+    updatedAt: plugin.updatedAt
   });
 });
 
@@ -57,8 +62,8 @@ router.post('/', async (req, res) => {
       version: yup.string().required(),
       author: yup.string().required(),
     }).required(),
-    parameters: yup.object().required(),
-    configuration: yup.object().required(),
+    parameters: yup.object().optional(),
+    configuration: yup.object().optional(),
     pipeline: yup.array().of(yup.object().shape({
       id: yup.string().required(),
       type: yup.string().required(),
@@ -98,12 +103,12 @@ router.patch('/:id', async (req, res) => {
     return res.status(400).json({ message: 'Bad request' });
   }
   try {
-    await mongoose.model('Models').findOneAndUpdate({ _id: req.params.id }, { chatPromptTemplate: payload.promptTemplate });
+    await mongoose.model('Plugins').findOneAndUpdate({ _id: req.params.id }, {});
   } catch (e) {
     console.error(e)
     return res.status(500).json({ message: 'Internal Server Error' })
   }
-  res.status(200).json({ message: 'Model updated' });
+  res.status(200).json({ message: 'Plugin updated' });
 })
 
 export default router;
