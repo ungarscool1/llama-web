@@ -14,6 +14,7 @@
   import Manage from '../../../components/plugins/manage.svelte';
 
   $: plugins = [];
+  $: reloadPlugins(showModal);
   let userInfo = {
     authenticated: false,
     token: null
@@ -33,6 +34,10 @@
     }
     getPlugins();
   });
+  
+  function reloadPlugins(...args) {
+      getPlugins();
+  }
 
   async function pingApi() {
     const req = await fetch(`${env.PUBLIC_API_URL}/`, {
