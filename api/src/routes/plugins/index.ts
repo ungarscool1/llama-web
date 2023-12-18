@@ -121,7 +121,8 @@ router.patch('/:id', async (req, res) => {
       metadata: payload.metadata,
       pipeline: payload.pipeline,
       parameters: payload.parameters,
-      configuration: payload.configuration
+      configuration: payload.configuration,
+      updatedAt: new Date()
     });
   } catch (e) {
     console.error(e)
