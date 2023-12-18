@@ -43,11 +43,10 @@ router.get('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   try {
-    const plugin = await mongoose.model('Plugins').findById(req.params.id);
+    const plugin = await mongoose.model('Plugins').findByIdAndDelete(req.params.id);
     if (!plugin) {
       return res.status(404).json({ message: 'Plugin not found' });
     }
-    await plugin.remove();
   } catch (e) {
     return res.status(500).json({ message: 'Internal Server Error' });
   }
@@ -92,7 +91,21 @@ router.post('/', async (req, res) => {
 
 router.patch('/:id', async (req, res) => {
   const schema = yup.object().shape({
-    promptTemplate: yup.string().required()
+    metadata: yup.object().shape({
+      name: yup.string().required(),
+      description: yup.string().required(),
+      version: yup.string().required(),
+      author: yup.string().required(),
+    }).required(),
+    parameters: yup.object().optional(),
+    configuration: yup.object().optional(),
+    pipeline: yup.array().of(yup.object().shape({
+      id: yup.string().required(),
+      type: yup.string().required(),
+      input: yup.string().optional(),
+      output: yup.string().optional(),
+      script: yup.string().optional(),
+    })).required(),
   })
   let payload: yup.InferType<typeof schema>
 
@@ -103,7 +116,12 @@ router.patch('/:id', async (req, res) => {
     return res.status(400).json({ message: 'Bad request' });
   }
   try {
-    await mongoose.model('Plugins').findOneAndUpdate({ _id: req.params.id }, {});
+    await mongoose.model('Plugins').findOneAndUpdate({ _id: req.params.id }, {
+      metadata: payload.metadata,
+      pipeline: payload.pipeline,
+      parameters: payload.parameters,
+      configuration: payload.configuration
+    });
   } catch (e) {
     console.error(e)
     return res.status(500).json({ message: 'Internal Server Error' })
