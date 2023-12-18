@@ -19,6 +19,7 @@
     token: null
   };
   $: onChange(id, modalShow);
+  $: onDefinitionChange(pluginDefinition);
 
   onMount(() => {
     if (localStorage.getItem('userInfo')) {
@@ -36,6 +37,26 @@
       configuration = {};
     }
   }
+  
+  function onDefinitionChange(...args) {
+    let def;
+    if (pluginDefinition.length === 0) return;
+    try {
+      def = JSON.parse(pluginDefinition);
+      error = '';
+    } catch (e) {
+      error = 'the plugin definition is not a valid JSON.';
+    }
+    if (def && def.parameters) {
+      console.log(typeof configuration)
+      for (const key of Object.keys(def.parameters)) {
+        if (key === '') continue;
+        if (!configuration[key]) {
+          configuration[key] = def.parameters[key].default || '';
+        }
+      }
+    }
+  }
 
   async function getPlugin(id: string) {
     const req = await fetch(`${env.PUBLIC_API_URL}/plugins/${id}`, {
@@ -44,13 +65,14 @@
       }
     });
     plugin = await req.json();
-    delete plugin.id;
-    delete plugin.createdAt;
-    delete plugin.updatedAt;
-    delete plugin.__v;
-    configuration = plugin.configuration;
-    delete plugin.configuration;
-    pluginDefinition = JSON.stringify(plugin, null, 2);
+    let pluginCopy = JSON.parse(JSON.stringify(plugin));
+    delete pluginCopy.id;
+    delete pluginCopy.createdAt;
+    delete pluginCopy.updatedAt;
+    delete pluginCopy.__v;
+    configuration = plugin.configuration || {};
+    delete pluginCopy.configuration;
+    pluginDefinition = JSON.stringify(pluginCopy, null, 2);
   }
 
   async function pluginAddEdit() {
@@ -96,6 +118,22 @@
       <span>Plugin definition</span>
       <textarea draggable="false" rows="20" class="block resize-none w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg" placeholder="Plugin definition" bind:value={pluginDefinition}></textarea>
     </Label>
+    {#if configuration && Object.keys(configuration).length > 0}
+      <Label class="space-y-2">
+        <span>Configuration</span>
+        {#each Object.keys(configuration) as key}
+          <div class="flex flex-row space-x-2">
+            <input type="text" class="block w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg" placeholder="Key" value={key} disabled />
+            <input type="text" class="block w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg" placeholder="Value" value={configuration[key]} />
+          </div>
+        {/each}
+      </Label>
+    {:else}
+      <Label class="space-y-2">
+        <span>Configuration</span>
+        <span class="text-gray-500 dark:text-gray-400">No configuration needed</span>
+      </Label>
+    {/if}
     <button
       type="submit"
       class="text-center font-medium focus:ring-4 focus:outline-none inline-flex items-center justify-center px-5 py-2.5 text-sm text-white bg-blue-700 hover:bg-blue-800 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 rounded-lg w-full1"
