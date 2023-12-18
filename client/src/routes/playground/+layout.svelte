@@ -25,6 +25,10 @@
       name: 'Models',
       url: '/playground/models',
     },
+    {
+      name: 'Plugins',
+      url: '/playground/plugins',
+    },
   ];
   onMount(() => {
     const store = JSON.parse(localStorage.getItem('userInfo') || '{}');

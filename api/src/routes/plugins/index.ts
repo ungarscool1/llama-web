@@ -33,7 +33,8 @@ router.get('/:id', async (req, res) => {
   res.json({
     id: plugin._id,
     name: plugin.name,
-    piepline: plugin.pipeline,
+    metadata: plugin.metadata,
+    pipeline: plugin.pipeline,
     parameters: plugin.parameters,
     configuration: plugin.configuration,
     createdAt: plugin.createdAt,
