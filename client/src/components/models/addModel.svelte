@@ -10,7 +10,7 @@
 
   export let modalShow: boolean = false
   let alternativeBackendSwitch = false;
-  let alternativeBackendAllowed = true;
+  $: alternativeBackendAllowed = false;
   let modalModelName = '';
   let modalModelUri = '';
   let modalModelPromptTemplate = '';
@@ -25,6 +25,7 @@
   onMount(() => {
     if (localStorage.getItem('userInfo')) {
       userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      checkAlternativeBackendOption();
     }
   });
   
@@ -53,7 +54,7 @@
   }
   
   async function checkAlternativeBackendOption() {
-    const req = await fetch(`${env.PUBLIC_API_URL}/server_settings`, {
+    const req = await fetch(`${env.PUBLIC_API_URL}/system`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${userInfo.token}`,
@@ -65,7 +66,7 @@
       return;
     }
     const res = await req.json();
-    alternativeBackendAllowed = res.alternative_backend_allowed;
+    alternativeBackendAllowed = res.options.allowAlternativeBackend;
   }
 </script>
 
@@ -144,7 +145,7 @@
           name="name"
           placeholder="Modal API Endpoint"
           required
-          bind:value={modalModelName}
+          bind:value={modalModelUri}
           class="block w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg"
           type="text"
         />
