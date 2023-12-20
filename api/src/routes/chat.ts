@@ -77,9 +77,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   if (span)
     span.finish();
   messages.push({ message: payload.message, role: Role.user });
-  console.log(model.alternativeBackend);
   if (model.alternativeBackend) {
-    console.log('Using alternative backend');
     try {
       const axiosRes = await axios.post(`${model.path}/completion`, {
         messages
