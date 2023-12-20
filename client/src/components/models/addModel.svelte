@@ -8,7 +8,7 @@
     P
   } from 'flowbite-svelte';
 
-  export let modalShow: boolean = false
+  export let modalShow: boolean = false;
   let alternativeBackendSwitch = false;
   $: alternativeBackendAllowed = false;
   let modalModelName = '';
@@ -56,6 +56,7 @@
     modalModelPromptTemplate = '';
     modelDownload = true;
     modalErrorMessage = '';
+    modalShow = false;
   }
   
   async function checkAlternativeBackendOption() {

@@ -22,6 +22,7 @@
   let addModel = false;
   let editModel = false;
   let editId = '';
+  $: onAddModalClose(addModel)
 
   onMount(() => {
     if (localStorage.getItem('userInfo')) {
@@ -34,6 +35,10 @@
     }
     getModels();
   });
+  
+  function onAddModalClose(...args) {
+    getModels();
+  }
 
   async function pingApi() {
     const req = await fetch(`${env.PUBLIC_API_URL}/`, {
