@@ -80,21 +80,15 @@ docker-compose up -d
 
 > [!WARNING]
 > Built-in models management is not supported when using an alternative compute backend.
-> You have to edit the Modal backend directly to support the model you want to use.
+> You have to edit the alternative backend directly to support the model you want to use.
 > No support will be provided for this.
-> However, it is possible to use the built-in models management and the alternative compute backend at the same time.
+> It is possible to use the built-in models management and the alternative compute backend at the same time.
 
 > [!NOTE]
 > You can disable alternative compute backend by setting `ALLOW_ALTERNATIVE_COMPUTE_BACKEND` to `false` in the api `.env` file.
 
 ### Requirements
-- modal.com account
-- modal.com API key
-- latest python3 version installed
-
-### Modal setup
-
-TODO: Add instructions
+- a server that can run an app similar to `examples/alt-backend/mixtral8x7B.py`
 
 ### Setup in LLaMa Web
 
@@ -103,6 +97,5 @@ TODO: Add instructions
 3. Click on `Install a new model`
 4. Enter the name of the model (e.g. `llama-2-7b-chat`)
 5. Press on `Use alternative compute backend`
-6. Enter the Modal API key
-7. Enter the Modal app name
-8. Press enter
+6. Enter the compute backend url (e.g. `https://my-alternative-compute-backend.domain.com`)
+7. Press on `Add the alternative backend model`
