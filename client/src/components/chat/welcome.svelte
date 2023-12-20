@@ -2,8 +2,6 @@
   import { env } from '$env/dynamic/public';
   import { onMount } from 'svelte';
   import {
-    Dropdown,
-    DropdownItem,
     P,
     Select,
   } from 'flowbite-svelte';
@@ -35,12 +33,11 @@
 </script>
 <div class="relative flex flex-col h-full justify-center items-center">
   <P size="2xl">How can I assist you today ?</P>
-
-  <div class="overflow-hidden absolute top-0 left-0">
-    <Select bind:value={model} placeholder=''>
-      {#each models as model}
-        <option value={model.name}>{model.name}</option>
-      {/each}
-    </Select>
-  </div>
+</div>
+<div class="overflow-hidden absolute top-4 left-4">
+  <Select bind:value={model} placeholder=''>
+    {#each models as model}
+      <option value={model.name}>{model.name}</option>
+    {/each}
+  </Select>
 </div>

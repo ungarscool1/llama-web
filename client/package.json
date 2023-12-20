@@ -40,7 +40,8 @@
 		"classnames": "^2.3.2",
 		"flowbite": "^1.6.4",
 		"flowbite-svelte": "^0.34.6",
+		"highlight.js": "^11.9.0",
 		"keycloak-js": "21.0.2",
-		"markdown-hljs": "^0.1.11"
+		"marked": "^11.0.0"
 	}
 }
