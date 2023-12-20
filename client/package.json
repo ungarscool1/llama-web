@@ -36,12 +36,21 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@codemirror/lang-json": "^6.0.1",
+		"@codemirror/language": ">=6.0.0",
+		"@codemirror/state": ">=6.0.0",
+		"@codemirror/theme-one-dark": "^6.1.2",
+		"@codemirror/view": ">=6.0.0",
+		"@lezer/common": "^1.0.0",
 		"@popperjs/core": "^2.11.7",
 		"classnames": "^2.3.2",
+		"codemirror": "^6.0.0",
 		"flowbite": "^1.6.4",
 		"flowbite-svelte": "^0.34.6",
 		"highlight.js": "^11.9.0",
 		"keycloak-js": "21.0.2",
-		"marked": "^11.0.0"
+		"marked": "^11.0.0",
+		"svelte-codemirror-editor": "^1.2.0",
+		"svelvet": "^9.0.0"
 	}
 }

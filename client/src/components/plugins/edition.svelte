@@ -6,6 +6,11 @@
     Modal,
     Label,
   } from 'flowbite-svelte';
+  import CodeMirror from "svelte-codemirror-editor";
+  import { json } from "@codemirror/lang-json";
+  import { oneDark } from '@codemirror/theme-one-dark';
+  import Pipeline from './pipeline.svelte';
+
 
   export let id: string;
   export let modalShow: boolean = false
@@ -30,12 +35,8 @@
   });
 
   function onChange(...args) {
-    if (modalShow && mode === 'edit' && id)
-      getPlugin(id)
-    if (modalShow == false) {
-      pluginDefinition = '';
-      configuration = {};
-    }
+    if (mode === 'edit' && id)
+      getPlugin(id);
   }
   
   function onDefinitionChange(...args) {
@@ -104,6 +105,28 @@
     modalShow = false;
   }
 </script>
+
+<div class="hidden md:flex flex-row">
+  {#if error.length > 0}
+    <Alert color="red">
+      <span class="font-medium">An error occured</span>
+      {error}
+    </Alert>
+  {/if}
+  <div class="w-[50dvw]">
+    <CodeMirror bind:value={pluginDefinition} lang={json()} tabSize={2} theme={oneDark} styles={{
+      "&": {
+        "height": "40rem"
+      }
+    }}/>
+  </div>
+  <div class="w-[50dvw]">
+    <Pipeline definition={pluginDefinition} />
+  </div>
+</div>
+<div class="block md:hidden">
+  <h2 class="text-xl font-semibold text-gray-900 dark:text-white">We are sorry but this page won't support phone size</h2>
+</div>
 
 <Modal bind:open={modalShow} size="xl" autoclose={false} class="w-full">
   <div class="flex flex-col space-y-6">
