@@ -6,6 +6,7 @@ import * as Sentry from '@sentry/node';
 import * as yup from 'yup';
 import { Message, Role } from '../types/Message';
 import compileTemplate from '../utils/compileTemplate';
+import axios from 'axios';
 
 interface Chat {
   user: string;
@@ -73,7 +74,30 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   }
   if (span)
     span.finish();
-    messages.push({ message: payload.message, role: Role.user });
+  messages.push({ message: payload.message, role: Role.user });
+  if (model.alternativeBackend) {
+    try {
+      const response = await axios.post(`${model.path}/completion`, {
+        messages
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        responseType: 'stream'
+      });
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'X-Accel-Buffering': 'no'
+      });
+      response.data.pipe(res, { end: true });
+    } catch (e) {
+      console.error(e);
+      return res.status(500).json({ message: 'Something went wrong' });
+    }
+    return;
+  }
   prompt += compileTemplate(model.chatPromptTemplate, { system: system, messages: messages });
   console.log(prompt);
   try {
