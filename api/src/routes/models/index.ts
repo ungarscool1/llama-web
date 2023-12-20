@@ -20,7 +20,9 @@ router.get('/', async (req, res) => {
   res.json(models.map((model) => ({
     id: model._id,
     name: model.name,
-    path: `${process.env.MODELS_DIR}/${model.path}`,
+    path: model.alternativeBackend ? model.path :
+      `${process.env.MODELS_DIR}/${model.path}`,
+    alternativeBackend: model.alternativeBackend,
     createdAt: model.createdAt
   })));
 });
@@ -35,6 +37,7 @@ router.get('/:id', async (req, res) => {
     name: model.name,
     createdAt: model.createdAt,
     parameters: model.parameters,
+    alternativeBackend: model.alternativeBackend,
     promptTemplate: model.chatPromptTemplate
   });
 });
@@ -53,7 +56,8 @@ router.post('/', async (req, res) => {
   const schema = yup.object().shape({
     name: yup.string().required(),
     uri: yup.string().required(),
-    promptTemplate: yup.string().required()
+    alternativeBackend: yup.boolean().default(false),
+    promptTemplate: yup.string().optional()
   })
   let payload: yup.InferType<typeof schema>;
   try {
@@ -61,24 +65,40 @@ router.post('/', async (req, res) => {
   } catch (e) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
-  try {
-    compileTemplate(payload.promptTemplate, { system: 'system', messages: [{role: 'user', message: ''}] });
-  } catch (e) {
-    return res.status(400).json({ message: 'Invalid prompt template' });
+  if (!payload.alternativeBackend) {
+    if (!payload.promptTemplate) {
+      return res.status(400).json({ message: 'Missing prompt template' });
+    }
+    try {
+      compileTemplate(payload.promptTemplate, { system: 'system', messages: [{role: 'user', message: ''}] });
+    } catch (e) {
+      return res.status(400).json({ message: 'Invalid prompt template' });
+    }
   }
   const ModelObj = mongoose.model('Models');
-  const fileName = encodeURI(payload.name);
-  file.download(payload.uri, `${process.env.MODELS_DIR}/${fileName}`)
-    .then(() => {
-      const model = new ModelObj({
-        name: payload.name,
-        path: `${fileName}`,
-        chatPromptTemplate: payload.promptTemplate,
-        parameters: req.body.parameters
+  if (!payload.alternativeBackend) {
+    const fileName = encodeURI(payload.name);
+    file.download(payload.uri, `${process.env.MODELS_DIR}/${fileName}`)
+      .then(() => {
+        const model = new ModelObj({
+          name: payload.name,
+          path: `${fileName}`,
+          chatPromptTemplate: payload.promptTemplate,
+          parameters: req.body.parameters
+        });
+        model.save();
       });
-      model.save();
-    })
     res.status(202).json({ message: 'Model download in progress.' });
+  } else {
+    const model = new ModelObj({
+      name: payload.name,
+      path: payload.uri,
+      alternativeBackend: true,
+      parameters: req.body.parameters
+    });
+    model.save();
+    res.status(201).json({ message: 'Model created' });
+  }
 });
 
 router.patch('/:id', async (req, res) => {

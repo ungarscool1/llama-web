@@ -40,7 +40,12 @@
         Authorization: `Bearer ${userInfo.token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ name: modalModelName, uri: modalModelUri, promptTemplate: modalModelPromptTemplate })
+      body: JSON.stringify({
+        name: modalModelName,
+        uri: modalModelUri,
+        promptTemplate: modalModelPromptTemplate,
+        alternativeBackend: alternativeBackendSwitch
+      })
     });
     if (!req.ok) {
       modalErrorMessage = (await req.json()).message;
