@@ -77,9 +77,11 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   if (span)
     span.finish();
   messages.push({ message: payload.message, role: Role.user });
+  console.log(model.alternativeBackend);
   if (model.alternativeBackend) {
+    console.log('Using alternative backend');
     try {
-      const response = await axios.post(`${model.path}/completion`, {
+      const axiosRes = await axios.post(`${model.path}/completion`, {
         messages
       }, {
         headers: {
@@ -93,7 +95,38 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
         'Connection': 'keep-alive',
         'X-Accel-Buffering': 'no'
       });
-      response.data.pipe(res, { end: true });
+      axiosRes.data.on('data', (data: string) => {
+        response += data;
+        res.write(data);
+        res.flushHeaders();
+      });
+      axiosRes.data.on('end', async () => {
+      const Chat = mongoose.model('Chats');
+      if (span)
+        span.finish();
+      if (payload.id) {
+        await Chat.findByIdAndUpdate(payload.id, {
+          $push: {
+            messages: {
+              $each: [
+                { message: payload.message, role: Role.user },
+                { message: response, role: Role.assistant }
+              ]
+            }
+          }
+        });
+      } else if (response) {
+        const newChat = new Chat({
+          user: req.user?.preferred_username,
+          messages: [{message: payload.message, role: Role.user}, { message: response, role: Role.assistant }],
+          time: new Date(),
+          model: model
+        });
+        await newChat.save();
+        res.write(`[[${newChat._id}]]`);
+      }
+      res.end();
+      });
     } catch (e) {
       console.error(e);
       return res.status(500).json({ message: 'Something went wrong' });
