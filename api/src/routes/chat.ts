@@ -76,8 +76,8 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   if (span)
     span.finish();
   messages.push({ message: payload.message, role: Role.user });
-  prompt += compileTemplate(model.chatPromptTemplate, { system: system, messages: messages });
-  console.log(prompt);
+  if (!model.alternativeBackend)
+    prompt += compileTemplate(model.chatPromptTemplate, { system: system, messages: messages });
   try {
     if (transaction)
       span = transaction.startChild({ op: 'generation', description: 'Generate response' });
