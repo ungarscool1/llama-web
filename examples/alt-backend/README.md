@@ -19,7 +19,7 @@ We take the same code as the previous example and we adapt it to work with this 
 ### Deploy
   
   ```bash
-  modal deploy mixtral8x7B.py
+  modal deploy mistral-7B-instruct.py
   ```
 
 ## More models ?
