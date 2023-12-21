@@ -51,8 +51,8 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
       span.finish();
     return res.status(400).json({ message: 'Model not found' });
   }
-  prompt += compileTemplate(model.chatPromptTemplate, { system: payload.system, messages: payload.messages });
-  console.log(prompt);
+  if (!model.alternativeBackend)
+    prompt += compileTemplate(model.chatPromptTemplate, { system: payload.system, messages: payload.messages });
   if (span)
     span.finish();
   try {
@@ -102,7 +102,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     }
   });
 
-  if (model.alternativeBackend) {
+  if (!model.alternativeBackend) {
     child.stderr!.on('data', (data) => {
       if (process.env.NODE_ENV === 'development')
         console.error(`stderr: ${data}`);
