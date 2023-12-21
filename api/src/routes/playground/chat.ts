@@ -58,16 +58,20 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (transaction)
       span = transaction.startChild({ op: 'generation', description: 'Generate response' });
-    child = generation.launch({
-      modelPath: `${process.env.MODELS_DIR}/${model.path}`,
-      contextSize: 4096,
-      temperature: 0.7,
-      repeatPenalty: 1.1,
-      threads: 4,
-      nPredict: -1,
-      prompt: prompt,
-      interactive: false,
-    });
+    if (!model.alternativeBackend) {
+      child = generation.launch({
+        modelPath: `${process.env.MODELS_DIR}/${model.path}`,
+        contextSize: 4096,
+        temperature: 0.7,
+        repeatPenalty: 1.1,
+        threads: 4,
+        nPredict: -1,
+        prompt: prompt,
+        interactive: false,
+      });
+    } else {
+      child = await generation.generateCompletionAlt(payload.messages, model.path);
+    }
   } catch (e) {
     return res.status(500).json({ message: 'Something went wrong' });
   }
@@ -81,6 +85,11 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   res.flushHeaders();
 
   child.data.on('data', (data) => {
+    if (model.alternativeBackend) {
+      res.write(data.toString());
+      res.flushHeaders();
+      return;
+    }
     if (ignoreIndex < prompt.replaceAll(/<\/?s>/g, '').trim().length) {
       ignoreIndex += data.toString().length;
       if (process.env.NODE_ENV === 'development')
@@ -93,12 +102,14 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     }
   });
 
-  child.stderr!.on('data', (data) => {
-    if (process.env.NODE_ENV === 'development')
-      console.error(`stderr: ${data}`);
-    if (data.toString().includes('[end of text]'))
-      child.kill();
-  });
+  if (model.alternativeBackend) {
+    child.stderr!.on('data', (data) => {
+      if (process.env.NODE_ENV === 'development')
+        console.error(`stderr: ${data}`);
+      if (data.toString().includes('[end of text]'))
+        child.kill();
+    });
+  }
 
   child.data.on('close', () => {
     if (span)

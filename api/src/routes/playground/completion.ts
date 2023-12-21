@@ -34,6 +34,8 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   if (!model) {
     return res.status(400).json({ message: 'Model not found' });
   }
+  if (model.alternativeBackend)
+    return res.status(400).json({ message: 'Alternative backend model are not supported' });
   try {
     if (transaction)
       span = transaction.startChild({ op: 'generation', description: 'Text completion' });
