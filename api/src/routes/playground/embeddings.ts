@@ -40,6 +40,8 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
         span.finish();
       return res.status(400).json({ message: 'Model not found' });
     }
+    if (model.alternativeBackend)
+      return res.status(400).json({ message: 'Alternative backend model are not supported' });
     const response = generation.generateEmbeddings(payload.prompt, `${process.env.MODELS_DIR}/${model.path}`);
     if (span)
       span.finish();

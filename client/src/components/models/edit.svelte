@@ -5,11 +5,17 @@
     Alert,
     Modal,
     Label,
+    Input
   } from 'flowbite-svelte';
 
   export let id: string
   export let modalShow: boolean = false
-  let model: {id: string, promptTemplate: string}
+  let model: {
+    id: string,
+    promptTemplate: string,
+    alternativeBackend: boolean,
+    parameters: Record<string, any>
+  }
   let error = '';
   let userInfo = {
     authenticated: false,
@@ -46,7 +52,8 @@
         Authorization: `Bearer ${userInfo.token}`
       },
       body: JSON.stringify({
-        promptTemplate: model.promptTemplate
+        promptTemplate: model.promptTemplate,
+        parameters: model.parameters
       })
     });
     if (!req.ok) {
@@ -67,10 +74,17 @@
           {error}
         </Alert>
       {/if}
-      <Label class="space-y-2">
-        <span>Model prompt template</span>
-        <textarea draggable="false" rows="2" class="block resize-none w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg" placeholder="Model prompt template" bind:value={model.promptTemplate}></textarea>
-      </Label>
+      {#if !model.alternativeBackend}
+        <Label class="space-y-2">
+          <span>Model prompt template</span>
+          <textarea draggable="false" rows="2" class="block resize-none w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg" placeholder="Model prompt template" bind:value={model.promptTemplate}></textarea>
+        </Label>
+      {:else}
+        <Label class="space-y-2">
+          <span>Authentication</span>
+          <Input type="text" class="disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg" placeholder="Authentication" bind:value={model.parameters.authentication}></Input>
+        </Label>
+      {/if}
       <button
         type="submit"
         class="text-center font-medium focus:ring-4 focus:outline-none inline-flex items-center justify-center px-5 py-2.5 text-sm text-white bg-blue-700 hover:bg-blue-800 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 rounded-lg w-full1"

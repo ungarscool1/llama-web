@@ -1,15 +1,15 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import type { ChildProcessWithoutNullStreams } from 'child_process';
-import { Generation } from '../utils/generation';
+import { Generation, GenerationOutput } from '../utils/generation';
 import mongoose from 'mongoose';
 import * as Sentry from '@sentry/node';
 import * as yup from 'yup';
 import { Message, Role } from '../types/Message';
 import compileTemplate from '../utils/compileTemplate';
+import axios from 'axios';
 
 interface Chat {
   user: string;
-  process: ChildProcessWithoutNullStreams;
+  process: GenerationOutput;
 }
 
 let router = Router();
@@ -43,7 +43,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   let messages: Array<Message> = [];
   let ignoreIndex = 0;
   let response = '';
-  let child: ChildProcessWithoutNullStreams;
+  let child: GenerationOutput;
   const transaction = Sentry.getActiveTransaction();
   let span: Sentry.Span|undefined;
   if (chatsProcess.find((chat) => chat.user === req.user?.preferred_username)) {
@@ -76,21 +76,25 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   if (span)
     span.finish();
   messages.push({ message: payload.message, role: Role.user });
-  prompt += compileTemplate(model.chatPromptTemplate, { system: system, messages: messages });
-  console.log(prompt);
+  if (!model.alternativeBackend)
+    prompt += compileTemplate(model.chatPromptTemplate, { system: system, messages: messages });
   try {
     if (transaction)
       span = transaction.startChild({ op: 'generation', description: 'Generate response' });
-    child = generation.launch({
-      modelPath: `${process.env.MODELS_DIR}/${model.path}`,
-      contextSize: 4096,
-      temperature: 0.7,
-      repeatPenalty: 1.1,
-      threads: 4,
-      nPredict: -1,
-      prompt: prompt,
-      interactive: false,
-    });
+    if (!model.alternativeBackend) {
+      child = generation.launch({
+        modelPath: `${process.env.MODELS_DIR}/${model.path}`,
+        contextSize: 4096,
+        temperature: 0.7,
+        repeatPenalty: 1.1,
+        threads: 4,
+        nPredict: -1,
+        prompt: prompt,
+        interactive: false,
+      });
+    } else {
+      child = await generation.generateCompletionAlt(messages, model.path, model.parameters.authentication);
+    }
   } catch (e) {
     return res.status(500).json({ message: 'Something went wrong' });
   }
@@ -98,7 +102,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     user: `${req.user?.preferred_username}`,
     process: child
   });
-  res.set({
+  res.writeHead(200, {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
     'Connection': 'keep-alive',
@@ -107,7 +111,13 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   res.status(200);
   res.flushHeaders();
 
-  child.stdout.on('data', (data) => {
+  child.data.on('data', (data) => {
+    if (model.alternativeBackend) {
+      response += data.toString();
+      res.write(data.toString());
+      res.flushHeaders();
+      return;
+    }
     if (ignoreIndex < prompt.replaceAll(/<\/?s>/g, '').trim().length) {
       ignoreIndex += data.toString().length;
       if (process.env.NODE_ENV === 'development')
@@ -121,18 +131,20 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     }
   });
 
-  child.stderr.on('data', (data) => {
-    //if (process.env.NODE_ENV === 'development')
-    //  console.error(`stderr: ${data}`);
-    if (data.toString().includes('[end of text]'))
-      child.kill();
-  });
+  if (child.stderr) {
+    child.stderr.on('data', (data) => {
+      //if (process.env.NODE_ENV === 'development')
+      //  console.error(`stderr: ${data}`);
+      if (data.toString().includes('[end of text]'))
+        child.kill!();
+    });
+  }
 
-  child.on('close', async (code) => {
+  child.data.on('close', async () => {
     const Chat = mongoose.model('Chats');
     if (span)
       span.finish();
-    if (payload.id) {
+    if (payload.id && response.length > 0) {
       await Chat.findByIdAndUpdate(payload.id, {
         $push: {
           messages: {
@@ -143,7 +155,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
           }
         }
       });
-    } else if (response) {
+    } else if (response && response.length > 0) {
       const newChat = new Chat({
         user: req.user?.preferred_username,
         messages: [{message: payload.message, role: Role.user}, { message: response, role: Role.assistant }],
