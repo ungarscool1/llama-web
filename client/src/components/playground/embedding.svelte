@@ -59,7 +59,7 @@
       const jsonRes: Array<number> = await res.json();
       embedResponse = jsonRes.join('\n');
     } else {
-      errorMessage = await res.text();
+      errorMessage = (await res.json()).message;
     }
     isRequesting = false;
   }
