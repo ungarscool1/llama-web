@@ -105,11 +105,8 @@ class Model:
 
         print(f"Generated {num_tokens} tokens in {time.time() - t0:.2f}s")
 
-from pathlib import Path
 
-from modal import Mount, asgi_app
-
-frontend_path = Path(__file__).parent / "llm-frontend"
+from modal import asgi_app
 
 @stub.function(
     allow_concurrent_inputs=20,
@@ -117,8 +114,6 @@ frontend_path = Path(__file__).parent / "llm-frontend"
 )
 @asgi_app(label="llama-web-mistral-7b-instruct")
 def app():
-    import json
-
     from fastapi import FastAPI, Request
     from fastapi.responses import StreamingResponse
 
