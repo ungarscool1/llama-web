@@ -58,7 +58,8 @@ router.post('/', async (req, res) => {
     name: yup.string().required(),
     uri: yup.string().required(),
     alternativeBackend: yup.boolean().default(false),
-    promptTemplate: yup.string().optional()
+    promptTemplate: yup.string().optional(),
+    parameters: yup.object().default({}).optional()
   })
   let payload: yup.InferType<typeof schema>;
   try {
@@ -95,7 +96,7 @@ router.post('/', async (req, res) => {
       name: payload.name,
       path: payload.uri,
       alternativeBackend: true,
-      parameters: req.body.parameters
+      parameters: payload.parameters
     });
     model.save();
     res.status(201).json({ message: 'Model created' });
@@ -104,7 +105,8 @@ router.post('/', async (req, res) => {
 
 router.patch('/:id', async (req, res) => {
   const schema = yup.object().shape({
-    promptTemplate: yup.string().required()
+    promptTemplate: yup.string().optional(),
+    parameters: yup.object().default({}).optional()
   })
   let payload: yup.InferType<typeof schema>
 
@@ -115,12 +117,16 @@ router.patch('/:id', async (req, res) => {
     return res.status(400).json({ message: 'Bad request' });
   }
   try {
-    compileTemplate(payload.promptTemplate, { system: 'system', messages: [{role: 'user', message: ''}] });
+    if (payload.promptTemplate)
+      compileTemplate(payload.promptTemplate, { system: 'system', messages: [{role: 'user', message: ''}] });
   } catch (e) {
     return res.status(400).json({ message: 'Invalid prompt template' });
   }
   try {
-    await mongoose.model('Models').findOneAndUpdate({ _id: req.params.id }, { chatPromptTemplate: payload.promptTemplate });
+    await mongoose.model('Models').findOneAndUpdate({ _id: req.params.id },
+      { chatPromptTemplate: payload.promptTemplate,
+        parameters: Object.keys(payload.parameters).length > 0 ? payload.parameters : undefined
+      });
   } catch (e) {
     console.error(e)
     return res.status(500).json({ message: 'Internal Server Error' })

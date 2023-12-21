@@ -6,11 +6,5 @@ export default new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   alternativeBackend: { type: Boolean, default: false },
   chatPromptTemplate: { type: String, required: false },
-  parameters: [
-    {
-      temperature: { type: Number, default: 0.8 },
-      topK: { type: Number, default: 40 },
-      topP: { type: Number, default: 0.5 },
-    },
-  ],
+  parameters: { type: Object, default: {}},
 });
