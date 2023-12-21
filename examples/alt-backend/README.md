@@ -16,6 +16,10 @@ The code is taken from their [documentation](https://modal.com/docs/examples/vll
 
 We take the same code as the previous example and we adapt it to work with this model.
 
+### Before the deployment
+
+You need to create a secret containing `AUTH_TOKEN` variable. This token is used to authenticate the request to the API. YOU NEED TO CALL THE SECRET `web-token`.
+
 ### Deploy
   
   ```bash

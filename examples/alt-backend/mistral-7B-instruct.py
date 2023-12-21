@@ -4,7 +4,7 @@
 import os
 import time
 
-from modal import Image, Stub, gpu, method
+from modal import Image, Stub, gpu, method, Secret
 
 MODEL_DIR = "/model"
 BASE_MODEL = "mistralai/Mistral-7B-Instruct-v0.2"
@@ -111,16 +111,26 @@ from modal import asgi_app
 @stub.function(
     allow_concurrent_inputs=20,
     timeout=60 * 10,
+    secret=Secret.from_name("web-token")
 )
 @asgi_app(label="llama-web-mistral-7b-instruct")
 def app():
-    from fastapi import FastAPI, Request
+    from fastapi import FastAPI, Request, Depends, HTTPException, status
     from fastapi.responses import StreamingResponse
+    from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+    import os
 
     web_app = FastAPI()
+    auth_scheme = HTTPBearer()
 
     @web_app.get("/stats")
-    async def stats():
+    async def stats(request: Request, token: HTTPAuthorizationCredentials = Depends(auth_scheme)):
+        if token.credentials != os.environ["AUTH_TOKEN"]:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect bearer token",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
         stats = await Model().completion_stream.get_current_stats.aio()
         return {
             "backlog": stats.backlog,
@@ -129,9 +139,14 @@ def app():
         }
 
     @web_app.post("/completion")
-    async def completion(request: Request):
+    async def completion(request: Request, token: HTTPAuthorizationCredentials = Depends(auth_scheme)):
+        if token.credentials != os.environ["AUTH_TOKEN"]:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect bearer token",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
         body = await request.json()
-        print(body)
 
         async def generate():
             async for text in Model().completion_stream.remote_gen.aio(
