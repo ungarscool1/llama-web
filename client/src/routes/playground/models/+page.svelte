@@ -31,13 +31,15 @@
     if (!userInfo.authenticated) {
       goto('/');
     } else {
+      getModels();
       pingApi();
     }
-    getModels();
   });
   
   function onAddModalClose(...args) {
-    getModels();
+    if (userInfo.authenticated) {
+      getModels();
+    }
   }
 
   async function pingApi() {
