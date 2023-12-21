@@ -37,7 +37,9 @@
   });
   
   function onAddModalClose(...args) {
-    getModels();
+    if (userInfo.authenticated) {
+      getModels();
+    }
   }
 
   async function pingApi() {
