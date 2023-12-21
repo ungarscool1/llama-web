@@ -1,4 +1,7 @@
-import { spawn, spawnSync, ChildProcessWithoutNullStreams } from 'child_process';
+import { spawn, spawnSync } from 'child_process';
+import { Readable } from 'stream';
+import axios from 'axios';
+import { Message } from '../types/Message';
 
 type GenerationOptions = {
   executablePath: string;
@@ -22,7 +25,11 @@ type LaunchOptions = {
 
 type LaunchOptionsLow = Omit<LaunchOptions, 'interactive'|'prompt'|'threads'>;
 
-export type GenerationLaunchOutput = ChildProcessWithoutNullStreams;
+export type GenerationOutput = {
+  data: Readable;
+  stderr?: Readable;
+  kill: () => void;
+}
 
 export class Generation {
   private options: GenerationOptions;
@@ -34,7 +41,7 @@ export class Generation {
    * @param options Launch options
    * @returns Child process
    */
-  launch(options: LaunchOptions): ChildProcessWithoutNullStreams {
+  launch(options: LaunchOptions): GenerationOutput {
     const args = [
       '-m', options.modelPath,
       '--threads', `${options.threads}`,
@@ -51,7 +58,11 @@ export class Generation {
       ...(options.reversePrompt ? ['--reverse-prompt', options.reversePrompt] : []),
     ];
     const child = spawn(this.options.executablePath, args.filter(arg => arg !== undefined));
-    return child;
+    return {
+      data: child.stdout,
+      stderr: child.stderr,
+      kill: child.kill
+    };
   }
   
   /**
@@ -86,8 +97,8 @@ export class Generation {
    * Generate completion
    * @param prompt The user's input
    */
-  generateCompletion(prompt: string, options: LaunchOptionsLow): ChildProcessWithoutNullStreams {
-    return this.launch({
+  generateCompletion(prompt: string, options: LaunchOptionsLow): GenerationOutput {
+    const child = this.launch({
       modelPath: options.modelPath,
       threads: 4,
       prompt,
@@ -97,6 +108,11 @@ export class Generation {
       topK: options.topK,
       topP: options.topP
     });
+    return {
+      data: child.data,
+      stderr: child.stderr,
+      kill: child.kill
+    };
   }
   
   /**
@@ -113,5 +129,30 @@ export class Generation {
     }).trim()
       .split(' ')
       .map(r => parseFloat(r));
+  }
+  
+  /**
+   * Generate completion in alternative backend
+   * @param messages The conversation history
+   * @returns Buffer
+   */
+  async generateCompletionAlt(messages: Message[], modelPath: string): Promise<GenerationOutput> {
+    const cancelToken = axios.CancelToken.source();
+    const axiosRes = await axios.post(`${modelPath}/completion`, {
+      messages
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      responseType: 'stream',
+      cancelToken: cancelToken.token
+    });
+    return {
+      data: axiosRes.data,
+      stderr: undefined,
+      kill: () => (
+        cancelToken.cancel('Generation cancelled')
+      )
+    };
   }
 }

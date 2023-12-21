@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { Generation, GenerationLaunchOutput } from '../../utils/generation';
+import { Generation, GenerationOutput } from '../../utils/generation';
 import * as Sentry from '@sentry/node';
 import * as yup from 'yup';
 import mongoose from 'mongoose';
@@ -24,7 +24,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   let payload: yup.InferType<typeof schema>;
   const transaction = Sentry.getActiveTransaction();
   let span: Sentry.Span;
-  let child: GenerationLaunchOutput;
+  let child: GenerationOutput;
   try {
     payload = await schema.validate(req.body);
   } catch (err) {
@@ -50,17 +50,16 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   });
   res.status(200);
   res.flushHeaders();
-  child.stdout.on('data', (data: Buffer) => {
+  child.data.on('data', (data: Buffer) => {
     res.write(data.toString());
     res.flushHeaders();
   });
-  child.stderr.on('data', (data: Buffer) => {
+  child.stderr!.on('data', (data: Buffer) => {
     console.error(`stderr: ${data.toString()}`);
   });
-  child.on('close', (code) => {
+  child.data.on('close', () => {
     if (span)
       span.finish();
-    console.log(`child process exited with code ${code}`)
     res.end();
   });
 });

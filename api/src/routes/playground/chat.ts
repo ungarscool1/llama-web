@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { Generation, GenerationLaunchOutput } from '../../utils/generation';
+import { Generation, GenerationOutput } from '../../utils/generation';
 import * as yup from 'yup';
 import * as Sentry from '@sentry/node';
 import mongoose from 'mongoose';
@@ -28,7 +28,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   let ignoreIndex = 0;
   let response = '';
   let detecting = false;
-  let child: GenerationLaunchOutput;
+  let child: GenerationOutput;
   const transaction = Sentry.getActiveTransaction();
   let span: Sentry.Span|undefined;
   if (!process.env.LLAMA_PATH || !process.env.MODELS_DIR) {
@@ -80,7 +80,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   res.status(200);
   res.flushHeaders();
 
-  child.stdout.on('data', (data) => {
+  child.data.on('data', (data) => {
     if (ignoreIndex < prompt.replaceAll(/<\/?s>/g, '').trim().length) {
       ignoreIndex += data.toString().length;
       if (process.env.NODE_ENV === 'development')
@@ -93,14 +93,14 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     }
   });
 
-  child.stderr.on('data', (data) => {
+  child.stderr!.on('data', (data) => {
     if (process.env.NODE_ENV === 'development')
       console.error(`stderr: ${data}`);
     if (data.toString().includes('[end of text]'))
       child.kill();
   });
 
-  child.on('close', (code) => {
+  child.data.on('close', () => {
     if (span)
       span.finish();
     res.end();
