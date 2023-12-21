@@ -70,7 +70,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
         interactive: false,
       });
     } else {
-      child = await generation.generateCompletionAlt(payload.messages, model.path);
+      child = await generation.generateCompletionAlt(payload.messages, model.path, model.parameters.authentication);
     }
   } catch (e) {
     return res.status(500).json({ message: 'Something went wrong' });

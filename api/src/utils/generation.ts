@@ -136,13 +136,14 @@ export class Generation {
    * @param messages The conversation history
    * @returns Buffer
    */
-  async generateCompletionAlt(messages: Message[], modelPath: string): Promise<GenerationOutput> {
+  async generateCompletionAlt(messages: Message[], modelPath: string, authentication: string): Promise<GenerationOutput> {
     const cancelToken = axios.CancelToken.source();
     const axiosRes = await axios.post(`${modelPath}/completion`, {
       messages
     }, {
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authentication}`
       },
       responseType: 'stream',
       cancelToken: cancelToken.token
