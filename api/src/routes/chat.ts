@@ -144,7 +144,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     const Chat = mongoose.model('Chats');
     if (span)
       span.finish();
-    if (payload.id) {
+    if (payload.id && response.length > 0) {
       await Chat.findByIdAndUpdate(payload.id, {
         $push: {
           messages: {
@@ -155,7 +155,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
           }
         }
       });
-    } else if (response) {
+    } else if (response && response.length > 0) {
       const newChat = new Chat({
         user: req.user?.preferred_username,
         messages: [{message: payload.message, role: Role.user}, { message: response, role: Role.assistant }],

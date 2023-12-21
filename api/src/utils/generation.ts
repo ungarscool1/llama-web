@@ -61,7 +61,7 @@ export class Generation {
     return {
       data: child.stdout,
       stderr: child.stderr,
-      kill: child.kill
+      kill: () => child.kill()
     };
   }
   
@@ -111,7 +111,7 @@ export class Generation {
     return {
       data: child.data,
       stderr: child.stderr,
-      kill: child.kill
+      kill: () => child.kill()
     };
   }
   
