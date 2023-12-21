@@ -12,6 +12,16 @@ The code is taken from their [documentation](https://modal.com/docs/examples/vll
   modal deploy mixtral8x7B.py
   ```
 
+## Mistral 7B Instruct v0.2
+
+We take the same code as the previous example and we adapt it to work with this model.
+
+### Deploy
+  
+  ```bash
+  modal deploy mixtral8x7B.py
+  ```
+
 ## More models ?
 
 More models example will be added soon !
