@@ -31,9 +31,9 @@
     if (!userInfo.authenticated) {
       goto('/');
     } else {
+      getModels();
       pingApi();
     }
-    getModels();
   });
   
   function onAddModalClose(...args) {
