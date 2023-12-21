@@ -59,7 +59,7 @@
       const jsonRes: Array<number> = await res.json();
       embedResponse = jsonRes.join('\n');
     } else {
-      errorMessage = await res.text();
+      errorMessage = (await res.json()).message;
     }
     isRequesting = false;
   }
@@ -114,7 +114,9 @@
           bind:value={model}
         >
           {#each models as model}
-            <option value={model.name}>{model.name}</option>
+            {#if !model.alternativeBackend}
+              <option value={model.name}>{model.name}</option>
+            {/if}
           {/each}
         </select>
       </div>

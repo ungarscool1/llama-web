@@ -75,3 +75,27 @@ docker-compose up -d
 6. Enter the model chat template (can be found [here](PROMPTS.md))
 7. Click on `Install the new model`
 8. Wait until the model is installed, you can refresh the page to see when it is done.
+
+## Use alternative compute backend
+
+> [!WARNING]
+> Built-in models management is not supported when using an alternative compute backend.
+> You have to edit the alternative backend directly to support the model you want to use.
+> No support will be provided for this.
+> It is possible to use the built-in models management and the alternative compute backend at the same time.
+
+> [!NOTE]
+> You can disable alternative compute backend by setting `ALLOW_ALTERNATIVE_COMPUTE_BACKEND` to `false` in the api `.env` file.
+
+### Requirements
+- a server that can run an app similar to `examples/alt-backend/mixtral8x7B.py`
+
+### Setup in LLaMa Web
+
+1. Go to the playground
+2. Then go to the `Models` tab
+3. Click on `Install a new model`
+4. Enter the name of the model (e.g. `llama-2-7b-chat`)
+5. Press on `Use alternative compute backend`
+6. Enter the compute backend url (e.g. `https://my-alternative-compute-backend.domain.com`)
+7. Press on `Add the alternative backend model`

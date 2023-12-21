@@ -5,3 +5,4 @@ dist
 build
 *.pem
 *.log
+__pycache__

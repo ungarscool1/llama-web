@@ -58,6 +58,10 @@
     xhr.send(JSON.stringify({ prompt, parameters, model }));
     isRequesting = true;
     xhr.addEventListener('progress', (event) => {
+      if (xhr.status !== 200) {
+        errorMessage = JSON.parse(xhr.responseText).message;
+        return;
+      }
       const resText = xhr.responseText.trim();
       if (prompt.length < resText.length) prompt = resText;
     });
@@ -109,7 +113,9 @@
           bind:value={model}
         >
           {#each models as model}
-            <option value={model.name}>{model.name}</option>
+            {#if !model.alternativeBackend}
+              <option value={model.name}>{model.name}</option>
+            {/if}
           {/each}
         </select>
         <p class="text-gray-500">Temperature</p>
