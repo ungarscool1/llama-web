@@ -114,7 +114,9 @@
           bind:value={model}
         >
           {#each models as model}
-            <option value={model.name}>{model.name}</option>
+            {#if !model.alternativeBackend}
+              <option value={model.name}>{model.name}</option>
+            {/if}
           {/each}
         </select>
       </div>

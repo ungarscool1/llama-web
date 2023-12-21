@@ -113,7 +113,9 @@
           bind:value={model}
         >
           {#each models as model}
-            <option value={model.name}>{model.name}</option>
+            {#if !model.alternativeBackend}
+              <option value={model.name}>{model.name}</option>
+            {/if}
           {/each}
         </select>
         <p class="text-gray-500">Temperature</p>
