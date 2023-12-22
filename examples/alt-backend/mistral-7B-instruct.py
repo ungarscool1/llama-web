@@ -57,6 +57,8 @@ class Model:
             model=MODEL_DIR,
             tensor_parallel_size=GPU_CONFIG.count,
             gpu_memory_utilization=0.90,
+            disable_log_requests=True,
+            disable_log_stats=True,
         )
 
         self.engine = AsyncLLMEngine.from_engine_args(engine_args)
