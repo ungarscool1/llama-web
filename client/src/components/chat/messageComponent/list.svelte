@@ -5,7 +5,7 @@
   export let ordered: boolean = false;
   export let items: Array<any>;
 </script>
-<List list={ordered ? 'decimal' : 'disc'} color="white">
+<List list={ordered ? 'decimal' : 'disc'} color="white" ulClass="">
   {#each items as item}
     <Li>{@html marked
       .parse(item.text).toString().replaceAll(/<\/?p>/g, '')}</Li>
