@@ -306,6 +306,6 @@
   </div>
 </main>
 
-<style lang="scss">
+<style>
   @import 'https://unpkg.com/@highlightjs/cdn-assets/styles/github-dark.min.css';
 </style>
