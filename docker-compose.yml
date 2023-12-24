@@ -7,7 +7,7 @@ services:
     ports:
       - "27017:27017"
   api:
-    build: ghcr.io/ungarscool1/llama-web:api
+    image: ghcr.io/ungarscool1/llama-web:api
     restart: always
     ports:
       - "3000:3000"
@@ -27,7 +27,7 @@ services:
       - /path/to/jwt/folder:/key
     user: "1000:1000"
   client:
-    build: ghcr.io/ungarscool1/llama-web:client
+    image: ghcr.io/ungarscool1/llama-web:client
     restart: always
     ports:
       - "4173:3000"
