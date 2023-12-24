@@ -7,14 +7,19 @@ services:
     ports:
       - "27017:27017"
   api:
-    build: ./api
+    build: ghcr.io/ungarscool1/llama-web:api
     restart: always
     ports:
       - "3000:3000"
     environment:
+      - PORT=3000
       - DB=mongodb://db:27017
-    env_file:
-      - ./api/.env
+      - LLAMA_PATH=/app/llama.cpp/main
+      - LLAMA_EMBEDDING_PATH=/app/llama.cpp/embedding
+      - MODELS_DIR=/models
+      - JWT_PUBLIC_KEY=/key/jwt.pem
+      - ALLOW_ALTERNATIVE_COMPUTE_BACKEND=true
+      - SKIP_AUTH=true
     depends_on:
       - db
     volumes:
@@ -22,13 +27,17 @@ services:
       - /path/to/jwt/folder:/key
     user: "1000:1000"
   client:
-    build: ./client
+    build: ghcr.io/ungarscool1/llama-web:client
     restart: always
     ports:
       - "4173:3000"
     environment:
       - PORT=3000
-    env_file:
-      - ./client/.env
+      #- PUBLIC_SSO_REALM=YOUR_SSO_REALM
+      #- PUBLIC_SSO_SERVER=YOUR_SSO_SERVER
+      #- PUBLIC_CLIENT_ID=YOUR_CLIENT_ID
+      #- PUBLIC_SSO_ACCOUNT_SETTINGS_URL=YOUR_SSO_ACCOUNT_SETTINGS_URL
+      #- PUBLIC_API_URL=YOUR_API_URL
+      - SKIP_AUTH=true
 volumes:
   mongo_data:
