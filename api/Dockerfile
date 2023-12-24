@@ -22,7 +22,7 @@ FROM base
 RUN mkdir -p /app/llama.cpp
 COPY --from=prod-deps /app/node_modules /app/node_modules
 COPY --from=build /app/dist /app/dist
-COPY --from=build /app/llama.cpp ./llama.cpp/main
-COPY --from=build /app/llama.cpp ./llama.cpp/embedding
+COPY --from=build /app/llama.cpp/main ./llama.cpp/main
+COPY --from=build /app/llama.cpp/embedding ./llama.cpp/embedding
 EXPOSE 3000
 CMD [ "pnpm", "start" ]
