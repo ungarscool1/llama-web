@@ -81,9 +81,10 @@
     <div>
       <h3 class="text-xl font-medium text-gray-900 dark:text-white">Add a new model</h3>
       {#if alternativeBackendAllowed}
-        <P size="sm" >Or use <span on:click={() => {
+        <P size="sm" >Or use <button on:click={(e) => {
+          e.preventDefault();
           alternativeBackendSwitch = !alternativeBackendSwitch;
-        }}>{alternativeBackendSwitch ? 'legacy' : 'alternative'} backend</span></P>
+        }}>{alternativeBackendSwitch ? 'legacy' : 'alternative'} backend</button></P>
       {/if}
     </div>
     {#if modalErrorMessage.length > 0}
