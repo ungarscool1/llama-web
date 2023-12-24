@@ -1,20 +1,28 @@
-FROM node:lts as build
+FROM node:20-slim AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+COPY . /app
 WORKDIR /app
 
-RUN apt-get update && apt-get install git gcc g++ make cmake -y
-COPY . .
-RUN yarn install
+FROM base AS prod-deps
+RUN apt-get update && apt-get install -y python3 python3-pip
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
+
+FROM base AS build
+RUN apt-get update && apt-get install git gcc g++ make cmake python3 python3-pip -y
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 RUN git clone https://github.com/ggerganov/llama.cpp && \
     cd llama.cpp && \
     git checkout b1671 && \
     make -j
-RUN yarn build
+RUN pnpm run build
 
-FROM node:lts
-WORKDIR /app
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/llama.cpp ./llama.cpp
-COPY --from=build /app/package.json ./package.json
-COPY --from=build /app/yarn.lock ./yarn.lock
-RUN yarn install --production
-CMD ["yarn", "start"]
+FROM base
+RUN mkdir -p /app/llama.cpp
+COPY --from=prod-deps /app/node_modules /app/node_modules
+COPY --from=build /app/dist /app/dist
+COPY --from=build /app/llama.cpp ./llama.cpp/main
+COPY --from=build /app/llama.cpp ./llama.cpp/embedding
+EXPOSE 3000
+CMD [ "pnpm", "start" ]
