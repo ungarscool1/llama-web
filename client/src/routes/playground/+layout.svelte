@@ -42,7 +42,6 @@
 </script>
 
 <Navbar
-  navClass="px-2 sm:px-4 py-2.5 absolute w-full z-20 top-0 left-0 border-b"
   let:hidden
   let:toggle
 >
@@ -51,9 +50,20 @@
     >
   </NavBrand>
   <NavHamburger on:click={toggle} />
-  <NavUl {hidden}>
+  {#if env.PUBLIC_SKIP_AUTH === 'false' || !env.PUBLIC_SKIP_AUTH}
+  <Dropdown placement="bottom" triggeredBy="#profile">
+    <DropdownHeader>
+      <span class="block text-sm"> {userName} </span>
+      <span class="block truncate text-sm font-medium"> {userEmail} </span>
+    </DropdownHeader>
+    <DropdownItem href={env.PUBLIC_SSO_ACCOUNT_SETTINGS_URL}>Settings</DropdownItem>
+    <DropdownItem href="/playground/api">API Keys</DropdownItem>
+    <DropdownItem href="/logout">Sign out</DropdownItem>
+  </Dropdown>
+  {/if}
+  <NavUl {hidden} {activeUrl}>
     {#each links as link}
-      <NavLi href={link.url} active={activeUrl === link.url}>{link.name}</NavLi>
+      <NavLi href={link.url}>{link.name}</NavLi>
     {/each}
     {#if env.PUBLIC_SKIP_AUTH === 'false' || !env.PUBLIC_SKIP_AUTH}
       <NavLi id="profile" style="cursor: pointer;">
@@ -67,18 +77,6 @@
     </NavLi>
   </NavUl>
 </Navbar>
-{#if env.PUBLIC_SKIP_AUTH === 'false' || !env.PUBLIC_SKIP_AUTH}
-  <Dropdown placement="bottom" triggeredBy="#profile" frameClass="mt-16 sm:mt-16 md:mt-20 lg:mt-20 xl:mt-20 2xl:mt-20">
-    <DropdownHeader>
-      <br/>
-      <span class="block text-sm"> {userName} </span>
-      <span class="block truncate text-sm font-medium"> {userEmail} </span>
-    </DropdownHeader>
-    <DropdownItem href={env.PUBLIC_SSO_ACCOUNT_SETTINGS_URL}>Settings</DropdownItem>
-    <DropdownItem href="/playground/api">API Keys</DropdownItem>
-    <DropdownItem href="/logout">Sign out</DropdownItem>
-  </Dropdown>
-{/if}
 <div>
   <slot />
 </div>
