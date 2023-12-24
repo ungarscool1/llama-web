@@ -6,6 +6,7 @@ COPY . /app
 WORKDIR /app
 
 FROM base AS prod-deps
+ENV NODE_OPTIONS=--max-old-space-size=8192
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
 
 FROM base AS build
