@@ -5,7 +5,6 @@ import * as Sentry from '@sentry/node';
 import * as yup from 'yup';
 import { Message, Role } from '../types/Message';
 import compileTemplate from '../utils/compileTemplate';
-import axios from 'axios';
 
 interface Chat {
   user: string;
@@ -63,7 +62,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   if (process.env.SKIP_AUTH === 'false')
     system += ` Here some information that can you help, the user name is ${req.user?.given_name}.`;
   if (payload.id) {
-    const chat = await mongoose.model('Chats').findById(payload.id).lean();
+    const chat = await mongoose.model('Chats').findById(payload.id).lean<any>();
     if (!chat || chat.user !== req.user?.preferred_username) {
       return res.status(400).json({ message: 'Chat not found' });
     }
