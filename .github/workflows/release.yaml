@@ -1,0 +1,60 @@
+name: Build Docker Image for release
+on:
+  release:
+  workflow_dispatch: # Allows for manual triggering
+
+jobs:
+  client:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./client
+    permissions: 
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      -
+        name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        run: |
+          docker build . --tag ghcr.io/ungarscool1/llama-web:client
+          docker push ghcr.io/ungarscool1/llama-web:client
+  api:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api
+    permissions: 
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      -
+        name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        run: |
+          docker build . --tag ghcr.io/ungarscool1/llama-web:api
+          docker push ghcr.io/ungarscool1/llama-web:api
