@@ -1,20 +1,19 @@
-FROM node:lts as builder
-
+FROM node:20-slim AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+COPY . /app
 WORKDIR /app
-COPY . .
 
-ENV NODE_OPTIONS=--max_old_space_size=4096
-ENV GENERATE_SOURCEMAP=false
-RUN yarn install --frozen-lockfile
-RUN yarn build
+FROM base AS prod-deps
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
 
-FROM node:lts-alpine
+FROM base AS build
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm run build
 
-WORKDIR /app
-COPY --from=builder /app/build ./build
-COPY --from=builder /app/package.json .
-COPY --from=builder /app/yarn.lock .
-RUN yarn install --frozen-lockfile --production && \
-    yarn cache clean
+FROM base
+COPY --from=prod-deps /app/node_modules /app/node_modules
+COPY --from=build /app/build /app/build
 EXPOSE 3000
 CMD [ "node", "build" ]
