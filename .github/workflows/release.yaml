@@ -1,6 +1,7 @@
 name: Build Docker Image for release
 on:
   release:
+    types: [created]
   workflow_dispatch: # Allows for manual triggering
 
 jobs:
