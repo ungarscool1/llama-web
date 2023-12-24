@@ -15,7 +15,7 @@ The LLaMa Web is a web interface to chat or play with LLaMa based models.
 ### Building
 
 ```bash
-cd client && yarn install --frozen-lockfile && yarn build
+cd client && pnpm install --frozen-lockfile && pnpm build
 cd ..
 cd api && yarn install --frozen-lockfile && yarn build
 ```
@@ -42,15 +42,15 @@ yarn start
 
 - Docker
 - Docker Compose
+- Download `docker-compose.yml` file
 
 ### Configuration
 
-Copy the `example.env` file from the both folder to `.env` and edit it.
+Edit the `docker-compose.yml` file and change the environment variables.
 
-```bash
-cp client/example.env client/.env && nano client/.env
-cp api/example.env api/.env && nano api/.env
-```
+However, you can't change the `DB`, `LLAMA_PATH` and `LLAMA_EMBEDDING_PATH` variables.
+
+If you don't want to use Keycloak, you can enable the `SKIP_AUTH` variable, by setting it to `true` in client AND api.
 
 ### Running
 
