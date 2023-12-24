@@ -110,7 +110,7 @@
   }
 
   function handleKeyDown(event: KeyboardEvent) {
-    if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+    if (event.key === 'Enter') {
       sendRequest();
     }
   }
@@ -204,7 +204,7 @@
   }
 </script>
 
-<main class="h-[100dvh] w-screen overflow-hidden relative z-0 md:flex" on:keydown={handleKeyDown}>
+<main class="h-[100dvh] w-screen overflow-hidden relative z-0 md:flex">
   <Sidebar {chats} />
   <div
     id="content"
@@ -238,6 +238,7 @@
             placeholder="Ask me anything..."
             bind:value={prompt}
             on:input={onTextAreaInput}
+            on:keypress={handleKeyDown}
           />
           {#if !isRequesting}
             <button
