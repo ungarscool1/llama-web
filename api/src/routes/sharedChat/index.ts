@@ -1,3 +1,4 @@
+import { optionalAuthMiddleware } from '@/middleware';
 import { Router, Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 
@@ -14,7 +15,7 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   })));
 });
 
-router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
+router.get('/:id', optionalAuthMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   if (req.params.id.length < 24) {
     return res.status(400).json({ message: 'Invalid chat id' });
   }

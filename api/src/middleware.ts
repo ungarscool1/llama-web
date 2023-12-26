@@ -70,3 +70,26 @@ export const anonymousMiddleware = async (req: Request, res: Response, next: Nex
   } as unknown as IUser;
   next();
 }
+
+export const optionalAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+  const token = req.headers.authorization;
+  const transaction = Sentry.getActiveTransaction();
+  
+  if (!token) return next();
+  if (token.split(' ')[0] !== 'Bearer') return next();
+  try {
+    if (token.split(' ').length !== 2) throw new Error('Unauthorized');
+    if (token.split(' ')[1].startsWith('sk-')) {
+      if (transaction)
+        transaction.startChild({ op: 'middleware', description: 'Verify authorization with API Key' });
+      await apiTokenMiddleware(req, token.split(' ')[1]);
+    } else {
+      if (transaction)
+        transaction.startChild({ op: 'middleware', description: 'Verify authorization with JWT' });
+      jwtMiddleware(req, token.split(' ')[1]);
+    }
+  } catch (err) {
+    return next();
+  }
+  next();
+}
