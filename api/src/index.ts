@@ -62,6 +62,8 @@ ORM();
 
 const port = process.env.PORT || 3000;
 
+app.use('/shared', sharedChatRouter);
+
 if (process.env.SKIP_AUTH === 'false' || !process.env.SKIP_AUTH) {
   app.use(middleware);
 } else {
@@ -77,7 +79,6 @@ app.use('/custom-chat', customChatRouter);
 app.use('/settings', settingsRouter);
 app.use('/models', modelsRouter);
 app.use('/system', systemRouter);
-app.use('/shared', sharedChatRouter);
 
 
 if (process.env.SENTRY_DSN) {
