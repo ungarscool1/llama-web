@@ -17,7 +17,7 @@ export default new mongoose.Schema({
   visibility: {
     type: String,
     enum: ['public', 'authenticated'],
-    default: 'authenticated',
+    required: true,
   },
 });
 
