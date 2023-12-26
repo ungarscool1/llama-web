@@ -31,7 +31,8 @@ router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
       role: message.role,
       message: message.message,
     })),
-    model: sharedChat.model.name
+    model: sharedChat.model.name,
+    visibility: sharedChat.visibility
   });
 });
 
