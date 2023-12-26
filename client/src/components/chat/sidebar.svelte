@@ -202,14 +202,14 @@
                     openDropdown = !openDropdown;
                   }}><ThreeHorizontalDots /></button
                 >
-                <Dropdown open={openDropdown} class="py-2">
+                <Dropdown open={openDropdown} class="py-2 cursor-default">
                   <DropdownItem
                     on:click={(e) => {
                       e.preventDefault();
                       openDropdown = false;
                       showShareModal = true;
                     }}
-                    class="flex items-center font-normal py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 w-full text-base dark:hover:bg-gray-700"
+                    class="flex items-center font-normal py-2 px-4 text-sm hover:bg-gray-100 w-full text-base"
                     ><Share /> &nbsp; Share</DropdownItem
                   >
                   <DropdownItem
@@ -218,7 +218,7 @@
                       openDropdown = false;
                       deleteChat();
                     }}
-                    class="text-red-500 flex items-center font-normal py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 w-full text-base dark:hover:bg-gray-700"
+                    class="text-red-500 flex items-center font-normal py-2 px-4 text-sm hover:bg-gray-100 w-full text-base"
                   >
                     <Trash /> &nbsp; Delete chat</DropdownItem
                   >
