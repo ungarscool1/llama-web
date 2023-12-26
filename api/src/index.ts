@@ -17,6 +17,7 @@ import customChatRouter from './routes/playground/chat';
 import settingsRouter from './routes/settings';
 import modelsRouter from './routes/models';
 import systemRouter from './routes/system';
+import sharedChatRouter from './routes/sharedChat';
 
 const app = express();
 
@@ -76,6 +77,7 @@ app.use('/custom-chat', customChatRouter);
 app.use('/settings', settingsRouter);
 app.use('/models', modelsRouter);
 app.use('/system', systemRouter);
+app.use('/shared', sharedChatRouter);
 
 
 if (process.env.SENTRY_DSN) {

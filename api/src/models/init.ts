@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Chat from "./chat";
+import sharedChat from "./sharedChat";
 import apiToken from "./apiToken";
 import model from "./model";
 
@@ -9,6 +10,7 @@ async function main() {
   mongoose.set('strictQuery', true);
   await mongoose.connect(process.env.DB);
   mongoose.model('Chats', Chat);
+  mongoose.model('SharedChats', sharedChat);
   mongoose.model('ApiTokens', apiToken);
   mongoose.model('Models', model);
 }
