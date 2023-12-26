@@ -56,7 +56,7 @@
 </script>
 <main class="h-[100dvh] w-screen overflow-hidden relative z-0 md:flex">
   {#if error}
-    <div class="flex items-center justify-center h-full w-full dark:text-white divide-x divide-white">
+    <div class="flex items-center justify-center h-full w-full dark:text-white divide-x dark:divide-white">
       <h1 class="text-3xl font-bold pr-2">404</h1>
       <p class="text-xl pl-2 ">Chat not found</p>
     </div>
