@@ -1,19 +1,8 @@
-import { optionalAuthMiddleware } from '../../middleware';
+import { optionalAuthMiddleware, middleware, anonymousMiddleware } from '../../middleware';
 import { Router, Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 
 var router = Router();
-
-router.get('/', async (req: Request, res: Response, next: NextFunction) => {
-  const sharedChats = await mongoose.model('SharedChats').find({ user: req.user?.preferred_username });
-  res.json(sharedChats.map((sharedChat: any) => ({
-    id: sharedChat._id,
-    time: sharedChat.time,
-    firstMessage: sharedChat.messages[0].message,
-    model: sharedChat.model,
-    visibility: sharedChat.visibility,
-  })));
-});
 
 router.get('/:id', optionalAuthMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   if (req.params.id.length < 24) {
@@ -35,6 +24,23 @@ router.get('/:id', optionalAuthMiddleware, async (req: Request, res: Response, n
     model: sharedChat.model.name,
     visibility: sharedChat.visibility
   });
+});
+
+if (process.env.SKIP_AUTH === 'false' || !process.env.SKIP_AUTH) {
+  router.use(middleware);
+} else {
+  router.use(anonymousMiddleware);
+}
+
+router.get('/', async (req: Request, res: Response, next: NextFunction) => {
+  const sharedChats = await mongoose.model('SharedChats').find({ user: req.user?.preferred_username });
+  res.json(sharedChats.map((sharedChat: any) => ({
+    id: sharedChat._id,
+    time: sharedChat.time,
+    firstMessage: sharedChat.messages[0].message,
+    model: sharedChat.model,
+    visibility: sharedChat.visibility,
+  })));
 });
 
 router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
