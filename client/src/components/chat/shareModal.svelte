@@ -75,20 +75,18 @@
       name: 'Public',
       value: 'public'
     },
-    env.PUBLIC_SKIP_AUTH !== 'true'
-      ? {
-          name: 'Authenticated',
-          value: 'authenticated'
-        }
-      : undefined
-  ].filter(Boolean);
+    {
+      name: 'Authenticated',
+      value: 'authenticated'
+    }
+  ];
 </script>
 
 <Modal bind:open={modalShow} size="xs" autoclose={false} class="w-full">
   <div class="flex flex-col space-y-6">
     {#if !isShared}
       <h3 class="text-xl font-medium text-gray-900 dark:text-white">Share the chat</h3>
-      {#if visibilityOptions.length > 1}
+      {#if env.PUBLIC_SKIP_AUTH !== 'true'}
         <p class="text-gray-500">Messages you send after sharing won't be shared</p>
         <Label class="space-y-2">
           <span>Visibility</span>
