@@ -216,9 +216,11 @@
       bind:this={chatBox}
     >
       {#if messages.length > 0}
-        {#each messages as message}
-          <Message {message} username={userInfo.name} />
-        {/each}
+        <div class="w-[75%]">
+          {#each messages as message}
+            <Message {message} username={userInfo.name} />
+          {/each}
+        </div>
       {:else}
         <Welcome bind:model />
       {/if}
