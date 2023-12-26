@@ -244,6 +244,7 @@ router.post('/:id/share', async (req: Request, res: Response, next: NextFunction
     return res.status(403).send({ message: 'You are not allowed to share this chat'});
   }
   const SharedChat = mongoose.model('SharedChats');
+  await SharedChat.findByIdAndDelete(req.params.id);
   const newSharedChat = new SharedChat({
     '_id': chat._id,
     user: chat.user,

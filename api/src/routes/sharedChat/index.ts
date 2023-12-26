@@ -41,6 +41,9 @@ router.delete('/:id', async (req: Request, res: Response, next: NextFunction) =>
     return res.status(400).json({ message: 'Invalid chat id' });
   }
   const sharedChat = await mongoose.model('SharedChats').findById(req.params.id);
+  if (!sharedChat) {
+    return res.status(404).json({ message: 'Shared chat not found' });
+  }
   if (sharedChat.user !== req.user?.preferred_username) {
     return res.status(403).send({ message: 'You are not allowed to delete this shared chat'});
   }
