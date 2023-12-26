@@ -13,7 +13,7 @@
   $: tokens = marked.lexer(message.message);
 </script>
 
-<div class="flex mb-2 flex-row w-full lg:w-[75%]">
+<div class="flex mb-2 flex-row w-full">
   <div class="flex w-12 h-12 me-1">
     {#if message.role === 'assistant'}
       <Avatar username="llama-robot-assistant" />

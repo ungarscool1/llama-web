@@ -223,4 +223,38 @@ router.delete('/:id', async (req: Request, res: Response, next: NextFunction) =>
   res.status(200).json({ message: 'Chat deleted' });
 });
 
+router.post('/:id/share', async (req: Request, res: Response, next: NextFunction) => {
+  const schema = yup.object().shape({
+    visibility: yup.string().oneOf(['public', 'authenticated']).required()
+  });
+  let payload: yup.InferType<typeof schema>;
+  if (req.params.id.length < 24) {
+    return res.status(400).json({ message: 'Invalid chat id' });
+  }
+  try {
+    payload = schema.validateSync(req.body);
+  } catch (err) {
+    return res.status(400).json({ message: 'Bad request' });
+  }
+  const chat = await mongoose.model('Chats').findById(req.params.id);
+  if (!chat) {
+    return res.status(404).json({ message: 'Chat not found' });
+  }
+  if (chat.user !== req.user?.preferred_username) {
+    return res.status(403).send({ message: 'You are not allowed to share this chat'});
+  }
+  const SharedChat = mongoose.model('SharedChats');
+  await SharedChat.findByIdAndDelete(req.params.id);
+  const newSharedChat = new SharedChat({
+    '_id': chat._id,
+    user: chat.user,
+    messages: chat.messages,
+    time: chat.time,
+    model: chat.model,
+    visibility: payload.visibility
+  });
+  await newSharedChat.save();
+  res.status(200).json({ message: 'Chat shared' });
+});
+
 export default router;

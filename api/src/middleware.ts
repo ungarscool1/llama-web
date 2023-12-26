@@ -41,6 +41,7 @@ export const middleware = async (req: Request, res: Response, next: NextFunction
   if (!token) return res.status(401).json({ message: 'Unauthorized' });
   if (token.split(' ')[0] !== 'Bearer') return res.status(401).json({ message: 'Unauthorized' });
   try {
+    if (token.split(' ').length !== 2) throw new Error('Unauthorized');
     if (token.split(' ')[1].startsWith('sk-')) {
       if (transaction)
         span = transaction.startChild({ op: 'middleware', description: 'Verify authorization with API Key' });
@@ -51,10 +52,10 @@ export const middleware = async (req: Request, res: Response, next: NextFunction
       jwtMiddleware(req, token.split(' ')[1]);
     }
   } catch (err) {
-    console.error(err);
     if (span)
       span.finish();
     if ((err as Error).message === 'Unauthorized') return res.status(401).json({ message: 'Unauthorized' });
+    console.error(err);
     return res.status(500).json({ message: 'Internal Server Error' });
   }
   if (span)
