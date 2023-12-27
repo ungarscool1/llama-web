@@ -32,6 +32,8 @@
           const data = await res.json();
           visibility = data.visibility;
           isShared = true;
+        } else {
+          isShared = false;
         }
       }
     }
