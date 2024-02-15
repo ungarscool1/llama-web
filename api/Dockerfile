@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install git gcc g++ make cmake python3 python3-pip
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 RUN git clone https://github.com/ggerganov/llama.cpp && \
     cd llama.cpp && \
-    git checkout b2110 && \
+    git checkout b2143 && \
     make -j
 RUN pnpm run build
 
