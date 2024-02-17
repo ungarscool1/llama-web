@@ -22,7 +22,7 @@
   import PlusIconLg from '../icons/PlusIconLg.svelte';
   import ChatLeftIcon from '../icons/ChatLeftIcon.svelte';
   import ShareModal from './shareModal.svelte';
-  export let chats: any;
+  let chats: any;
   $: activeUrl = $page.url.pathname;
   $: toggle = false;
   $: navBarTitle = 'New chat';
@@ -42,7 +42,8 @@
       getCurrentTitle();
     });
   });
-  function onChange(...args) {
+  async function onChange(...args) {
+    await fetchChats();
     getCurrentTitle();
     if (toggle) toggleSidebar();
     openDropdown = false;
@@ -94,12 +95,14 @@
       return;
     }
     const id = $page.params.id;
+    console.log(`I have this id: ${id}`)
     if (!id) {
       navBarTitle = 'New chat';
       return;
     }
     const chat = chats.find((chat: any) => chat.id === id);
     if (!chat) {
+      console.log(`No chat found for the id ${id}`, chats)
       navBarTitle = 'New chat';
       return;
     }
