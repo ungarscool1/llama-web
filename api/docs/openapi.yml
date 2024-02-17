@@ -1,0 +1,1202 @@
+openapi: 3.1.0
+info:
+  title: LLaMa-Web
+  contact:
+    name: ungarscool1/llama-web
+    url: https://github.com/ungarscool1/llama-web/issues
+  license:
+    name: MIT
+    url: https://github.com/ungarscool1/llama-web/blob/main/LICENSE
+  version: 1.0.0
+paths:
+  /chat:
+    summary: Saved chat endpoint
+    get:
+      summary: Get chat history
+      tags:
+        - Saved chat
+      security:
+        - api_auth: []
+      responses:
+        200:
+          description: Successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatHistory'
+        401:
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Unauthorized
+        500:
+          description: Internal server error (most likely database is down)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Internal Server Error
+    post:
+      summary: Create a new chat
+      tags:
+        - Saved chat
+      security:
+        - api_auth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - model
+                - message
+              properties:
+                id:
+                  type: string
+                  description: chat id
+                model:
+                  type: string
+                  description: model name
+                message:
+                  type: string
+                  description: user message
+            examples:
+              newChat:
+                value:
+                  model: llama-2-7b-chat
+                  message: Hi there, how are you ?
+              appendChat:
+                value:
+                  model: llama-2-7b-chat
+                  message: I want to create a todo application, can you tell me how to do that in python ?
+      responses:
+        200:
+          description: Text stream from the model
+          headers:
+            Content-Type:
+              description: text/event-stream
+              schema:
+                type: string
+            Cache-Control:
+              description: no-cache
+              schema:
+                type: string
+            Connection:
+              description: keep-alive
+              schema:
+                type: string
+            X-Accel-Buffering:
+              description: no
+              schema:
+                type: string
+          content:
+            text/event-stream:
+              example: My text output
+        400:
+          description: The request body is not compliant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Bad request
+        401:
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Unauthorized
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Internal Server Error
+  /chat/stop:
+    get:
+      summary: Stop the current generation
+      tags:
+        - Saved chat
+      security:
+        - api_auth: []
+      responses:
+        200:
+          description: Chat stopped
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Chat stopped
+        401:
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Unauthorized
+        404:
+          description: No chat running for the current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Chat not found
+  /chat/{id}:
+    get:
+      summary: Get chat content
+      tags:
+        - Saved chat
+      security:
+        - api_auth: []
+      parameters:
+        - in: path
+          name: id
+          description: Chat id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+        400:
+          description: Invalid chat id format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Invalid chat id
+        401:
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Unauthorized
+        404:
+          description: No chat found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Chat not found
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Internal Server Error
+    delete:
+      summary: Delete a chat
+      tags:
+        - Saved chat
+      security:
+        - api_auth: []
+      parameters:
+        - in: path
+          name: id
+          description: Chat id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Chat deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Chat deleted
+        400:
+          description: Invalid chat id format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Invalid chat id
+        401:
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Unauthorized
+        403:
+          description: You are not allowed to delete this chat
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: You are not allowed to delete this chat
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Internal Server Error
+  /chat/{id}/share:
+    post:
+      summary: Share a chat
+      tags:
+        - Saved chat
+      security:
+        - api_auth: []
+      parameters:
+        - in: path
+          name: id
+          description: Chat id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                visibility:
+                  type: string
+                  enum: [public, authenticated]
+      responses:
+        200:
+          description: Chat shared
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Chat shared
+        400:
+          description: Invalid chat id format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Bad request
+        401:
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Unauthorized
+        403:
+          description: You are not allowed to share this chat
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: You are not allowed to share this chat
+        404:
+          description: Chat not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Chat not found
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Internal Server Error
+  /models:
+    get:
+      summary: Get all models
+      tags:
+        - Models
+      security:
+        - api_auth: []
+      responses:
+        200:
+          description: Models list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ModelListItem'
+        401:
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Unauthorized
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Internal Server Error
+    post:
+      summary: Add a new model
+      tags:
+        - Models
+      security:
+        - api_auth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: model name
+                uri:
+                  type: string
+                  description: model path or model http endpoint
+                alternativeBackend:
+                  type: boolean
+                  description: Is a http endpoint ?
+                prompTemplate:
+                  type: string
+                parameters:
+                  type: object
+                  properties:
+                    .:
+                      description: is here but not taken
+                      type: string
+      responses:
+        201:
+          description: Model added (alternative backend)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Model created
+        202:
+          description: Model download in progress (no alt. backend)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Model download in progress.
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Bad request
+        401:
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Unauthorized
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Internal Server Error
+  /models/{id}:
+    get:
+      summary: Get model information
+      tags:
+        - Models
+      security:
+        - api_auth: []
+      parameters:
+        - in: path
+          name: id
+          description: model id
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Model'
+        401:
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Unauthorized
+        404:
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Model not found
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Internal Server Error
+    patch:
+      summary: Change model information
+      tags:
+        - Models
+      security:
+        - api_auth: []
+      parameters:
+        - in: path
+          name: id
+          description: model id
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                promptTemplate:
+                  type: string
+                parameters:
+                  type: object
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Model'
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Bad request
+        401:
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Unauthorized
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Internal Server Error
+    delete:
+      summary: Delete a model
+      tags:
+        - Models
+      security:
+        - api_auth: []
+      parameters:
+        - in: path
+          name: id
+          description: model id
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Model deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Model'
+              example:
+                message: Model deleted
+        401:
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Unauthorized
+        404:
+          description: Model not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Model not found
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Internal Server Error
+  /text-completion:
+    post:
+      summary: Text completion
+      tags:
+        - Playground
+      security:
+        - api_auth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                model:
+                  type: string
+                  description: model name
+                parameters:
+                  type: object
+                  properties:
+                    temperature:
+                      type: number
+                    topK:
+                      type: number
+                    topP:
+                      type: number
+                    nPredict:
+                      type: number
+                      description: number of token to predict
+                prompt:
+                  type: string
+                  description: the text you want to complete
+      responses:
+        200:
+          description: Text stream from the model
+          headers:
+            Content-Type:
+              description: text/event-stream
+              schema:
+                type: string
+            Cache-Control:
+              description: no-cache
+              schema:
+                type: string
+            Connection:
+              description: keep-alive
+              schema:
+                type: string
+            X-Accel-Buffering:
+              description: no
+              schema:
+                type: string
+          content:
+            text/event-stream:
+              example: My text output
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Bad request
+        401:
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Unauthorized
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Internal Server Error
+  /embeddings:
+    post:
+      summary: Generate embeddings
+      tags:
+        - Playground
+      security:
+        - api_auth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                model:
+                  type: string
+                  description: model name
+                prompt:
+                  type: string
+                  description: the text you want to complete
+      responses:
+        200:
+          description: Text stream from the model
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: number
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Bad request
+        401:
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Unauthorized
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Internal Server Error
+  /custom-chat:
+    post:
+      summary: Generate a chat with custom values
+      tags:
+        - Playground
+      security:
+        - api_auth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                model:
+                  type: string
+                  description: model name
+                system:
+                  type: string
+                  description: chat system prompt
+                messages:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ChatMessage'
+      responses:
+        200:
+          description: Text stream from the model
+          headers:
+            Content-Type:
+              description: text/event-stream
+              schema:
+                type: string
+            Cache-Control:
+              description: no-cache
+              schema:
+                type: string
+            Connection:
+              description: keep-alive
+              schema:
+                type: string
+            X-Accel-Buffering:
+              description: no
+              schema:
+                type: string
+          content:
+            text/event-stream:
+              example: My text output
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Bad request
+        401:
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Unauthorized
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Internal Server Error
+  /shared:
+    get:
+      summary: Get authenticated user's shared chat
+      tags:
+        - Saved chat
+        - Shared chat
+      security: 
+        - api_auth: []
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SharedChats'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Internal Server Error
+  /shared/{id}:
+    get:
+      summary: get shared chat messages and information
+      tags:
+        - Shared chat
+      parameters:
+        - in: path
+          name: id
+          description: (shared) chat id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Shared chat content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SharedChat'
+        400:
+          description: Invalid chat id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        403:
+          description: Not authorized to perform this action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        404:
+          description: Chat not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Internal Server Error
+    delete:
+      summary: delete a shared chat
+      tags:
+        - Shared chat
+      parameters:
+        - in: path
+          name: id
+          description: (shared) chat id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Shared chat content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SharedChat'
+        400:
+          description: Invalid chat id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        403:
+          description: Not authorized to perform this action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        404:
+          description: Chat not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Internal Server Error
+  /settings/api:
+    get:
+      summary: Get api keys
+      tags:
+        - Settings
+      security:
+        - api_auth: []
+      responses:
+        200:
+          description: Api keys list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApiKey'
+        401:
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+    post:
+      summary: Create an api key
+      tags:
+        - Settings
+      security:
+        - api_auth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        200:
+          description: Api keys list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: Api key (can be retrieved once)
+                  message:
+                    type: string
+                    description: Token created successfully.
+        401:
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+  /settings/api/{id}:
+    patch:
+      summary: Change api key name
+      tags:
+        - Settings
+      parameters:
+        - in: path
+          name: id
+          description: Api key id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: the new name
+      responses:
+        200:
+          description: Token updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Token updated successfully.
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Invalid token id.
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Internal Server Error
+    delete:
+      summary: Delete an api key
+      tags:
+        - Settings
+      parameters:
+        - in: path
+          name: id
+          description: Api key id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Token deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Token deleted successfully.
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Invalid token id.
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Internal Server Error
+  /system:
+    get:
+      summary: Get system configuration
+      tags:
+        - System
+      security:
+        - api_auth: []
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  skipAuth:
+                    type: boolean
+                  allowAlternativeBackend:
+                    type: boolean
+components:
+  schemas:
+    ApiKey:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Api key name
+        token:
+          type: string
+          description: Redacted api token
+        id:
+          type: string
+          description: Api key id
+        createdAt:
+          type: string
+          description: date and time of the api key creation
+        lastUsed:
+          type: string
+          description: date and time of the last usage of the api key
+    ChatHistory:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+            description: mongodb id
+          user:
+            type: string
+            description: username
+          message:
+            type: string
+            description: first message (user first message)
+          model:
+            type: string
+            description: model name
+    Chat:
+      type: object
+      properties:
+        id:
+          type: string
+        user:
+          type: string
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatMessage'
+        time:
+          type: string
+        model:
+          type: string
+    ChatMessage:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+        message:
+          type: string
+    Message:
+      type: object
+      properties:
+        message:
+          type: string
+    ModelListItem:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        path:
+          type: string
+          description: Model path in local mode or model http endpoint in alt. backend
+        alternativeBackend:
+          type: boolean
+          description: Is a http endpoint ?
+        createAt:
+          type: string
+    Model:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        createdAt:
+          type: string
+          description: Creation date and time
+        alternativeBackend:
+          type: boolean
+          description: Is a http endpoint ?
+        parameters:
+          type: object
+          properties:
+            authentication:
+              description: Authentication for alternative backend (not mandatory)
+            .:
+              description: All parameters given by the user
+    SharedChats:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            description: chat and shared chat id
+            type: string
+          time:
+            type: string
+            description: is shared at
+          firstMessage:
+            type: string
+          model:
+            type: string
+            description: model name
+          visibility:
+            type: string
+            enum: [public, authenticated]
+    SharedChat:
+      type: object
+      properties:
+        id:
+          description: chat and shared chat id
+          type: string
+        time:
+          type: string
+          description: is shared at
+        messages:
+          $ref: '#/components/schemas/ChatMessage'
+        model:
+          type: string
+          description: model name
+        visibility:
+          type: string
+          enum: [public, authenticated]
+  securitySchemes:
+    api_auth:
+      type: apiKey
+      name: Authentication
+      in: header
