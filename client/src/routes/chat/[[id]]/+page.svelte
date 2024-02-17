@@ -8,7 +8,6 @@
   import Welcome from '../../../components/chat/welcome.svelte';
 
   $: activeUrl = $page.url.pathname;
-  $: chats = undefined;
   $: messages = [];
   $: onChange(activeUrl);
   $: prompt = '';
@@ -48,7 +47,6 @@
       localStorage.setItem('previousPage', $page.url.pathname);
       goto('/');
     }
-    fetchChats();
     fetchMessage();
     pingApi();
     chatBox.addEventListener('scroll', checkScroll);
@@ -61,7 +59,6 @@
       messages = [];
       return;
     }
-    await fetchChats();
     await fetchMessage();
     if (chatBox) {
       checkScroll();
@@ -84,17 +81,6 @@
     }
   }
 
-  async function fetchChats() {
-    if (!userInfo.authenticated) return;
-    const req = await fetch(`${env.PUBLIC_API_URL}/chat`, {
-      headers: {
-        Authorization: `Bearer ${userInfo.token}`
-      }
-    });
-    if (!req.ok) return console.log('Error');
-    const res = await req.json();
-    chats = res;
-  }
   async function fetchMessage() {
     const id = $page.params.id;
     if (!id || !userInfo.authenticated) return;
@@ -205,7 +191,7 @@
 </script>
 
 <main class="h-[100dvh] w-screen overflow-hidden relative z-0 md:flex">
-  <Sidebar {chats} />
+  <Sidebar />
   <div
     id="content"
     class="relative px-2 md:px-0 flex pt-1 h-full max-w-full flex-1 flex-col overflow-hidden"
