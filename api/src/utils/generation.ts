@@ -5,9 +5,9 @@ import { Message, Role } from '../types/Message';
 import { IModel } from '../models/model';
 import * as express from 'express';
 import { IUser } from '@/types/express';
-import mongoose from 'mongoose';
 
 import { createOrUpdateChat } from './createOrUpdateChat';
+import compileTemplate from './compileTemplate';
 
 type GenerationOptions = {
   executablePath: string;
@@ -190,7 +190,7 @@ export class Generation {
         repeatPenalty: 1.1,
         threads: 4,
         nPredict: -1,
-        prompt: prompt,
+        prompt: compileTemplate(model.chatPromptTemplate!, { system: system, messages: messages }),
         interactive: false,
       });
     } else {

@@ -1,10 +1,9 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { Generation, GenerationOutput } from '../utils/generation';
+import { Generation } from '../utils/generation';
 import mongoose from 'mongoose';
 import * as Sentry from '@sentry/node';
 import * as yup from 'yup';
 import { Message, Role } from '../types/Message';
-import compileTemplate from '../utils/compileTemplate';
 
 let router = Router();
 const generation = new Generation({
