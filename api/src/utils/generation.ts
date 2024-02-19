@@ -183,6 +183,7 @@ export class Generation {
     if (user)
       system += ` Here some information that can you help, the user name is ${user.given_name}.`;
     if (!model.alternativeBackend) {
+      prompt = compileTemplate(model.chatPromptTemplate!, { system: system, messages: messages });
       child = this.launch({
         modelPath: `${process.env.MODELS_DIR}/${model.path}`,
         contextSize: 4096,
@@ -190,7 +191,7 @@ export class Generation {
         repeatPenalty: 1.1,
         threads: 4,
         nPredict: -1,
-        prompt: compileTemplate(model.chatPromptTemplate!, { system: system, messages: messages }),
+        prompt,
         interactive: false,
       });
     } else {
