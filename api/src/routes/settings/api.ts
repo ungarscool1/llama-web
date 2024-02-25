@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import { randomBytes } from 'crypto';
-import { IApiToken } from '@/models/apiToken';
+import { IApiToken } from '../../models/apiToken';
 
 var router = Router();
 

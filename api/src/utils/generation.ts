@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Message, Role } from '../types/Message';
 import { IModel } from '../models/model';
 import * as express from 'express';
-import { IUser } from '@/types/express';
+import { IUser } from '../types/express';
 
 import { createOrUpdateChat } from './createOrUpdateChat';
 import compileTemplate from './compileTemplate';

@@ -3,10 +3,10 @@ import mongoose from 'mongoose';
 import * as Sentry from '@sentry/node';
 import * as yup from 'yup';
 
-import { Generation } from '@/utils/generation';
-import { Message, Role } from '@/types/Message';
-import { IChat } from '@/models/chat';
-import { IModel } from '@/models/model';
+import { Generation } from '../utils/generation';
+import { Message, Role } from '../types/Message';
+import { IChat } from '../models/chat';
+import { IModel } from '../models/model';
 
 let router = Router();
 const generation = new Generation({

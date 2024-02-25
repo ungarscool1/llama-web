@@ -1,4 +1,4 @@
-import { Role } from '@/types/Message';
+import { Role } from '../types/Message';
 import mongoose from 'mongoose';
 
 export interface IChat {

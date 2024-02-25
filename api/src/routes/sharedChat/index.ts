@@ -1,4 +1,4 @@
-import { ISharedChat } from '@/models/sharedChat';
+import { ISharedChat } from '../../models/sharedChat';
 import { optionalAuthMiddleware, middleware, anonymousMiddleware } from '../../middleware';
 import { Router, Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
