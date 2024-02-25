@@ -62,8 +62,7 @@ class Model:
         )
 
         self.engine = AsyncLLMEngine.from_engine_args(engine_args)
-        self.system = "Below is an instruction that describes a task. Write a response that appropriately completes the request. The response must be accurate, concise and evidence-based whenever possible."
-        self.template = "<s>{% for message in messages %}{% if message.role == 'user' %}[INST] {% if loop.first %}{% if message.system %}{{ system }}\n{% endif %}{% endif %}{{ message.message }} [/INST]{% elif message.role == 'assistant' %}{{ message.message }}</s> {% endif %}{% endfor %}"
+        self.template = "<s>{% for message in messages %}{% if message.role == 'user' %}[INST] {% if loop.first %}{{ system }}\n{% endif %}{{ message.content }} [/INST]{% elif message.role == 'assistant' %}{{ message.content }}</s> {% endif %}{% endfor %}"
 
         # Performance improvement from https://github.com/vllm-project/vllm/issues/2073#issuecomment-1853422529
         if GPU_CONFIG.count > 1:
@@ -73,7 +72,7 @@ class Model:
             subprocess.call(RAY_CORE_PIN_OVERRIDE, shell=True)
 
     @method()
-    async def completion_stream(self, messages: list):
+    async def completion_stream(self, messages: list, system: str):
         from vllm import SamplingParams
         from vllm.utils import random_uuid
         from jinja2 import Template
@@ -86,7 +85,7 @@ class Model:
 
         t0 = time.time()
         request_id = random_uuid()
-        conversation = Template(self.template).render(messages=messages, system=self.system)
+        conversation = Template(self.template).render(messages=messages, system=system)
         result_generator = self.engine.generate(
             conversation,
             sampling_params,
@@ -149,10 +148,22 @@ def app():
                 headers={"WWW-Authenticate": "Bearer"},
             )
         body = await request.json()
+        if "messages" not in body:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="`messages` field is required",
+            )
+        messages = body["messages"]
+        if messages and messages[0]["role"] == "system":
+            system = messages[0]["content"]
+            messages = messages[1:]
+        else:
+            system = "Below is an instruction that describes a task. Write a response that appropriately completes the request. The response must be accurate, concise and evidence-based whenever possible."
 
         async def generate():
             async for text in Model().completion_stream.remote_gen.aio(
-                body["messages"]
+                messages=messages,
+                system=system
             ):
                 yield f"{text}"
 
