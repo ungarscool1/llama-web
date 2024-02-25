@@ -26,8 +26,6 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   let payload: yup.InferType<typeof schema>;
   let prompt = ``;
   let ignoreIndex = 0;
-  let response = '';
-  let detecting = false;
   let child: GenerationOutput;
   const transaction = Sentry.getActiveTransaction();
   let span: Sentry.Span|undefined;
