@@ -148,10 +148,11 @@ export class Generation {
    * @param messages The conversation history
    * @returns Buffer
    */
-  async generateCompletionAlt(messages: Message[], modelPath: string, authentication: string): Promise<GenerationOutput> {
+  async generateCompletionAlt(messages: Message[], modelPath: string, authentication: string, system: string): Promise<GenerationOutput> {
     const cancelToken = axios.CancelToken.source();
+    messages.unshift({ role: Role.system, message: system });
     const axiosRes = await axios.post(`${modelPath}/completion`, {
-      messages
+      messages: messages.map(m => ({ role: m.role, content: m.message }))
     }, {
       headers: {
         'Content-Type': 'application/json',
@@ -195,7 +196,7 @@ export class Generation {
         interactive: false,
       });
     } else {
-      child = await this.generateCompletionAlt(messages, model.path, model.parameters.authentication as string);
+      child = await this.generateCompletionAlt(messages, model.path, model.parameters.authentication as string, system);
     }
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
