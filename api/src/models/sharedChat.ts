@@ -1,6 +1,11 @@
 import mongoose from 'mongoose';
+import { IChat } from './chat';
 
-export default new mongoose.Schema({
+export interface ISharedChat extends IChat {
+  visibility: 'public' | 'authenticated';
+}
+
+export default new mongoose.Schema<ISharedChat>({
   time: { type: Date, default: Date.now },
   user: { type: String, required: true },
   messages: [

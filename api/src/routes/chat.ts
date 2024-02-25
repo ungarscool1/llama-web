@@ -1,9 +1,12 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { Generation } from '../utils/generation';
 import mongoose from 'mongoose';
 import * as Sentry from '@sentry/node';
 import * as yup from 'yup';
-import { Message, Role } from '../types/Message';
+
+import { Generation } from '@/utils/generation';
+import { Message, Role } from '@/types/Message';
+import { IChat } from '@/models/chat';
+import { IModel } from '@/models/model';
 
 let router = Router();
 const generation = new Generation({
@@ -12,13 +15,12 @@ const generation = new Generation({
 
 router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   await mongoose.connect(`${process.env.DB}`);
-  const chats = await mongoose.model('Chats').find({ user: req.user?.preferred_username }, '-__v');
-  const chatsArray = chats.map((chat: any) => ({
+  const chats = await mongoose.model('Chats').find<IChat>({ user: req.user?.preferred_username }, '-__v');
+  const chatsArray = chats.map((chat) => ({
     id: chat._id,
     user: chat.user,
     message: chat.messages[0].message,
-    time: chat.time,
-    model: chat.model.name
+    time: chat.time
   })).reverse();
   res.json(chatsArray);
 });
@@ -45,13 +47,13 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     return res.status(400).json({ message: 'Bad request' });
   }
   if (payload.id) {
-    const chat = await mongoose.model('Chats').findById(payload.id).lean<any>();
+    const chat = await mongoose.model('Chats').findById(payload.id).lean<IChat>();
     if (!chat || chat.user !== req.user?.preferred_username) {
       return res.status(400).json({ message: 'Chat not found' });
     }
     messages = chat.messages;
   }
-  const model = await mongoose.model('Models').findOne({ name: payload.model });
+  const model = await mongoose.model('Models').findOne<IModel>({ name: payload.model });
   if (!model) {
     return res.status(400).json({ message: 'Model not found' });
   }
@@ -81,7 +83,7 @@ router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
     return res.status(400).json({ message: 'Invalid chat id' });
   }
   try {
-    chat = await mongoose.model('Chats').findOne({ _id: req.params.id, user: req.user?.preferred_username }, '-__v');
+    chat = await mongoose.model('Chats').findOne<IChat>({ _id: req.params.id, user: req.user?.preferred_username }, '-__v');
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: 'Internal Server Error' });
@@ -90,7 +92,7 @@ router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
     return res.status(404).json({ message: 'Chat not found' });
   }
   try {
-    model = await mongoose.model('Models').findOne({ _id: chat.model });
+    model = await mongoose.model('Models').findOne<IModel>({ _id: chat.model });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: 'Internal Server Error' });
@@ -109,8 +111,8 @@ router.delete('/:id', async (req: Request, res: Response, next: NextFunction) =>
     return res.status(400).json({ message: 'Invalid chat id' });
   }
   await mongoose.connect(`${process.env.DB}`);
-  const chat = await mongoose.model('Chats').findById(req.params.id);
-  if (chat.user !== req.user?.preferred_username) {
+  const chat = await mongoose.model('Chats').findById<IChat>(req.params.id);
+  if (!chat || chat.user !== req.user?.preferred_username) {
     return res.status(403).send({ message: 'You are not allowed to delete this chat'});
   }
   await mongoose.model('Chats').findByIdAndDelete(req.params.id);
@@ -130,7 +132,7 @@ router.post('/:id/share', async (req: Request, res: Response, next: NextFunction
   } catch (err) {
     return res.status(400).json({ message: 'Bad request' });
   }
-  const chat = await mongoose.model('Chats').findById(req.params.id);
+  const chat = await mongoose.model('Chats').findById<IChat>(req.params.id);
   if (!chat) {
     return res.status(404).json({ message: 'Chat not found' });
   }

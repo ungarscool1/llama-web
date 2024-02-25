@@ -1,3 +1,4 @@
+import { ISharedChat } from '@/models/sharedChat';
 import { optionalAuthMiddleware, middleware, anonymousMiddleware } from '../../middleware';
 import { Router, Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
@@ -8,7 +9,7 @@ router.get('/:id', optionalAuthMiddleware, async (req: Request, res: Response, n
   if (req.params.id.length < 24) {
     return res.status(400).json({ message: 'Invalid chat id' });
   }
-  const sharedChat = await mongoose.model('SharedChats').findById(req.params.id);
+  const sharedChat = await mongoose.model('SharedChats').findById<ISharedChat>(req.params.id);
   if (!sharedChat) {
     return res.status(404).json({ message: 'Shared chat not found' });
   }
@@ -21,7 +22,6 @@ router.get('/:id', optionalAuthMiddleware, async (req: Request, res: Response, n
       role: message.role,
       message: message.message,
     })),
-    model: sharedChat.model.name,
     visibility: sharedChat.visibility
   });
 });
@@ -33,8 +33,8 @@ if (process.env.SKIP_AUTH === 'false' || !process.env.SKIP_AUTH) {
 }
 
 router.get('/', async (req: Request, res: Response, next: NextFunction) => {
-  const sharedChats = await mongoose.model('SharedChats').find({ user: req.user?.preferred_username });
-  res.json(sharedChats.map((sharedChat: any) => ({
+  const sharedChats = await mongoose.model('SharedChats').find<ISharedChat>({ user: req.user?.preferred_username });
+  res.json(sharedChats.map((sharedChat) => ({
     id: sharedChat._id,
     time: sharedChat.time,
     firstMessage: sharedChat.messages[0].message,
@@ -47,7 +47,7 @@ router.delete('/:id', async (req: Request, res: Response, next: NextFunction) =>
   if (req.params.id.length < 24) {
     return res.status(400).json({ message: 'Invalid chat id' });
   }
-  const sharedChat = await mongoose.model('SharedChats').findById(req.params.id);
+  const sharedChat = await mongoose.model('SharedChats').findById<ISharedChat>(req.params.id);
   if (!sharedChat) {
     return res.status(404).json({ message: 'Shared chat not found' });
   }
