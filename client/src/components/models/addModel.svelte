@@ -11,11 +11,16 @@
   export let modalShow: boolean = false;
   let alternativeBackendSwitch = false;
   $: alternativeBackendAllowed = false;
-  let modalModelName = '';
-  let modalModelUri = '';
-  let modalModelPromptTemplate = '';
   let modelDownload = false;
   let modalErrorMessage = '';
+  let modelConfig = {
+    name: '',
+    uri: '',
+    promptTemplate: '',
+    parameters: {
+      authentication: ''
+    }
+  };
   let userInfo = {
     authenticated: false,
     token: null
@@ -30,7 +35,7 @@
   });
   
   async function createModel() {
-    if (modalModelName.length === 0) {
+    if (modelConfig.name.length === 0) {
       modalErrorMessage = 'Please enter a name';
       return;
     }
@@ -41,19 +46,20 @@
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        name: modalModelName,
-        uri: modalModelUri,
-        promptTemplate: modalModelPromptTemplate,
-        alternativeBackend: alternativeBackendSwitch
+        name: modelConfig.name,
+        uri: modelConfig.uri,
+        promptTemplate: modelConfig.promptTemplate,
+        alternativeBackend: alternativeBackendSwitch,
+        parameters: modelConfig.parameters
       })
     });
     if (!req.ok) {
       modalErrorMessage = (await req.json()).message;
       return;
     }
-    modalModelName = '';
-    modalModelUri = '';
-    modalModelPromptTemplate = '';
+    modelConfig.name = '';
+    modelConfig.uri = '';
+    modelConfig.promptTemplate = '';
     modelDownload = true;
     modalErrorMessage = '';
     modalShow = false;
@@ -101,7 +107,7 @@
             name="name"
             placeholder="Model name"
             required
-            bind:value={modalModelName}
+            bind:value={modelConfig.name}
             class="block w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg"
             type="text"
           />
@@ -112,14 +118,14 @@
             name="repository"
             placeholder="Model download URI"
             required
-            bind:value={modalModelUri}
+            bind:value={modelConfig.uri}
             class="block w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg"
             type="text"
           />
         </Label>
         <Label class="space-y-2">
           <span>Model prompt template</span>
-          <textarea draggable="false" rows="2" class="block resize-none w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg" placeholder="Model prompt template" bind:value={modalModelPromptTemplate}></textarea>
+          <textarea draggable="false" rows="2" class="block resize-none w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg" placeholder="Model prompt template" bind:value={modelConfig.promptTemplate}></textarea>
         </Label>
         <button
           type="submit"
@@ -141,7 +147,7 @@
           name="name"
           placeholder="Model name"
           required
-          bind:value={modalModelName}
+          bind:value={modelConfig.name}
           class="block w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg"
           type="text"
         />
@@ -152,7 +158,18 @@
           name="name"
           placeholder="Model API Endpoint"
           required
-          bind:value={modalModelUri}
+          bind:value={modelConfig.uri}
+          class="block w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg"
+          type="text"
+        />
+      </Label>
+      <Label class="space-y-2">
+        <span>Authentication</span>
+        <input
+          name="name"
+          placeholder="Model API Authentication"
+          required
+          bind:value={modelConfig.parameters.authentication}
           class="block w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg"
           type="text"
         />
