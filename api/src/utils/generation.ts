@@ -1,7 +1,13 @@
 import { spawn, spawnSync } from 'child_process';
 import { Readable } from 'stream';
 import axios from 'axios';
-import { Message } from '../types/Message';
+import { Message, Role } from '../types/Message';
+import { IModel } from '../models/model';
+import * as express from 'express';
+import { IUser } from '../types/express';
+
+import { createOrUpdateChat } from './createOrUpdateChat';
+import compileTemplate from './compileTemplate';
 
 type GenerationOptions = {
   executablePath: string;
@@ -31,8 +37,14 @@ export type GenerationOutput = {
   kill: () => void;
 }
 
+interface ChatProcess {
+  user: string;
+  process: GenerationOutput;
+}
+
 export class Generation {
   private options: GenerationOptions;
+  private chatsProcess: Array<ChatProcess> = [];
   constructor(options: GenerationOptions) {
     this.options = options;
   }
@@ -155,5 +167,88 @@ export class Generation {
         cancelToken.cancel('Generation cancelled')
       )
     };
+  }
+  
+  async generationWrapper(messages: Message[], model: IModel, res: express.Response, user?: IUser, id?: string): Promise<void> {
+    let child: GenerationOutput;
+    let system = `Below is an instruction that describes a task. Write a response that appropriately completes the request. The response must be accurate, concise and evidence-based whenever possible.`;
+    let prompt = ``;
+    let ignoreIndex = 0;
+    let response = '';
+
+    if (this.chatsProcess.find((chat) => chat.user === user?.preferred_username)) {
+      res.status(400).json({ message: 'There is already a chat in progress' });
+      return;
+    }
+    if (user)
+      system += ` Here some information that can you help, the user name is ${user.given_name}.`;
+    if (!model.alternativeBackend) {
+      prompt = compileTemplate(model.chatPromptTemplate!, { system: system, messages: messages });
+      child = this.launch({
+        modelPath: `${process.env.MODELS_DIR}/${model.path}`,
+        contextSize: 4096,
+        temperature: 0.7,
+        repeatPenalty: 1.1,
+        threads: 4,
+        nPredict: -1,
+        prompt,
+        interactive: false,
+      });
+    } else {
+      child = await this.generateCompletionAlt(messages, model.path, model.parameters.authentication as string);
+    }
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no'
+    });
+    res.flushHeaders();
+    child.data.on('data', (data) => {
+      if (!model.alternativeBackend && ignoreIndex < prompt.replaceAll(/<\/?s>/g, '').trim().length) {
+        ignoreIndex += data.toString().length;
+        return;
+      }
+      response += data.toString();
+      res.write(data.toString());
+      res.flushHeaders();
+    });
+  
+    if (child.stderr) {
+      child.stderr.on('data', (data) => {
+        if (data.toString().includes('[end of text]'))
+          child.kill!();
+      });
+    }
+  
+    child.data.on('close', async () => {
+      try {
+        let newId = await createOrUpdateChat([
+          messages.pop() as Message,
+          { role: Role.assistant, message: response.trim() }
+        ], model.name, id, user?.preferred_username);
+        if (newId.length > 0)
+          res.write(`[[${newId}]]`)
+      } catch (e) {
+        console.error(e);
+      }
+      res.end();
+      this.chatsProcess.splice(this.chatsProcess.findIndex(c => c.user === user?.preferred_username), 1);
+    });
+    
+    this.chatsProcess.push({
+      user: `${user?.preferred_username}`,
+      process: child
+    });
+  }
+  
+  stopGeneration(user?: string): boolean {
+    const chatProcess = this.chatsProcess.find((chat) => chat.user === user);
+    if (chatProcess) {
+      chatProcess.process.kill();
+      this.chatsProcess.splice(this.chatsProcess.indexOf(chatProcess), 1);
+      return true;
+    }
+    return false;
   }
 }

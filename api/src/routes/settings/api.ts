@@ -1,12 +1,13 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import { randomBytes } from 'crypto';
+import { IApiToken } from '../../models/apiToken';
 
 var router = Router();
 
 router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   await mongoose.connect(`${process.env.DB}`);
-  const userTokens = (await mongoose.model('ApiTokens').find({ user: req.user?.preferred_username }, '-__v')).map((token) => ({
+  const userTokens = (await mongoose.model('ApiTokens').find<IApiToken>({ user: req.user?.preferred_username }, '-__v')).map((token) => ({
     name: token.name,
     token: token.token.slice(0, 4) + '...' + token.token.slice(-4),
     id: token._id,
