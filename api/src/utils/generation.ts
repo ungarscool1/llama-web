@@ -181,7 +181,7 @@ export class Generation {
       res.status(400).json({ message: 'There is already a chat in progress' });
       return;
     }
-    if (user)
+    if (user?.given_name)
       system += ` Here some information that can you help, the user name is ${user.given_name}.`;
     if (!model.alternativeBackend) {
       prompt = compileTemplate(model.chatPromptTemplate!, { system: system, messages: messages });
