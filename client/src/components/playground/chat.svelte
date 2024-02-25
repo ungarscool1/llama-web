@@ -115,15 +115,11 @@
   <div class="flex w-[75%] space-x-3 space-y-3 flex-col lg:flex-row">
     <div class="flex w-full lg:w-[35%] flex-col">
       <h3 class="dark:text-white">System</h3>
-      {#if isModelAlternativeBackend}
-        <p class="text-gray-500">Alternative model does not support custom system prompt</p>
-      {:else}
         <textarea
           placeholder="You are a helpful assistant."
           class="h-[100%] rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:placeholder-gray-400 dark:text-white border border-gray-200 dark:border-gray-600 resize-none p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
           bind:value={system}
         />
-      {/if}
     </div>
     <div class="flex w-[65%] flex-col space-y-3">
       {#each messages as message, i}
