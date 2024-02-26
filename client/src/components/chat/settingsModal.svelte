@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Modal } from 'flowbite-svelte';
-    import ChangeSystemPrompt from './settingsComponent/changeSystemPrompt.svelte';
+  import ChangeSystemPrompt from './settingsComponent/changeSystemPrompt.svelte';
 
   export let modalShow: boolean = false;
   

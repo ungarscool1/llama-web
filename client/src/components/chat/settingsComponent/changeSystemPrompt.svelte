@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { env } from '$env/dynamic/public';
-    import { Spinner } from 'flowbite-svelte';
+  import { Spinner } from 'flowbite-svelte';
 
   let prompts = {
     sendable: false,
