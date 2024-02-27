@@ -5,9 +5,11 @@ import { Message, Role } from '../types/Message';
 import { IModel } from '../models/model';
 import * as express from 'express';
 import { IUser } from '../types/express';
+import mongoose from 'mongoose';
 
 import { createOrUpdateChat } from './createOrUpdateChat';
 import compileTemplate from './compileTemplate';
+import { IPrompt } from '../models/prompt';
 
 type GenerationOptions = {
   executablePath: string;
@@ -181,6 +183,7 @@ export class Generation {
       res.status(400).json({ message: 'There is already a chat in progress' });
       return;
     }
+    system = (await mongoose.model('Prompts').findOne<IPrompt>({ user: user?.preferred_username }))?.prompt || system;
     if (user?.given_name)
       system += ` Here some information that can you help, the user name is ${user.given_name}.`;
     if (!model.alternativeBackend) {

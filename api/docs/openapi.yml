@@ -1040,6 +1040,84 @@ paths:
                 $ref: '#/components/schemas/Message'
               example:
                 message: Internal Server Error
+  /settings/prompt:
+    get:
+      summary: Get user prompt
+      tags:
+        - Settings
+      security:
+        - api_auth: []
+      responses:
+        200:
+          description: User prompt
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  prompt:
+                    type: string
+                    description: User prompt
+        401:
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+    post:
+      summary: Change user prompt
+      tags:
+        - Settings
+      security:
+        - api_auth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prompt:
+                  type: string
+                  description: the new prompt
+      responses:
+        200:
+          description: Prompt updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Prompt updated successfully.
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Bad request
+        401:
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Unauthorized
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                message: Internal Server Error
   /system:
     get:
       summary: Get system configuration
