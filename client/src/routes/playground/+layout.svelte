@@ -46,7 +46,7 @@
   let:toggle
 >
   <NavBrand href="/playground">
-    <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">LLaMa AI</span
+    <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">CapacitiveML</span
     >
   </NavBrand>
   <NavHamburger on:click={toggle} />

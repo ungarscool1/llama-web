@@ -1,5 +1,5 @@
 {
-  "name": "@ungarscool1/llama-web",
+  "name": "@ungarscool1/capacitiveml-api",
   "version": "1.0.0",
   "description": "Llama web interface for llama.cpp in docker container",
   "main": "index.js",

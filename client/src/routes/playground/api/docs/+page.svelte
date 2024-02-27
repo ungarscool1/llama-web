@@ -82,7 +82,7 @@
 <div class="p-6">
   <h1 class="text-4xl font-extrabold dark:text-white">API documentation</h1>
   <p class="text-sm text-gray-500 dark:text-gray-400">
-    API documentation page for LLaMa AI. Get started now.
+    API documentation page for CapacitiveML. Get started now.
   </p>
   <div class="p-5">
     <p class="mb-3 text-sm text-gray-500 md:text-lg dark:text-gray-400">API endpoint: <span>{env.PUBLIC_API_URL}</span></p>

@@ -1,6 +1,6 @@
-# LLaMa Web
+# CapacitiveML
 
-The LLaMa Web is a web interface to chat or play with LLaMa based models.
+The CapacitiveML is a web interface to chat or play with LLaMa based models.
 
 ## Installation
 
@@ -90,7 +90,7 @@ docker-compose up -d
 ### Requirements
 - a server that can run an app similar to `examples/alt-backend/mixtral8x7B.py`
 
-### Setup in LLaMa Web
+### Setup in CapacitiveML
 
 1. Go to the playground
 2. Then go to the `Models` tab

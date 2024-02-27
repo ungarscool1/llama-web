@@ -172,7 +172,7 @@
           />
         </svg>
       </button>
-      <a href="/chat" class="text-2xl dark:text-white m-2">LLaMa AI</a>
+      <a href="/chat" class="text-2xl dark:text-white m-2">CapacitiveML</a>
       <DarkMode
         btnClass="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5"
       />
