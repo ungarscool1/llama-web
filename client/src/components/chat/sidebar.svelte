@@ -22,6 +22,8 @@
   import PlusIconLg from '../icons/PlusIconLg.svelte';
   import ChatLeftIcon from '../icons/ChatLeftIcon.svelte';
   import ShareModal from './shareModal.svelte';
+  import GearIcon from '../icons/GearIcon.svelte';
+  import SettingsModal from './settingsModal.svelte';
   let chats: any;
   $: activeUrl = $page.url.pathname;
   $: toggle = false;
@@ -29,6 +31,7 @@
   $: onChange(activeUrl);
   $: openDropdown = false;
   $: showShareModal = false;
+  $: showSettingsModal = false;
   let userInfo = {
     authenticated: false,
     token: null
@@ -235,6 +238,11 @@
       {/if}
     </SidebarGroup>
     <SidebarGroup border={true}>
+      <SidebarItem on:click={() => { showSettingsModal = true; }} label="Settings" active={false}>
+        <svelte:fragment slot="icon">
+          <GearIcon />
+        </svelte:fragment>
+      </SidebarItem>
       <SidebarItem on:click={deleteChats} label="Clear conversations" active={false}>
         <svelte:fragment slot="icon">
           <Trash />
@@ -245,3 +253,4 @@
 </Sidebar>
 
 <ShareModal bind:modalShow={showShareModal} id={$page.params.id} />
+<SettingsModal bind:modalShow={showSettingsModal} />
