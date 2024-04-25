@@ -25,10 +25,15 @@ def download_model_to_folder():
     move_cache()
 
 vllm_image = (
-    Image.from_registry(
-        "nvidia/cuda:12.1.0-base-ubuntu22.04", add_python="3.10"
+    Image.debian_slim()
+    .pip_install(
+        "vllm==0.4.1",
+        "torch==2.2.1",
+        "transformers==4.40.0",
+        "ray==2.10.0",
+        "hf-transfer==0.1.6",
+        "huggingface_hub==0.22.2",
     )
-    .pip_install("vllm==0.2.5", "huggingface_hub==0.19.4", "hf-transfer==0.1.4", "jinja2")
     .env({"HF_HUB_ENABLE_HF_TRANSFER": "1"})
     .run_function(download_model_to_folder, timeout=60 * 20, secrets=[Secret.from_name("huggingface-secret")],)
 )
@@ -44,16 +49,13 @@ stub = Stub("llama-web-llama3-8b-instruct")
 )
 class Model:
     @enter()
-    def __init__(self):
+    def start_engine(self):
+        from vllm import LLM
         from vllm.engine.arg_utils import AsyncEngineArgs
         from vllm.engine.async_llm_engine import AsyncLLMEngine
 
-        if GPU_CONFIG.count > 1:
-            # Patch issue from https://github.com/vllm-project/vllm/issues/1116
-            import ray
-
-            ray.shutdown()
-            ray.init(num_gpus=GPU_CONFIG.count)
+        print("🥶 cold starting inference")
+        start = time.monotonic_ns()
 
         engine_args = AsyncEngineArgs(
             model=MODEL_DIR,
@@ -64,19 +66,12 @@ class Model:
         )
 
         self.engine = AsyncLLMEngine.from_engine_args(engine_args)
-
-        # Performance improvement from https://github.com/vllm-project/vllm/issues/2073#issuecomment-1853422529
-        if GPU_CONFIG.count > 1:
-            import subprocess
-
-            RAY_CORE_PIN_OVERRIDE = "cpuid=0 ; for pid in $(ps xo '%p %c' | grep ray:: | awk '{print $1;}') ; do taskset -cp $cpuid $pid ; cpuid=$(($cpuid + 1)) ; done"
-            subprocess.call(RAY_CORE_PIN_OVERRIDE, shell=True)
-
+        duration_s = (time.monotonic_ns() - start) / 1e9
+        print(f"🏎️ engine started in {duration_s:.0f}s")
     @method()
     async def completion_stream(self, messages: list):
         from vllm import SamplingParams
         from vllm.utils import random_uuid
-        from jinja2 import Template
 
         tokenizer = self.engine.tokenizer()
         sampling_params = SamplingParams(
@@ -86,14 +81,15 @@ class Model:
             stop_token_ids=[tokenizer.eos_token_id, tokenizer.convert_tokens_to_ids("<|eot_id|>")],
         )
 
-        t0 = time.time()
         request_id = random_uuid()
+        conversation = tokenizer.apply_chat_template(messages, tokenize=False)
         result_generator = self.engine.generate(
-            messages,
+            conversation,
             sampling_params,
             request_id,
         )
         index, num_tokens = 0, 0
+        start = time.monotonic_ns()
         async for output in result_generator:
             if (
                 output.outputs[0].text
@@ -105,8 +101,7 @@ class Model:
             num_tokens = len(output.outputs[0].token_ids)
 
             yield text_delta
-
-        print(f"Generated {num_tokens} tokens in {time.time() - t0:.2f}s")
+        print(f"Generated {num_tokens} tokens in {time.time() - start:.2f}s ({num_tokens / (time.time() - start):.2f} tokens/s)")
 
 
 from modal import asgi_app
