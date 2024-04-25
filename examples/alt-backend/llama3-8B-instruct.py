@@ -7,7 +7,7 @@ import time
 from modal import Image, Stub, gpu, method, Secret, enter
 
 MODEL_DIR = "/model"
-BASE_MODEL = "mistralai/Mistral-7B-Instruct-v0.2"
+BASE_MODEL = "meta-llama/Meta-Llama-3-8B-Instruct"
 GPU_CONFIG = gpu.A10G(count=1)
 
 def download_model_to_folder():
@@ -20,7 +20,7 @@ def download_model_to_folder():
         BASE_MODEL,
         local_dir=MODEL_DIR,
         token=os.environ["HF_TOKEN"],
-        ignore_patterns="*.pt",  # Using safetensors
+        ignore_patterns="*.pth",  # Using safetensors
     )
     move_cache()
 
@@ -33,7 +33,7 @@ vllm_image = (
     .run_function(download_model_to_folder, timeout=60 * 20, secrets=[Secret.from_name("huggingface-secret")],)
 )
 
-stub = Stub("llama-web-mistral-7b-instruct")
+stub = Stub("llama-web-llama3-8b-instruct")
 
 @stub.cls(
     gpu=GPU_CONFIG,
@@ -64,7 +64,6 @@ class Model:
         )
 
         self.engine = AsyncLLMEngine.from_engine_args(engine_args)
-        self.template = "<s>{% for message in messages %}{% if message.role == 'user' %}[INST] {% if loop.first %}{{ system }}\n{% endif %}{{ message.content }} [/INST]{% elif message.role == 'assistant' %}{{ message.content }}</s> {% endif %}{% endfor %}"
 
         # Performance improvement from https://github.com/vllm-project/vllm/issues/2073#issuecomment-1853422529
         if GPU_CONFIG.count > 1:
@@ -74,22 +73,23 @@ class Model:
             subprocess.call(RAY_CORE_PIN_OVERRIDE, shell=True)
 
     @method()
-    async def completion_stream(self, messages: list, system: str):
+    async def completion_stream(self, messages: list):
         from vllm import SamplingParams
         from vllm.utils import random_uuid
         from jinja2 import Template
 
+        tokenizer = self.engine.tokenizer()
         sampling_params = SamplingParams(
             temperature=0.75,
             max_tokens=1024,
             repetition_penalty=1.1,
+            stop_token_ids=[tokenizer.eos_token_id, tokenizer.convert_tokens_to_ids("<|eot_id|>")],
         )
 
         t0 = time.time()
         request_id = random_uuid()
-        conversation = Template(self.template).render(messages=messages, system=system)
         result_generator = self.engine.generate(
-            conversation,
+            messages,
             sampling_params,
             request_id,
         )
@@ -116,8 +116,8 @@ from modal import asgi_app
     timeout=60 * 10,
     secrets=[Secret.from_name("web-token")]
 )
-@asgi_app(label="llama-web-mistral-7b-instruct")
-def app():
+@asgi_app(label="llama-web-llama3-8b-instruct")
+def web():
     from fastapi import FastAPI, Request, Depends, HTTPException, status
     from fastapi.responses import StreamingResponse
     from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -164,8 +164,7 @@ def app():
 
         async def generate():
             async for text in Model().completion_stream.remote_gen.aio(
-                messages=messages,
-                system=system
+                messages=[{"role": "system", "content": system}] + messages
             ):
                 yield f"{text}"
 
