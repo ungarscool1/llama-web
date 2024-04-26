@@ -7,7 +7,7 @@ import time
 from modal import Image, Stub, gpu, method, Secret, enter
 
 MODEL_DIR = "/model"
-BASE_MODEL = "mistralai/Mistral-7B-Instruct-v0.2"
+BASE_MODEL = "meta-llama/Meta-Llama-3-8B-Instruct"
 GPU_CONFIG = gpu.A10G(count=1)
 
 def download_model_to_folder():
@@ -20,7 +20,7 @@ def download_model_to_folder():
         BASE_MODEL,
         local_dir=MODEL_DIR,
         token=os.environ["HF_TOKEN"],
-        ignore_patterns="*.pt",  # Using safetensors
+        ignore_patterns="*.pth",  # Using safetensors
     )
     move_cache()
 
@@ -33,13 +33,12 @@ vllm_image = (
         "ray==2.10.0",
         "hf-transfer==0.1.6",
         "huggingface_hub==0.22.2",
-        "jinja2==3.1.3"
     )
     .env({"HF_HUB_ENABLE_HF_TRANSFER": "1"})
     .run_function(download_model_to_folder, timeout=60 * 20, secrets=[Secret.from_name("huggingface-secret")],)
 )
 
-stub = Stub("llama-web-mistral-7b-instruct")
+stub = Stub("llama-web-llama3-8b-instruct")
 
 @stub.cls(
     gpu=GPU_CONFIG,
@@ -56,54 +55,54 @@ class Model:
 
         print("🥶 cold starting inference")
         start = time.monotonic_ns()
+
         engine_args = AsyncEngineArgs(
             model=MODEL_DIR,
             tensor_parallel_size=GPU_CONFIG.count,
             gpu_memory_utilization=0.90,
             disable_log_requests=True,
             disable_log_stats=True,
-            max_model_len=15453
         )
 
         self.engine = AsyncLLMEngine.from_engine_args(engine_args)
-        self.template = "<s>{% for message in messages %}{% if message.role == 'user' %}[INST] {% if loop.first %}{{ system }}\n{% endif %}{{ message.content }} [/INST]{% elif message.role == 'assistant' %}{{ message.content }}</s> {% endif %}{% endfor %}"
         duration_s = (time.monotonic_ns() - start) / 1e9
         print(f"🏎️ engine started in {duration_s:.0f}s")
-
     @method()
-    async def completion_stream(self, messages: list, system: str):
+    async def completion_stream(self, messages: list):
         from vllm import SamplingParams
         from vllm.utils import random_uuid
-        from jinja2 import Template
 
         sampling_params = SamplingParams(
             temperature=0.75,
             max_tokens=1024,
             repetition_penalty=1.1,
         )
-
-        t0 = time.time()
+        tokenizer = await self.engine.get_tokenizer()
         request_id = random_uuid()
-        conversation = Template(self.template).render(messages=messages, system=system)
+        conversation = tokenizer.apply_chat_template(messages, tokenize=False)
         result_generator = self.engine.generate(
             conversation,
             sampling_params,
             request_id,
         )
         index, num_tokens = 0, 0
+        start = time.monotonic_ns()
         async for output in result_generator:
             if (
                 output.outputs[0].text
                 and "\ufffd" == output.outputs[0].text[-1]
             ):
                 continue
+            elif (num_tokens < 4):
+                num_tokens = len(output.outputs[0].token_ids)
+                index = len(output.outputs[0].text)
+                continue
             text_delta = output.outputs[0].text[index:]
             index = len(output.outputs[0].text)
             num_tokens = len(output.outputs[0].token_ids)
 
             yield text_delta
-
-        print(f"Generated {num_tokens} tokens in {time.time() - t0:.2f}s")
+        print(f"Generated {num_tokens} tokens in {time.time() - start:.2f}s ({num_tokens / (time.time() - start):.2f} tokens/s)")
 
 
 from modal import asgi_app
@@ -113,8 +112,8 @@ from modal import asgi_app
     timeout=60 * 10,
     secrets=[Secret.from_name("web-token")]
 )
-@asgi_app(label="llama-web-mistral-7b-instruct")
-def app():
+@asgi_app(label="llama-web-llama3-8b-instruct")
+def web():
     from fastapi import FastAPI, Request, Depends, HTTPException, status
     from fastapi.responses import StreamingResponse
     from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -161,8 +160,7 @@ def app():
 
         async def generate():
             async for text in Model().completion_stream.remote_gen.aio(
-                messages=messages,
-                system=system
+                messages=[{"role": "system", "content": system}] + messages
             ):
                 yield f"{text}"
 

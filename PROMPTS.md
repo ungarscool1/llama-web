@@ -1,10 +1,16 @@
 # Prompt templates
 
-## Llama 2
+## Llama
+
+### Version 2
 
 ```
 <s>[INST] <<SYS>>\n{{system}}\n<</SYS>>\n\n{{#each messages}}{{#ifUser}}{{message}} [/INST] {{/ifUser}}{{#ifAssistant}}{{message}} </s><s>[INST] {{/ifAssistant}}{{/each}}
 ```
+
+### Version 3
+
+*Not known*
 
 ## CodeLlama
 
