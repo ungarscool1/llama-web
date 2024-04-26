@@ -50,7 +50,6 @@ stub = Stub("llama-web-llama3-8b-instruct")
 class Model:
     @enter()
     def start_engine(self):
-        from vllm import LLM
         from vllm.engine.arg_utils import AsyncEngineArgs
         from vllm.engine.async_llm_engine import AsyncLLMEngine
 
@@ -73,14 +72,12 @@ class Model:
         from vllm import SamplingParams
         from vllm.utils import random_uuid
 
-        tokenizer = self.engine.tokenizer()
         sampling_params = SamplingParams(
             temperature=0.75,
             max_tokens=1024,
             repetition_penalty=1.1,
-            stop_token_ids=[tokenizer.eos_token_id, tokenizer.convert_tokens_to_ids("<|eot_id|>")],
         )
-
+        tokenizer = await self.engine.get_tokenizer()
         request_id = random_uuid()
         conversation = tokenizer.apply_chat_template(messages, tokenize=False)
         result_generator = self.engine.generate(
