@@ -93,6 +93,10 @@ class Model:
                 and "\ufffd" == output.outputs[0].text[-1]
             ):
                 continue
+            elif (num_tokens < 4):
+                num_tokens = len(output.outputs[0].token_ids)
+                index = len(output.outputs[0].text)
+                continue
             text_delta = output.outputs[0].text[index:]
             index = len(output.outputs[0].text)
             num_tokens = len(output.outputs[0].token_ids)
