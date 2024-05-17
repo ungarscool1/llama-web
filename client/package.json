@@ -44,6 +44,6 @@
 		"flowbite-svelte": "^0.44.21",
 		"highlight.js": "^11.9.0",
 		"keycloak-js": "23.0.3",
-		"marked": "^11.1.0"
+		"marked": "^11.2.0"
 	}
 }
