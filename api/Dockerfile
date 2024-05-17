@@ -25,4 +25,4 @@ COPY --from=build /app/dist /app/dist
 COPY --from=build /app/llama.cpp/main ./llama.cpp/main
 COPY --from=build /app/llama.cpp/embedding ./llama.cpp/embedding
 EXPOSE 3000
-CMD [ "pnpm", "start" ]
+CMD [ "node", "dist/index.js" ]
