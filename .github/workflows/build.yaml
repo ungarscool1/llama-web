@@ -44,7 +44,7 @@ jobs:
           node-version: 20
       - name: Install dependencies
         working-directory: ./client
-        run: pnpm install --frozen-lockfile
+        run: ls pnpm-lock.yaml && pnpm install --frozen-lockfile
       - name: Build
         working-directory: ./client
         run: pnpm run build
