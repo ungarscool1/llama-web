@@ -92,6 +92,10 @@
       isRequesting = false;
     };
   }
+  
+  function removeMessage(i: number) {
+    messages = messages.filter((_, index) => index !== i);
+  }
 </script>
 <div
     class="relative hidden flex-col items-start gap-8 md:flex"
@@ -156,7 +160,7 @@
     <Badge variant="outline" class="absolute right-3 top-3">Output</Badge>
     <div class="flex-1 mt-4 h-70">
       {#each messages as message, i}
-        <ChatBubble role={message.role} message={message.message} />
+        <ChatBubble role={message.role} message={message.message} onRemove={() => {removeMessage(i)}} />
       {/each}
     </div>
     <form
