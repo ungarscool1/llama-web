@@ -3,7 +3,7 @@
   import { goto } from '$app/navigation';
   import Generate from '../../components/playground/generate.svelte';
   import Embedding from '../../components/playground/embedding.svelte';
-  import Chat from '../../components/playground/chat.svelte';
+  import Chat from '$lib/components/playground/chat.svelte';
   import * as Tooltip from "$lib/components/ui/tooltip/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
   import ScrollText from "lucide-svelte/icons/scroll-text";
