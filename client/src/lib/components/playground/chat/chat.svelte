@@ -11,6 +11,7 @@
   import CornerDownLeft from "lucide-svelte/icons/corner-down-left";
   import PlusIcon from 'lucide-svelte/icons/plus';
   import ChatBubble from "$lib/components/ui/chat/playground.svelte";
+  import Alert from "$lib/components/playground/alert/alert.svelte";
   
   $: system = '';
   $: messages = [];
@@ -90,6 +91,9 @@
       messages[messages.length - 1].message = resText;
     });
     xhr.onloadend = () => {
+      if (xhr.status !== 200) {
+        errorMessage = JSON.parse(xhr.responseText).message;
+      }
       isRequesting = false;
     };
   }
@@ -161,7 +165,11 @@
     <Badge variant="outline" class="absolute right-3 top-3">Output</Badge>
     <div class="flex-1 mt-4 h-70">
       {#each messages as message, i}
-        <ChatBubble role={message.role} message={message.message} onRemove={() => {removeMessage(i)}} />
+        {#if i === messages.length - 1 && errorMessage.length > 0}
+          <Alert errorMessage={errorMessage} />
+        {:else}
+          <ChatBubble role={message.role} message={message.message} onRemove={() => {removeMessage(i)}} />
+        {/if}
       {/each}
     </div>
     <form
