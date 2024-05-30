@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { browser } from '$app/environment';
-  import Generate from '../../components/playground/generate.svelte';
+  import Generate from '$lib/components/playground/generate/generate.svelte';
   import Embedding from '$lib/components/playground/embeddings/embeddings.svelte';
   import Chat from '$lib/components/playground/chat/chat.svelte';
   import * as Tooltip from "$lib/components/ui/tooltip/index.js";

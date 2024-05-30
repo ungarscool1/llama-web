@@ -8,17 +8,15 @@
   import { Button } from "$lib/components/ui/button/index.js";
   import { Slider } from "$lib/components/ui/slider/index.js";
   import CornerDownLeft from "lucide-svelte/icons/corner-down-left";
+  import Alert from '$lib/components/playground/alert/alert.svelte';
 
   $: prompt = '';
   $: isRequesting = false;
   $: errorMessage = '';
-  $: parameters = {
-    temperature: [1],
-    topK: [40],
-    topP: [0.9],
-    nPredict: [512]
-  };
-  $: temp = [1];
+  $: parameterTemperature = [1];
+  $: parameterLength = [512];
+  $: parameterTopK = [40];
+  $: parameterTopP = [0.9];
   $: model = {value: '', label: ''};
   $: models = [];
   let userInfo = {
@@ -42,7 +40,6 @@
     
     if (!req.ok) return goto('/');
     models = await req.json();
-    // remove all alternative backend models
     models = models.filter(model => !model.alternativeBackend);
     model.label = models[0].name;
     model.value = models[0].name;
@@ -65,7 +62,12 @@
     xhr.open('POST', `${env.PUBLIC_API_URL}/text-completion`);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.setRequestHeader('Authorization', `Bearer ${userInfo.token}`);
-    xhr.send(JSON.stringify({ prompt, parameters, model: model.value }));
+    xhr.send(JSON.stringify({ prompt, parameters: {
+      temperature: parameterTemperature[0],
+      topK: parameterTopK[0],
+      topP: parameterTopP[0],
+      nPredict: parameterLength[0]
+    }, model: model.value }));
     isRequesting = true;
     xhr.addEventListener('progress', (event) => {
       if (xhr.status !== 200) {
@@ -121,28 +123,23 @@
         </div>
         <div class="grid gap-3">
           <Label for="temperature">Temperature</Label>
-          <Slider bind:value={temp} max={2} step={0.01} class="max-w-[70%]" />
-          <p>{parameters.temperature}</p>
+          <Slider bind:value={parameterTemperature} max={2} step={0.01} class="max-w-[70%]" />
+          <p>{parameterTemperature}</p>
         </div>
         <div class="grid gap-3">
           <Label for="temperature">Length</Label>
-          <Slider bind:value={parameters.nPredict} max={8192} step={1} class="max-w-[70%]" />
-          <p>{parameters.temperature}</p>
+          <Slider bind:value={parameterLength} max={8192} step={1} class="max-w-[70%]" />
+          <p>{parameterLength}</p>
+        </div>
+        <div class="grid gap-3">
+          <Label for="temperature">Top K</Label>
+          <Slider value={parameterTopK} max={80} step={0.1} class="max-w-[70%]" />
+          <p>{parameterTopK}</p>
         </div>
         <div class="grid gap-3">
           <Label for="temperature">Top P</Label>
-          <Slider value={[parameters.topP]} max={1} step={0.01} class="max-w-[70%]" />
-          <p>{parameters.temperature}</p>
-        </div>
-        <div class="grid gap-3">
-          <Label for="temperature">Freq penal</Label>
-          <Slider value={[parameters.nPredict]} max={2} step={0.01} class="max-w-[70%]" />
-          <p>{parameters.temperature}</p>
-        </div>
-        <div class="grid gap-3">
-          <Label for="temperature">Pres penal</Label>
-          <Slider value={[parameters.temperature]} max={2} step={0.01} class="max-w-[70%]" />
-          <p>{parameters.temperature}</p>
+          <Slider value={parameterTopP} max={1} step={0.01} class="max-w-[70%]" />
+          <p>{parameterTopP}</p>
         </div>
       </fieldset>
     </form>
@@ -156,11 +153,15 @@
         id="message"
         placeholder="Write a fairy tale..."
         class="min-h-12 h-[90%] mt-7 resize-none border-0 p-3 shadow-none focus-visible:ring-0"
-        value={prompt}
+        bind:value={prompt}
       />
     </div>
     <div class="flex items-center p-3 pt-0">
-      <p class="text-sm">Completion is considered as legacy.</p>
+      {#if errorMessage.length > 0}
+        <Alert errorMessage={errorMessage} />
+      {:else}
+        <p class="text-sm">Completion is considered as legacy.</p>
+      {/if}
       <Button type="submit" on:click={textCompletion} size="sm" class="ml-auto gap-1.5">
         Complete
         <CornerDownLeft class="size-3.5" />
