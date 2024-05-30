@@ -3,7 +3,7 @@
   import { goto } from '$app/navigation';
   import { browser } from '$app/environment';
   import Generate from '../../components/playground/generate.svelte';
-  import Embedding from '../../components/playground/embedding.svelte';
+  import Embedding from '$lib/components/playground/embeddings/embeddings.svelte';
   import Chat from '$lib/components/playground/chat/chat.svelte';
   import * as Tooltip from "$lib/components/ui/tooltip/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
