@@ -49,8 +49,15 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
       span.finish();
     return res.status(400).json({ message: 'Model not found' });
   }
-  if (!model.alternativeBackend)
-    prompt += compileTemplate(model.chatPromptTemplate, { system: payload.system, messages: payload.messages });
+  if (!model.alternativeBackend) {
+    try {
+      prompt += compileTemplate(model.chatPromptTemplate, { system: payload.system, messages: payload.messages });
+    } catch (e) {
+      if (span)
+        span.finish();
+      return res.status(500).json({ message: 'Unable to generate prompt from template' });
+    }
+  }
   if (span)
     span.finish();
   try {
