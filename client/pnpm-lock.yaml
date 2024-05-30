@@ -38,12 +38,18 @@ importers:
       marked:
         specifier: ^11.2.0
         version: 11.2.0
+      svelte-device-info:
+        specifier: ^1.0.5
+        version: 1.0.5
       tailwind-merge:
         specifier: ^2.3.0
         version: 2.3.0
       tailwind-variants:
         specifier: ^0.2.1
         version: 0.2.1(tailwindcss@3.4.0)
+      vaul-svelte:
+        specifier: ^0.3.1
+        version: 0.3.1(svelte@4.2.8)
     devDependencies:
       '@sveltejs/adapter-auto':
         specifier: ^3.0.1
@@ -1515,6 +1521,9 @@ packages:
     peerDependencies:
       svelte: ^3.55.0 || ^4.0.0-next.0 || ^4.0.0 || ^5.0.0-next.0
 
+  svelte-device-info@1.0.5:
+    resolution: {integrity: sha512-ImYE588bWDufOQChS8xfb6bVstkJHPuDk8tDtwYgkYU55WvfSzKTzkpblZkizWRpUNvnrakgsx24yHr6O3rY1g==}
+
   svelte-eslint-parser@0.33.1:
     resolution: {integrity: sha512-vo7xPGTlKBGdLH8T5L64FipvTrqv3OQRx9d2z5X05KKZDlF4rQk8KViZO4flKERY+5BiVdOh7zZ7JGJWo5P0uA==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
@@ -1676,6 +1685,11 @@ packages:
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
+
+  vaul-svelte@0.3.1:
+    resolution: {integrity: sha512-tCIJQMlwHZMPBvBLhLJhzYw6EvQLm808rWVzmd0uTFbfS/12Z6MJ4JGP6z9Fy/sW7Jl7xQVF625N2Zk3cwN1iQ==}
+    peerDependencies:
+      svelte: ^4.0.0
 
   vite@5.0.10:
     resolution: {integrity: sha512-2P8J7WWgmc355HUMlFrwofacvr98DAjoE52BfdbwQtyLH06XKwaL/FMnmKM2crF0iX4MpmMKoDlNCB1ok7zHCw==}
@@ -3102,6 +3116,10 @@ snapshots:
       - stylus
       - sugarss
 
+  svelte-device-info@1.0.5:
+    dependencies:
+      tslib: 2.6.2
+
   svelte-eslint-parser@0.33.1(svelte@4.2.8):
     dependencies:
       eslint-scope: 7.2.2
@@ -3262,6 +3280,11 @@ snapshots:
       punycode: 2.3.1
 
   util-deprecate@1.0.2: {}
+
+  vaul-svelte@0.3.1(svelte@4.2.8):
+    dependencies:
+      bits-ui: 0.21.9(svelte@4.2.8)
+      svelte: 4.2.8
 
   vite@5.0.10:
     dependencies:

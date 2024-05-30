@@ -62,6 +62,7 @@
   async function chatResponse() {
     if (system.length === 0 && userMessage.length > 1)
       system = 'You are a helpful assistant.';
+    if (isRequesting) return;
     isRequesting = true;
     errorMessage = '';
     const xhr = new XMLHttpRequest();
