@@ -1,7 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { env } from '$env/dynamic/public';
-  import { Spinner } from 'flowbite-svelte';
+  import { Button } from "$lib/components/ui/button/index.js";
+  import { Textarea } from "$lib/components/ui/textarea/index.js";
+  import LoaderCircle from "lucide-svelte/icons/loader-circle";
 
   let prompts = {
     sendable: false,
@@ -13,6 +15,7 @@
     authenticated: false,
     token: null
   };
+  $: onChange(prompts.outgoingPrompt);
 
   onMount(() => {
     if (localStorage.getItem('userInfo')) {
@@ -20,6 +23,9 @@
       loadSystemPrompt();
     }
   });
+  async function onChange(...args) {
+    isSendable();
+  }
 
   function loadSystemPrompt() {
     fetch(`${env.PUBLIC_API_URL}/settings/prompt`, {
@@ -60,13 +66,14 @@
 </script>
 
 <div class="flex flex-col justify-between h-full">
-  <textarea draggable="false" rows="10" class="block resize-none w-full focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 p-2.5 text-sm rounded-lg" placeholder="You are a helpful assistant." bind:value={prompts.outgoingPrompt} on:change={isSendable}></textarea>
+  <Textarea draggable="false" class="resize-none" placeholder="You are a helpful assistant." bind:value={prompts.outgoingPrompt} rows="10" />
   <div class="flex justify-end mt-4">
-    <button class="text-white bg-blue-700 disabled:bg-blue-500 disabled:hover:bg-blue-600 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none" on:click={changeSystemPrompt} disabled={!prompts.sendable}>
-    {#if prompts.sending}
-      <Spinner color='gray' />
-    {:else}
-      Save
-    {/if}
+    <Button on:click={changeSystemPrompt} disabled={!prompts.sendable}>
+      {#if prompts.sending}
+        <LoaderCircle class="size-5 animate-spin" />
+      {:else}
+        Save
+      {/if}
+    </Button>
   </div>
 </div>
