@@ -95,7 +95,7 @@
     </Dialog.Header>
     <div class="flex flex-col gap-6">
       {#if !isShared}
-        {#if env.PUBLIC_SKIP_AUTH !== 'false'}
+        {#if env.PUBLIC_SKIP_AUTH !== 'true'}
           <p class="text-gray-500">Messages you send after sharing won't be shared</p>
           <Label for="visibility">Visibility</Label>
           <Select.Root bind:selected={visibility}>
