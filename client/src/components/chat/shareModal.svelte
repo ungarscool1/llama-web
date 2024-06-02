@@ -1,14 +1,18 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { env } from '$env/dynamic/public';
-  import { Modal, Label, Select, type SelectOptionType } from 'flowbite-svelte';
-  import Link45DegIcon from '../icons/Link45DegIcon.svelte';
+  import { Label } from "$lib/components/ui/label/index.js";
+  import * as Dialog from "$lib/components/ui/dialog";
+  import * as Select from "$lib/components/ui/select";
+  import { Button } from "$lib/components/ui/button/index.js";
+  import Link from "lucide-svelte/icons/link";
+  import Unlink from "lucide-svelte/icons/unlink";
 
   export let id: string;
   export let modalShow: boolean = false;
   let isShared: boolean = false;
   $: onChange(modalShow);
-  let visibility = 'public';
+  let visibility = {label: 'Public', value: 'public'};
   let userInfo = {
     authenticated: false,
     token: null
@@ -60,7 +64,7 @@
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        visibility
+        visibility: visibility.value
       })
     });
     isShared = true;
@@ -74,51 +78,62 @@
 
   const visibilityOptions: Array<SelectOptionType<string>> = [
     {
-      name: 'Public',
+      label: 'Public',
       value: 'public'
     },
     {
-      name: 'Authenticated',
+      label: 'Authenticated',
       value: 'authenticated'
     }
   ];
 </script>
 
-<Modal bind:open={modalShow} size="xs" autoclose={false} class="w-full">
-  <div class="flex flex-col space-y-6">
-    {#if !isShared}
-      <h3 class="text-xl font-medium text-gray-900 dark:text-white">Share the chat</h3>
-      {#if env.PUBLIC_SKIP_AUTH !== 'true'}
-        <p class="text-gray-500">Messages you send after sharing won't be shared</p>
-        <Label class="space-y-2">
-          <span>Visibility</span>
-          <Select items={visibilityOptions} bind:value={visibility} />
-        </Label>
+<Dialog.Root bind:open={modalShow} >
+  <Dialog.Content>
+    <Dialog.Header>
+      <Dialog.Title>{isShared ? 'Unshare': 'Share'} the chat</Dialog.Title>
+    </Dialog.Header>
+    <div class="flex flex-col gap-6">
+      {#if !isShared}
+        {#if env.PUBLIC_SKIP_AUTH !== 'false'}
+          <p class="text-gray-500">Messages you send after sharing won't be shared</p>
+          <Label for="visibility">Visibility</Label>
+          <Select.Root bind:selected={visibility}>
+            <Select.Trigger
+              id="model"
+              class="items-start [&_[data-description]]:hidden"
+            >
+              <Select.Value placeholder="Select a model" />
+            </Select.Trigger>
+            <Select.Content>
+              {#each visibilityOptions as option}
+              <Select.Item value={option.value}>
+                <div class="flex items-start gap-3 text-muted-foreground">
+                  <div class="grid gap-0.5">
+                    <p>
+                      <span class="font-medium text-foreground">
+                        {option.label}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </Select.Item>
+              {/each}
+            </Select.Content>
+          </Select.Root>
+        {:else}
+          <p class="text-gray-500">
+            Messages you send after sharing won't be shared. Anyone with the link will be able to
+            access to the shared chat.
+          </p>
+        {/if}
+        <Button on:click={shareChat}><Link class="size-4 mr-2" /> Share chat</Button>
       {:else}
-        <p class="text-gray-500">
-          Messages you send after sharing won't be shared. Anyone with the link will be able to
-          access to the shared chat.
-        </p>
+        <div class="flex justify-between">
+          <Button on:click={unshareChat} class="bg-red-700 hover:bg-red-800 dark:bg-red-600 dark:hover:bg-red-700"><Unlink class="size-4 mr-2" /> Unshare chat</Button>
+          <Button on:click={copyLink}><Link class="size-4 mr-2" /> Copy link</Button>
+        </div>
       {/if}
-      <button
-        type="submit"
-        class="text-center font-medium focus:outline-none inline-flex items-center justify-center px-5 py-2.5 text-sm text-white bg-blue-700 hover:bg-blue-800 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 rounded-lg w-full1"
-        on:click|preventDefault={shareChat}><Link45DegIcon /> Share chat</button
-      >
-    {:else}
-      <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Unshare the chat</h3>
-      <div class="flex justify-between">
-        <button
-          type="submit"
-          class="text-center font-medium focus:outline-none inline-flex items-center justify-center px-5 py-2.5 text-sm text-white bg-red-700 hover:bg-red-800 dark:bg-red-600 dark:hover:bg-red-700 rounded-lg w-full1"
-          on:click|preventDefault={unshareChat}>Unshare chat</button
-        >
-        <button
-          type="submit"
-          class="text-center font-medium focus:outline-none inline-flex items-center justify-center px-5 py-2.5 text-sm text-white bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-lg w-full1"
-          on:click|preventDefault={copyLink}><Link45DegIcon /> Copy link</button
-        >
-      </div>
-    {/if}
-  </div>
-</Modal>
+    </div>
+  </Dialog.Content>
+</Dialog.Root>
