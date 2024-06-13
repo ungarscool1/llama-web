@@ -3,9 +3,9 @@
   import { onMount, tick } from 'svelte';
   import { goto } from '$app/navigation';
   import { env } from '$env/dynamic/public';
-  import Sidebar from '../../../components/chat/sidebar.svelte';
-  import Message from '../../../components/chat/message.svelte';
-  import Welcome from '../../../components/chat/welcome.svelte';
+  import Sidebar from '$lib/components/chat/sidebar/sidebar.svelte';
+  import Message from '$lib/components/chat/message/message.svelte';
+  import Welcome from '$lib/components/chat/message/welcome.svelte';
 
   $: activeUrl = $page.url.pathname;
   $: messages = [];
