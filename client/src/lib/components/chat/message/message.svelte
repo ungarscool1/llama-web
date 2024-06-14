@@ -29,13 +29,11 @@
 {#if message.role === 'user'}
   <Bubble message={message.message} />
 {:else}
-  <div class="mx-auto flex flex-1 gap-3 text-base juice:gap-4 juice:md:gap-6 md:max-w-3xl lg:max-w-[40rem] xl:max-w-[48rem]">
+  <div class="flex mb-2 flex-row w-full">
     <div class="flex-shrink-0 flex flex-col relative items-end size-10">
       <Avatar username="llama-robot-assistant" />
     </div>
-    <div class="flex-col gap-1 md:gap-3">
-      <div class="flex flex-grow flex-col max-w-full">
-        <div class="group min-h-[20px] flex flex-col items-start whitespace-pre-wrap break-words overflow-x-auto gap-2">
+    <div class="flex-1 mb-0 ml-1 mt-2 dark:text-white text-black whitespace-pre-line w-3/4">
           {#each tokens as token}
             {#if token.type === "code"}
               <Codeblock code={unsanitize(token.text)} language={token.lang} />
@@ -47,8 +45,6 @@
               {@html marked.parse(token.raw)}
             {/if}
           {/each}
-        </div>
-      </div>
     </div>
   </div>
 {/if}

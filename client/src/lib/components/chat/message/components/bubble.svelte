@@ -12,8 +12,8 @@
             <div class="group min-h-[20px] flex flex-col items-start whitespace-pre-wrap break-words overflow-x-auto gap-2">
               <div class="flex w-full flex-row-reverse gap-1 items-end">
                 <div class="relative max-w-[70%] rounded-3xl bg-[#f4f4f4] px-5 py-2.5 dark:bg-background">{message}</div>
-                <div class="group-hover:block hidden">
-                  <button class="text-center font-medium inline-flex px-2.5 py-2.5 text-sm text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-gray-100 dark:border-gray-600 rounded-lg" on:click={onRemove}>
+                <div class="group-hover:hidden hidden">
+                  <button class="text-center font-medium inline-flex px-2.5 py-2.5 text-sm text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-gray-100 dark:border-gray-600 rounded-lg" on:click={() => {}}>
                     <CircleMinus class="w-5 h-5" />
                   </button>
                 </div>
