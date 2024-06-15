@@ -5,6 +5,7 @@
   import Avatar from '../../../../components/chat/avatar.svelte';
   import List from './components/list.svelte';
   import Bubble from './components/bubble.svelte';
+  import Alert from '$lib/components/playground/alert/alert.svelte';
 
   function sanitize(text: string) {
 		return text
@@ -34,17 +35,21 @@
       <Avatar username="llama-robot-assistant" />
     </div>
     <div class="flex-1 mb-0 ml-1 mt-2 dark:text-white text-black whitespace-pre-line w-3/4">
-          {#each tokens as token}
-            {#if token.type === "code"}
-              <Codeblock code={unsanitize(token.text)} language={token.lang} />
-            {:else if token.type === "table"}
-              <Table rows={token.rows} header={token.header} />
-            {:else if token.type === "list"}
-              <List ordered={token.ordered} items={token.items} />
-            {:else}
-              {@html marked.parse(token.raw)}
-            {/if}
-          {/each}
+      {#if message.message.startsWith('<!--ERROR:')}
+        <Alert errorMessage={message.message.replace('<!--ERROR: ', '').replace('-->', '')}/>
+      {:else}
+        {#each tokens as token}
+          {#if token.type === "code"}
+            <Codeblock code={unsanitize(token.text)} language={token.lang} />
+          {:else if token.type === "table"}
+            <Table rows={token.rows} header={token.header} />
+          {:else if token.type === "list"}
+            <List ordered={token.ordered} items={token.items} />
+          {:else}
+            {@html marked.parse(token.raw)}
+          {/if}
+        {/each}
+      {/if}
     </div>
   </div>
 {/if}

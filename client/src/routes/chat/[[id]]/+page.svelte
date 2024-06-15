@@ -164,9 +164,7 @@
         const error = JSON.parse(xhr.responseText);
         messages[
           messages.length - 1
-        ].message = `<div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
-          ${error.message}
-        </div>`;
+        ].message = `<!--ERROR: ${error.message}-->`;
         isError = true;
       } else {
         isError = false;
@@ -217,7 +215,6 @@
         <div class="flex flex-col w-full relative items-start">
           <textarea
             bind:this={textArea}
-            disabled={isRequesting}
             draggable="false"
             rows="1"
             class="m-0 min-h-[52px] md:min-h-[54px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-none pr-10 pl-3 md:py-3.5 md:pr-12 md:pl-4 {isPromptError
