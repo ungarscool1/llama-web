@@ -15,7 +15,7 @@
   import { env } from '$env/dynamic/public';
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
-  import Message from '../../../components/chat/message.svelte';
+  import Message from '$lib/components/chat/message/message.svelte';
 
   let id = $page.params.id;
   let error = false;

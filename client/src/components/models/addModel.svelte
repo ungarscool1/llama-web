@@ -1,12 +1,12 @@
 <script lang="ts">
   import { env } from '$env/dynamic/public';
   import { onMount } from 'svelte';
-  import {
-    Alert,
-    Label,
-    Modal,
-    P
-  } from 'flowbite-svelte';
+  import * as Dialog from "$lib/components/ui/dialog";
+  import { Button } from "$lib/components/ui/button/index.js";
+  import { Label } from "$lib/components/ui/label/index.js";
+  import { Input } from "$lib/components/ui/input";
+  import { Textarea } from "$lib/components/ui/textarea/index.js";
+  import Alert from '$lib/components/playground/alert/alert.svelte';
 
   export let modalShow: boolean = false;
   let alternativeBackendSwitch = false;
@@ -82,103 +82,56 @@
   }
 </script>
 
-<Modal bind:open={modalShow} size="xs" autoclose={false} class="w-full">
-  <div class="flex flex-col space-y-6">
-    <div>
-      <h3 class="text-xl font-medium text-gray-900 dark:text-white">Add a new model</h3>
+<Dialog.Root bind:open={modalShow} >
+  <Dialog.Content class="md:max-w-[680px]">
+    <Dialog.Header>
+      <Dialog.Title>Add a new model</Dialog.Title>
       {#if alternativeBackendAllowed}
-        <P size="sm" >Or use <button on:click={(e) => {
+        <p class="text-sm text-gray-900 dark:text-white leading-normal font-normal text-left whitespace-normal mt-1" >Or use <button class="text-blue-500" on:click={(e) => {
           e.preventDefault();
           alternativeBackendSwitch = !alternativeBackendSwitch;
-        }}>{alternativeBackendSwitch ? 'legacy' : 'alternative'} backend</button></P>
+        }}>{alternativeBackendSwitch ? 'legacy' : 'alternative'} backend</button></p>
       {/if}
-    </div>
-    {#if modalErrorMessage.length > 0}
-      <Alert color="red">
-        <span class="font-medium">An error occured</span>
-        {modalErrorMessage}
-      </Alert>
-    {/if}
-    {#if !alternativeBackendSwitch}
-      {#if !modelDownload}
+    </Dialog.Header>
+    <div class="flex flex-col justify-between h-full space-y-2">
+      {#if !alternativeBackendSwitch}
         <Label class="space-y-2">
           <span>Model name</span>
-          <input
-            name="name"
-            placeholder="Model name"
-            required
-            bind:value={modelConfig.name}
-            class="block w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg"
-            type="text"
-          />
+          <Input type="name" placeholder="Model name" bind:value={modelConfig.name} />
         </Label>
         <Label class="space-y-2">
           <span>Model download URI</span>
-          <input
-            name="repository"
-            placeholder="Model download URI"
-            required
-            bind:value={modelConfig.uri}
-            class="block w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg"
-            type="text"
-          />
+          <Input type="repository" placeholder="Model download URI" bind:value={modelConfig.uri} />
         </Label>
         <Label class="space-y-2">
           <span>Model prompt template</span>
-          <textarea draggable="false" rows="2" class="block resize-none w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg" placeholder="Model prompt template" bind:value={modelConfig.promptTemplate}></textarea>
+          <Textarea placeholder="Model prompt template" bind:value={modelConfig.promptTemplate} rows=2 draggable="false" class="resize-none" />
         </Label>
-        <button
-          type="submit"
-          class="text-center font-medium focus:ring-4 focus:outline-none inline-flex items-center justify-center px-5 py-2.5 text-sm text-white bg-blue-700 hover:bg-blue-800 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 rounded-lg w-full1"
-          on:click|preventDefault={createModel}>Install the new model</button
-        >
+        <div class="flex justify-end mt-4">
+          <Button on:click={createModel}>
+            Install the new model
+          </Button>
+        </div>
       {:else}
-        <P size="base">Please wait while the model is being downloaded and installed.</P>
-        <P size="base">The model will appear in the list after the download complete.</P>
+        <Alert errorMessage="Using another backend may not comply with your security policy." />
+        <Label class="space-y-2">
+          <span>Model name</span>
+          <Input type="name" placeholder="Model name" bind:value={modelConfig.name} />
+        </Label>
+        <Label class="space-y-2">
+          <span>Model API Endpoint</span>
+          <Input type="repository" placeholder="Model API Endpoint" bind:value={modelConfig.uri} />
+        </Label>
+        <Label class="space-y-2">
+          <span>Authentication</span>
+          <Input type="authentication" placeholder="Model API Authentication" bind:value={modelConfig.parameters.authentication} />
+        </Label>
+        <div class="flex justify-end mt-4">
+          <Button on:click={createModel}>
+            Add the alternative backend model
+          </Button>
+        </div>
       {/if}
-    {:else}
-      <Alert color="red">
-        <span class="font-medium">⚠ WARNING</span>
-        Using another backend may not comply with your security policy.
-      </Alert>
-      <Label class="space-y-2">
-        <span>Model name</span>
-        <input
-          name="name"
-          placeholder="Model name"
-          required
-          bind:value={modelConfig.name}
-          class="block w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg"
-          type="text"
-        />
-      </Label>
-      <Label class="space-y-2">
-        <span>Model API Endpoint</span>
-        <input
-          name="name"
-          placeholder="Model API Endpoint"
-          required
-          bind:value={modelConfig.uri}
-          class="block w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg"
-          type="text"
-        />
-      </Label>
-      <Label class="space-y-2">
-        <span>Authentication</span>
-        <input
-          name="name"
-          placeholder="Model API Authentication"
-          required
-          bind:value={modelConfig.parameters.authentication}
-          class="block w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg"
-          type="text"
-        />
-      </Label>
-      <button
-        type="submit"
-        class="text-center font-medium focus:ring-4 focus:outline-none inline-flex items-center justify-center px-5 py-2.5 text-sm text-white bg-blue-700 hover:bg-blue-800 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 rounded-lg w-full1"
-        on:click|preventDefault={createModel}>Add the alternative backend model</button
-      >
-    {/if}
-  </div>
-</Modal>
+    </div>
+  </Dialog.Content>
+</Dialog.Root>
