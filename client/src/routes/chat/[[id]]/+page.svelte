@@ -6,6 +6,7 @@
   import Sidebar from '$lib/components/chat/sidebar/sidebar.svelte';
   import Message from '$lib/components/chat/message/message.svelte';
   import Welcome from '$lib/components/chat/message/welcome.svelte';
+    import Icon from '$lib/components/ui/icon/icon.svelte';
 
   $: activeUrl = $page.url.pathname;
   $: messages = [];
@@ -219,7 +220,7 @@
             disabled={isRequesting}
             draggable="false"
             rows="1"
-            class="m-0 w-full resize-none border-1 border-solid rounded-md py-[10px] min-h-[52px] md:min-h-[54px] pr-10 pl-3 md:py-3.5 md:pr-12 md:pl-4 bg-transparent focus:ring-0 focus-visible:ring-0 dark:bg-transparent dark:text-white {isPromptError
+            class="m-0 min-h-[52px] md:min-h-[54px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-none pr-10 pl-3 md:py-3.5 md:pr-12 md:pl-4 {isPromptError
               ? 'border-red-700'
               : ''}"
             style="max-height: 200px;"
@@ -230,23 +231,11 @@
           />
           {#if !isRequesting}
             <button
-              class="absolute md:right-3 md:bottom-[0.6875rem] right-2 bottom-[0.6rem] bg-blue-500 hover:bg-blue-600 dark:hover:bg-gray-200 dark:bg-white disabled:opacity-10 text-white font-bold py-2 px-2 rounded-md"
+              class="absolute md:right-3 md:bottom-[0.6875rem] right-2 bottom-[0.6rem] inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 px-2 py-2"
               on:click|preventDefault={sendRequest}
               disabled={prompt.length === 0}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                fill="currentColor"
-                class="bi bi-arrow-up dark:text-black"
-                viewBox="0 0 16 16"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5"
-                />
-              </svg>
+              <Icon name="arrow-up" class="size-4" />
             </button>
           {:else}
             <button
