@@ -6,11 +6,9 @@
   import { Icon } from '$lib/components/ui/icon';
   import * as Dialog from "$lib/components/ui/dialog";
   import { Button } from "$lib/components/ui/button/index.js";
+  import { Label } from "$lib/components/ui/label/index.js";
   import { Input } from "$lib/components/ui/input";
   import Alert from '$lib/components/playground/alert/alert.svelte';
-  import {
-    Label
-  } from 'flowbite-svelte';
 
   $: apiKeys = [];
   let userInfo = {
@@ -95,7 +93,7 @@
     <Table.Caption class={apiKeys.length === 0 ? '' : 'hidden'}>An empty list of your API keys.</Table.Caption>
     <Table.Header>
       <Table.Row>
-        <Table.Head class="w-[100px]">Key name</Table.Head>
+        <Table.Head>Key name</Table.Head>
         <Table.Head>Key</Table.Head>
         <Table.Head>Created at</Table.Head>
         <Table.Head>Last used at</Table.Head>
