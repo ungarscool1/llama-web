@@ -140,41 +140,47 @@
     </div>
   </div>
 </aside>
+<Button variant="primary" class="absolute z-10 justify-start hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5 hidden {toggle ? 'flex' : ''} flex-col self-center hover:bg-gray-300 dark:hover:bg-gray-700" on:click={toggleSidebar}>
+  <PanelLeftOpen class="size-6" />
+</Button>
 
-<Sheet.Root>
-  <Sheet.Trigger asChild let:builder>
-    <Button
-      variant="outline"
-      size="icon"
-      class="shrink-0 md:hidden"
-      builders={[builder]}
-    >
-      <Menu class="h-5 w-5" />
-      <span class="sr-only">Toggle navigation menu</span>
-    </Button>
-  </Sheet.Trigger>
-  <Sheet.Content side="left" class="flex flex-col justify-between py-4 px-3 h-[100dvh]">
-    <Sheet.Header class="flex-row justify-between items-center">
-      <Button variant="primary" class="justify-start hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5 flex flex-col self-center hover:bg-gray-300 dark:hover:bg-gray-700" on:click={toggleSidebar}>
-        <PanelLeftClose class="size-6" />
+<header class="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 md:hidden justify-between">
+  <Sheet.Root>
+    <Sheet.Trigger asChild let:builder>
+      <Button
+        variant="outline"
+        size="icon"
+        class="shrink-0 md:hidden border-0"
+        builders={[builder]}
+      >
+        <Menu class="h-5 w-5" />
+        <span class="sr-only">Toggle navigation menu</span>
       </Button>
-      <a href="/chat" class="justify-start hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5 flex flex-col self-center hover:bg-gray-300 dark:hover:bg-gray-700">
-        <SquarePen class="size-5" />
-      </a>
-    </Sheet.Header>
-    <nav class="py-2{chats !== undefined && chats.length > 0 ? ' space-y-2 overflow-y-auto flex-1 mt-2 items-center justify-center' : ''}">
-        {#if chats === undefined}
-          <div class="text-center flex justify-center items-center w-full"><LoaderCircle class="size-5 animate-spin" /></div>
-        {:else if chats.length === 0}
-          <div class="text-center text-gray-500 dark:text-gray-400">No chats yet</div>
-        {:else}
-          {#each chats as chat}
-            <Chat chat={chat} active={activeUrl === `/chat/${chat.id}`} bind:showShareModal deleteChat={deleteChat} />
-          {/each}
-        {/if}
-    </nav>
-  </Sheet.Content>
-</Sheet.Root>
+    </Sheet.Trigger>
+    <Sheet.Content side="left" class="flex flex-col justify-between py-4 px-3 h-[100dvh]">
+      <Sheet.Header class="flex-row-reverse justify-between items-center">
+        <a href="/chat" class="justify-start hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5 flex flex-col self-center hover:bg-gray-300 dark:hover:bg-gray-700">
+          <SquarePen class="size-5" />
+        </a>
+      </Sheet.Header>
+      <nav class="py-2{chats !== undefined && chats.length > 0 ? ' space-y-2 overflow-y-auto flex-1 mt-2 items-center justify-center' : ''}">
+          {#if chats === undefined}
+            <div class="text-center flex justify-center items-center w-full"><LoaderCircle class="size-5 animate-spin" /></div>
+          {:else if chats.length === 0}
+            <div class="text-center text-gray-500 dark:text-gray-400">No chats yet</div>
+          {:else}
+            {#each chats as chat}
+              <Chat chat={chat} active={activeUrl === `/chat/${chat.id}`} bind:showShareModal deleteChat={deleteChat} />
+            {/each}
+          {/if}
+      </nav>
+    </Sheet.Content>
+  </Sheet.Root>
+  <span class="flex-1 overflow-hidden whitespace-nowrap">{navBarTitle}</span>
+  <a href="/chat" class="justify-start hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5 flex flex-col self-center hover:bg-gray-300 dark:hover:bg-gray-700">
+    <SquarePen class="size-5" />
+  </a>
+</header>
 
 <ShareModal bind:modalShow={showShareModal} id={$page.params.id} />
 <SettingsModal bind:modalShow={showSettingsModal} />

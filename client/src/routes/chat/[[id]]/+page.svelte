@@ -201,7 +201,7 @@
       bind:this={chatBox}
     >
       {#if messages.length > 0}
-        <div class="w-[75%]">
+        <div class="md:w-[75%]">
           {#each messages as message}
             <Message {message} username={userInfo.name} />
           {/each}

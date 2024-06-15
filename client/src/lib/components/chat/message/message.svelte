@@ -30,7 +30,7 @@
 {#if message.role === 'user'}
   <Bubble message={message.message} />
 {:else}
-  <div class="flex mb-2 flex-row w-full">
+  <div class="flex mb-2 flex-row w-full px-2 md:px-0">
     <div class="flex-shrink-0 flex flex-col relative items-end size-10">
       <Avatar username="llama-robot-assistant" />
     </div>
