@@ -91,7 +91,6 @@
       return;
     }
     const id = $page.params.id;
-    console.log(`I have this id: ${id}`)
     if (!id) {
       navBarTitle = 'New chat';
       return;

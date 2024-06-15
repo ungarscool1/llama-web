@@ -208,7 +208,7 @@
           {/each}
         </div>
       {:else}
-        <Welcome bind:model />
+        <Welcome bind:model bind:prompt sendMessage={sendRequest} />
       {/if}
     </div>
     <div class="flex justify-center items-center md:mb-2">
