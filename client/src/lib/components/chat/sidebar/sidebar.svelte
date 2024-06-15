@@ -176,7 +176,7 @@
       </nav>
     </Sheet.Content>
   </Sheet.Root>
-  <span class="flex-1 overflow-hidden whitespace-nowrap">{navBarTitle}</span>
+  <span class="flex-1 text-center overflow-hidden whitespace-nowrap">{navBarTitle}</span>
   <a href="/chat" class="justify-start hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5 flex flex-col self-center hover:bg-gray-300 dark:hover:bg-gray-700">
     <SquarePen class="size-5" />
   </a>

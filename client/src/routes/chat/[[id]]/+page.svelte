@@ -201,7 +201,7 @@
       bind:this={chatBox}
     >
       {#if messages.length > 0}
-        <div class="md:w-[75%]">
+        <div class="lg:w-[75%]">
           {#each messages as message}
             <Message {message} username={userInfo.name} />
           {/each}
@@ -238,19 +238,7 @@
             <button
               class="absolute md:right-3 md:bottom-[1rem] right-2 bottom-[0.845rem] text-white font-bold rounded-full border-2 border-gray-900 p-1 dark:border-gray-200"
               on:click|preventDefault={stopChat}
-              ><svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                fill="currentColor"
-                class="h-2 w-2 text-gray-900 dark:text-gray-200"
-                viewBox="0 0 16 16"
-              >
-                <path
-                  d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2z"
-                  stroke-width="0"
-                />
-              </svg></button
+              ><Icon name="circle-stop" class="size-4" /></button
             >
           {/if}
         </div>
@@ -260,22 +248,10 @@
       <button
         class="absolute z-10 text-gray-600 right-[46dvw] bottom-32 md:right-[40dvw] lg:right-[44.5dvw] md:bottom-20 {atBottom
           ? 'hidden'
-          : 'block'} bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-600 hover:bg-blue-600 text-white font-bold py-2 px-2 rounded-full"
+          : 'block'} bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-600 hover:bg-gray-200 dark:hover:bg-slate-600 text-white font-bold py-2 px-2 rounded-full"
         on:click={goDown}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          fill="currentColor"
-          class="bi bi-chevron-bar-down text-black dark:text-white"
-          viewBox="0 0 16 16"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M3.646 4.146a.5.5 0 0 1 .708 0L8 7.793l3.646-3.647a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 0-.708zM1 11.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13a.5.5 0 0 1-.5-.5"
-          />
-        </svg>
+        <Icon name="arrow-down-to-line" class="size-4 text-black dark:text-white" />
       </button>
     {/if}
   </div>
