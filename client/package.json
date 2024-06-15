@@ -42,8 +42,6 @@
 		"bits-ui": "^0.21.10",
 		"classnames": "^2.3.2",
 		"clsx": "^2.1.1",
-		"flowbite": "^2.2.1",
-		"flowbite-svelte": "^0.44.21",
 		"highlight.js": "^11.9.0",
 		"keycloak-js": "23.0.3",
 		"lucide-svelte": "^0.379.0",
