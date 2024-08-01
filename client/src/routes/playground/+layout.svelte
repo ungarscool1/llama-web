@@ -9,6 +9,7 @@
   import Package2 from "lucide-svelte/icons/command";
   import Avatar from '../../components/chat/avatar.svelte';
   import { goto } from '$app/navigation';
+  import DarkMode from '$lib/components/ui/dark-mode/dark-mode.svelte';
   
   $: activeUrl = $page.url.pathname;
   let userName = '';
@@ -94,7 +95,7 @@
           {link.name}
         </a>
       {/each}
-      <!--<DarkMode btnClass="text-muted-foreground transition-colors hover:text-foreground" />-->
+      <DarkMode btnClass="text-muted-foreground transition-colors hover:text-foreground" />
     </div>
     <div class="block md:hidden ml-auto flex-1 sm:flex-initial relative"></div>
     {#if env.PUBLIC_SKIP_AUTH === 'false' || !env.PUBLIC_SKIP_AUTH}

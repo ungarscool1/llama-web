@@ -5,6 +5,10 @@
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
 		<meta name="viewport" content="width=device-width" />
 		<title>LLaMa AI</title>
+		<script>
+			localStorage.getItem('color-theme') === 'dark' && document.documentElement.classList.add('dark');
+			window.matchMedia('(prefers-color-scheme: dark)').matches && document.documentElement.classList.add('dark');
+		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
