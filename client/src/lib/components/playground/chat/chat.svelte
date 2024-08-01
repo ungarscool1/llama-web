@@ -153,7 +153,7 @@
             id="content"
             placeholder="You are a helpful assistant."
             class="min-h-[9.5rem]"
-            value={system}
+            bind:value={system}
           />
         </div>
       </fieldset>

@@ -47,7 +47,7 @@
   });
 </script>
 
-<header class="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+<header class="sticky z-50 top-0 flex h-16 items-center gap-4 border-b bg-white dark:bg-slate-950 px-4 md:px-6">
   <nav
     class="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6"
   >
