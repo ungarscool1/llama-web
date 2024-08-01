@@ -14,10 +14,10 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   const schema = yup.object().shape({
     prompt: yup.string().required(),
     parameters: yup.object().shape({
-      temperature: yup.number().min(0).max(1).required(),
+      temperature: yup.number().min(0).max(2).required(),
       topK: yup.number().min(0).required(),
       topP: yup.number().min(0).max(1).required(),
-      nPredict: yup.number().min(0).max(2048).required()
+      nPredict: yup.number().min(0).max(8192).required()
     }),
     model: yup.string().required()
   });
