@@ -8,7 +8,6 @@
   import Menu from "lucide-svelte/icons/menu";
   import Package2 from "lucide-svelte/icons/command";
   import Avatar from '../../components/chat/avatar.svelte';
-  import { DarkMode } from 'flowbite-svelte';
   import { goto } from '$app/navigation';
   
   $: activeUrl = $page.url.pathname;
@@ -95,7 +94,7 @@
           {link.name}
         </a>
       {/each}
-      <DarkMode btnClass="text-muted-foreground transition-colors hover:text-foreground" />
+      <!--<DarkMode btnClass="text-muted-foreground transition-colors hover:text-foreground" />-->
     </div>
     <div class="block md:hidden ml-auto flex-1 sm:flex-initial relative"></div>
     {#if env.PUBLIC_SKIP_AUTH === 'false' || !env.PUBLIC_SKIP_AUTH}

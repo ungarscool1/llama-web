@@ -1,23 +1,25 @@
 <script lang="ts">
-  import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
+  import * as Table from "$lib/components/ui/table/index.js";
 
   export let header: any;
   export let rows: any;
 </script>
 
-<Table divClass="overflow-x-auto rounded-lg w-full md:w-[75%] border dark:border-gray-700">
-  <TableHead>
-    {#each header as head}
-      <TableHeadCell>{head.text}</TableHeadCell>
-    {/each}
-  </TableHead>
-  <TableBody>
+<Table.Root class="overflow-x-auto rounded-lg w-full md:w-[75%] border dark:border-gray-700">
+  <Table.Header>
+    <Table.Row>
+      {#each header as head}
+      <Table.Head>{head.text}</Table.Head>
+      {/each}
+    </Table.Row>
+  </Table.Header>
+  <Table.Body>
     {#each rows as row}
-      <TableBodyRow>
+      <Table.Row>
         {#each row as cell}
-          <TableBodyCell>{cell.text}</TableBodyCell>
+          <Table.Cell>{cell.text}</Table.Cell>
         {/each}
-      </TableBodyRow>
+      </Table.Row>
     {/each}
-  </TableBody>
-</Table>
+  </Table.Body>
+</Table.Root>

@@ -1,13 +1,12 @@
 <script lang="ts">
-  import { List, Li } from 'flowbite-svelte';
   import * as marked from 'marked';
   
   export let ordered: boolean = false;
   export let items: Array<any>;
 </script>
-<List list={ordered ? 'decimal' : 'disc'} color="white" ulClass="">
+<ul class="{ordered ? 'list-decimal' : 'list-disc'} list-inside text-slate-900 dark:text-white">
   {#each items as item}
-    <Li>{@html marked
-      .parse(item.text).toString().replaceAll(/<\/?p>/g, '')}</Li>
+    <li>{@html marked
+      .parse(item.text).toString().replaceAll(/<\/?p>/g, '')}</li>
   {/each}
-</List>
+</ul>
