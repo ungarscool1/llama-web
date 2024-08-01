@@ -19,7 +19,6 @@
 	function unsanitize(text: string) {
 		return text.replaceAll("&lt;", "<");
 	}
-  export let username: string;
   export let message: {
     message: string;
     role: string;
@@ -28,10 +27,10 @@
 </script>
 
 {#if message.role === 'user'}
-  <Bubble message={message.message} />
+  <Bubble message={message.message} onRemove={() => {}} />
 {:else}
   <div class="flex mb-2 flex-row w-full px-2 md:px-0">
-    <div class="flex-shrink-0 flex flex-col relative items-end size-10">
+    <div class="flex-shrink-0 flex flex-col relative items-end size-10 mr-4">
       <Avatar username="llama-robot-assistant" />
     </div>
     <div class="flex-1 mb-0 ml-1 mt-2 dark:text-white text-black whitespace-pre-line w-3/4">
