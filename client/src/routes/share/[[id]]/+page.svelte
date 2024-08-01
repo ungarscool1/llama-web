@@ -81,7 +81,7 @@
         <div class="mx-auto w-full p-4 md:max-w-2xl md:px-0 lg:max-w-[38rem] xl:max-w-3xl">
           <div class="border-b border-gray-100 pb-4 pt-3 sm:mb-2 sm:pb-6 sm:pt-8">
             <h1 class="text-3xl font-semibold leading-tight text-gray-700 dark:text-gray-100 sm:text-4xl">
-              <Icon name='loader-circle' class='size-5 animate-spin'>
+              <Icon name='loader-circle' class='size-5 animate-spin' />
             </h1>
           </div>
         </div>
