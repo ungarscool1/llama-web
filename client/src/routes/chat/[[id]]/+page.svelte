@@ -98,6 +98,7 @@
 
   function handleKeyDown(event: KeyboardEvent) {
     if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
       sendRequest();
     }
   }
@@ -236,10 +237,11 @@
             </button>
           {:else}
             <button
-              class="absolute md:right-3 md:bottom-[1rem] right-2 bottom-[0.845rem] text-white font-bold rounded-full border-2 border-gray-900 p-1 dark:border-gray-200"
+              class="absolute md:right-3 md:bottom-[0.6rem] right-2 bottom-[0.5125rem] inline-flex items-center justify-center whitespace-nowrap text-sm font-medium bg-transparent px-2 py-2"
               on:click|preventDefault={stopChat}
-              ><Icon name="circle-stop" class="size-4" /></button
             >
+              <Icon name="circle-stop" class="size-5" />
+            </button>
           {/if}
         </div>
       </div>
