@@ -5,7 +5,9 @@
   let isDarkMode = false;
   
   onMount(() => {
-    isDarkMode = localStorage.getItem('color-theme') === 'dark' || window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const userTheme = localStorage.getItem('color-theme');
+		const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    isDarkMode = userTheme === 'dark' || (userTheme === null && systemPrefersDark);
   });
 
   function toggleDarkMode() {
