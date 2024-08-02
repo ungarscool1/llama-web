@@ -3,7 +3,6 @@ import fs from 'fs';
 import { Request, Response, NextFunction } from 'express';
 import type { IUser } from './types/express';
 import mongoose from 'mongoose';
-import * as Sentry from '@sentry/node';
 
 const apiTokenMiddleware = async (req: Request, reqToken: string) => {
   await mongoose.connect(`${process.env.DB}`);
@@ -36,30 +35,20 @@ const jwtMiddleware = (req: Request, token: string) => {
 
 export const middleware = async (req: Request, res: Response, next: NextFunction) => {
   const token = req.headers.authorization;
-  const transaction = Sentry.getActiveTransaction();
-  let span: Sentry.Span|undefined;
   if (!token) return res.status(401).json({ message: 'Unauthorized' });
   if (token.split(' ')[0] !== 'Bearer') return res.status(401).json({ message: 'Unauthorized' });
   try {
     if (token.split(' ').length !== 2) throw new Error('Unauthorized');
     if (token.split(' ')[1].startsWith('sk-')) {
-      if (transaction)
-        span = transaction.startChild({ op: 'middleware', description: 'Verify authorization with API Key' });
       await apiTokenMiddleware(req, token.split(' ')[1]);
     } else {
-      if (transaction)
-        span = transaction.startChild({ op: 'middleware', description: 'Verify authorization with JWT' });
       jwtMiddleware(req, token.split(' ')[1]);
     }
   } catch (err) {
-    if (span)
-      span.finish();
     if ((err as Error).message === 'Unauthorized') return res.status(401).json({ message: 'Unauthorized' });
     console.error(err);
     return res.status(500).json({ message: 'Internal Server Error' });
   }
-  if (span)
-    span.finish();
   next();
 }
 
@@ -73,19 +62,14 @@ export const anonymousMiddleware = async (req: Request, res: Response, next: Nex
 
 export const optionalAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   const token = req.headers.authorization;
-  const transaction = Sentry.getActiveTransaction();
   
   if (!token) return next();
   if (token.split(' ')[0] !== 'Bearer') return next();
   try {
     if (token.split(' ').length !== 2) throw new Error('Unauthorized');
     if (token.split(' ')[1].startsWith('sk-')) {
-      if (transaction)
-        transaction.startChild({ op: 'middleware', description: 'Verify authorization with API Key' });
       await apiTokenMiddleware(req, token.split(' ')[1]);
     } else {
-      if (transaction)
-        transaction.startChild({ op: 'middleware', description: 'Verify authorization with JWT' });
       jwtMiddleware(req, token.split(' ')[1]);
     }
   } catch (err) {

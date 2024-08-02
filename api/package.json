@@ -7,8 +7,6 @@
   "author": "Léo Godard <leo@legodard.fr>",
   "license": "MIT",
   "dependencies": {
-    "@sentry/node": "^7.48.0",
-    "@sentry/profiling-node": "^0.3.0",
     "axios": "^1.6.2",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",

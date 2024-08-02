@@ -4,8 +4,6 @@ import morgan from 'morgan';
 import ORM from './models/init';
 import {anonymousMiddleware, middleware} from './middleware';
 import cors from 'cors';
-import * as Sentry from "@sentry/node";
-import { ProfilingIntegration } from "@sentry/profiling-node";
 
 dotenv.config();
 
@@ -20,31 +18,6 @@ import systemRouter from './routes/system';
 import sharedChatRouter from './routes/sharedChat';
 
 const app = express();
-
-if (process.env.SENTRY_DSN) {
-  Sentry.init({
-    dsn: process.env.SENTRY_DSN,
-    integrations: [
-      new Sentry.Integrations.Http({ tracing: true }),
-      ...Sentry.autoDiscoverNodePerformanceMonitoringIntegrations(),
-      new ProfilingIntegration()
-    ],
-    tracesSampleRate: 1.0,
-    profilesSampleRate: 1.0,
-    environment: process.env.NODE_ENV || 'production'
-  });
-  Sentry.configureScope((scope) => {
-    scope.addEventProcessor((event) => {
-      delete event.request?.data;
-      event.user = {
-        username: event.user?.username,
-      };
-      return event;
-    });
-  });
-  app.use(Sentry.Handlers.requestHandler());
-  app.use(Sentry.Handlers.tracingHandler());
-}
 
 app.use(morgan('dev'));
 app.use(express.json());
@@ -79,11 +52,6 @@ app.use('/custom-chat', customChatRouter);
 app.use('/settings', settingsRouter);
 app.use('/models', modelsRouter);
 app.use('/system', systemRouter);
-
-
-if (process.env.SENTRY_DSN) {
-  app.use(Sentry.Handlers.errorHandler());
-}
 
 // Catch 404 and forward to error handler
 app.use(function (req, res, next) {
