@@ -108,7 +108,7 @@
           <Table.Cell>{key.name}</Table.Cell>
           <Table.Cell>{key.token}</Table.Cell>
           <Table.Cell>{new Date(key.createdAt).toLocaleString()}</Table.Cell>
-          <Table.Cell>{new Date(key.lastUsed).toLocaleString()}</Table.Cell>
+          <Table.Cell>{key.createdAt === key.lastUsed ? 'Never' : new Date(key.lastUsed).toLocaleString()}</Table.Cell>
           <Table.Cell><button
             class="flex btn btn-ghost btn-sm"
             on:click|preventDefault={() => {
