@@ -1,6 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { Generation, GenerationOutput } from '../../utils/generation';
-import * as Sentry from '@sentry/node';
 import * as yup from 'yup';
 import mongoose from 'mongoose';
 
@@ -22,8 +21,6 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     model: yup.string().required()
   });
   let payload: yup.InferType<typeof schema>;
-  const transaction = Sentry.getActiveTransaction();
-  let span: Sentry.Span;
   let child: GenerationOutput;
   try {
     payload = await schema.validate(req.body);
@@ -37,8 +34,6 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   if (model.alternativeBackend)
     return res.status(400).json({ message: 'Alternative backend model are not supported' });
   try {
-    if (transaction)
-      span = transaction.startChild({ op: 'generation', description: 'Text completion' });
     child = generation.generateCompletion(payload.prompt, {...payload.parameters, modelPath: `${process.env.MODELS_DIR}/${model.path}`});
   } catch (err) {
     console.log((err as Error).message);
@@ -60,8 +55,6 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     console.error(`stderr: ${data.toString()}`);
   });
   child.data.on('close', () => {
-    if (span)
-      span.finish();
     res.end();
   });
 });

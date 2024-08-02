@@ -1,7 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { Generation, GenerationOutput } from '../../utils/generation';
 import * as yup from 'yup';
-import * as Sentry from '@sentry/node';
 import mongoose from 'mongoose';
 import compileTemplate from '../../utils/compileTemplate';
 import { Role } from '../../types/Message';
@@ -27,42 +26,28 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   let prompt = ``;
   let ignoreIndex = 0;
   let child: GenerationOutput;
-  const transaction = Sentry.getActiveTransaction();
-  let span: Sentry.Span|undefined;
   if (!process.env.LLAMA_PATH || !process.env.MODELS_DIR) {
     throw new Error('LLAMA_PATH and MODELS_DIR must be set');
   }
 
-  if (transaction)
-    span = transaction.startChild({ op: 'parsing', description: 'Parse request body' });
   try {
     payload = schema.validateSync(req.body);
   } catch (err) {
     console.error((err as Error).message);
-    if (span)
-      span.finish();
     return res.status(400).json({ message: 'Bad request' });
   }
   const model = await mongoose.model('Models').findOne({ name: payload.model });
   if (!model) {
-    if (span)
-      span.finish();
     return res.status(400).json({ message: 'Model not found' });
   }
   if (!model.alternativeBackend) {
     try {
       prompt += compileTemplate(model.chatPromptTemplate, { system: payload.system, messages: payload.messages });
     } catch (e) {
-      if (span)
-        span.finish();
       return res.status(500).json({ message: 'Unable to generate prompt from template' });
     }
   }
-  if (span)
-    span.finish();
   try {
-    if (transaction)
-      span = transaction.startChild({ op: 'generation', description: 'Generate response' });
     if (!model.alternativeBackend) {
       child = generation.launch({
         modelPath: `${process.env.MODELS_DIR}/${model.path}`,
@@ -117,8 +102,6 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   }
 
   child.data.on('close', () => {
-    if (span)
-      span.finish();
     res.end();
   });
 });

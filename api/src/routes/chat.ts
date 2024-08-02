@@ -1,6 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
-import * as Sentry from '@sentry/node';
 import * as yup from 'yup';
 
 import { Generation } from '../utils/generation';
@@ -33,17 +32,11 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   });
   let payload: yup.InferType<typeof schema>;
   let messages: Array<Message> = [];
-  const transaction = Sentry.getActiveTransaction();
-  let span: Sentry.Span|undefined;
 
-  if (transaction)
-    span = transaction.startChild({ op: 'parsing', description: 'Parse request body' });
   try {
     payload = schema.validateSync(req.body);
   } catch (err) {
     console.error((err as Error).message);
-    if (span)
-      span.finish();
     return res.status(400).json({ message: 'Bad request' });
   }
   if (payload.id) {
@@ -57,12 +50,8 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   if (!model) {
     return res.status(400).json({ message: 'Model not found' });
   }
-  if (span)
-    span.finish();
   messages.push({ message: payload.message, role: Role.user });
   try {
-    if (transaction)
-      span = transaction.startChild({ op: 'generation', description: 'Generate response' });
     generation.generationWrapper(messages, model, res, req.user, payload.id);
   } catch (e) {
     return res.status(500).json({ message: 'Something went wrong' });
