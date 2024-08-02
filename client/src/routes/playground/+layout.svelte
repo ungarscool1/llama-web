@@ -98,7 +98,7 @@
       <DarkMode btnClass="text-muted-foreground transition-colors hover:text-foreground" />
     </div>
     <div class="block md:hidden ml-auto flex-1 sm:flex-initial relative"></div>
-    {#if env.PUBLIC_SKIP_AUTH === 'false' || !env.PUBLIC_SKIP_AUTH}
+    {#if (env.PUBLIC_SKIP_AUTH === 'false' || !env.PUBLIC_SKIP_AUTH) && userName}
       <DropdownMenu.Root>
         <DropdownMenu.Trigger asChild let:builder>
           <Button
