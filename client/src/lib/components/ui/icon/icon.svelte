@@ -4,7 +4,6 @@
   
   function realName(): string {
     name = name.replace(/^([a-z])/, x => x.toUpperCase()).replaceAll(/-([a-z])/g, x => x.toUpperCase()).replaceAll('-', '');
-    console.log(name);
     return name;
   }
 </script>

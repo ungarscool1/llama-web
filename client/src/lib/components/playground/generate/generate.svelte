@@ -9,6 +9,7 @@
   import { Slider } from "$lib/components/ui/slider/index.js";
   import CornerDownLeft from "lucide-svelte/icons/corner-down-left";
   import Alert from '$lib/components/playground/alert/alert.svelte';
+  import PlaygroundSlider from '$lib/components/ui/playground-slider/slider.svelte';
 
   $: prompt = '';
   $: isRequesting = false;
@@ -121,26 +122,10 @@
             </Select.Content>
           </Select.Root>
         </div>
-        <div class="grid gap-3">
-          <Label for="temperature">Temperature</Label>
-          <Slider bind:value={parameterTemperature} max={2} step={0.01} class="max-w-[70%]" />
-          <p>{parameterTemperature}</p>
-        </div>
-        <div class="grid gap-3">
-          <Label for="temperature">Length</Label>
-          <Slider bind:value={parameterLength} max={8192} step={1} class="max-w-[70%]" />
-          <p>{parameterLength}</p>
-        </div>
-        <div class="grid gap-3">
-          <Label for="temperature">Top K</Label>
-          <Slider value={parameterTopK} max={80} step={0.1} class="max-w-[70%]" />
-          <p>{parameterTopK}</p>
-        </div>
-        <div class="grid gap-3">
-          <Label for="temperature">Top P</Label>
-          <Slider value={parameterTopP} max={1} step={0.01} class="max-w-[70%]" />
-          <p>{parameterTopP}</p>
-        </div>
+        <PlaygroundSlider label="Temperature" max={2} step={0.01} bind:parameterArray={parameterTemperature} />
+        <PlaygroundSlider label="Length" min={1} max={8192} step={1} bind:parameterArray={parameterLength} />
+        <PlaygroundSlider label="Top K" max={80} step={0.1} bind:parameterArray={parameterTopK} />
+        <PlaygroundSlider label="Top P" max={1} step={0.01} bind:parameterArray={parameterTopP} />
       </fieldset>
     </form>
   </div>
@@ -162,7 +147,7 @@
       {:else}
         <p class="text-sm">Completion is considered as legacy.</p>
       {/if}
-      <Button type="submit" on:click={textCompletion} size="sm" class="ml-auto gap-1.5">
+      <Button type="submit" on:click={textCompletion} disabled={isRequesting} size="sm" class="ml-auto gap-1.5">
         Complete
         <CornerDownLeft class="size-3.5" />
       </Button>
