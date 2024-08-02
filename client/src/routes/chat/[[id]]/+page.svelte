@@ -3,9 +3,10 @@
   import { onMount, tick } from 'svelte';
   import { goto } from '$app/navigation';
   import { env } from '$env/dynamic/public';
-  import Sidebar from '../../../components/chat/sidebar.svelte';
-  import Message from '../../../components/chat/message.svelte';
-  import Welcome from '../../../components/chat/welcome.svelte';
+  import Sidebar from '$lib/components/chat/sidebar/sidebar.svelte';
+  import Message from '$lib/components/chat/message/message.svelte';
+  import Welcome from '$lib/components/chat/message/welcome.svelte';
+    import Icon from '$lib/components/ui/icon/icon.svelte';
 
   $: activeUrl = $page.url.pathname;
   $: messages = [];
@@ -97,6 +98,7 @@
 
   function handleKeyDown(event: KeyboardEvent) {
     if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
       sendRequest();
     }
   }
@@ -163,9 +165,7 @@
         const error = JSON.parse(xhr.responseText);
         messages[
           messages.length - 1
-        ].message = `<div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
-          ${error.message}
-        </div>`;
+        ].message = `<!--ERROR: ${error.message}-->`;
         isError = true;
       } else {
         isError = false;
@@ -202,13 +202,13 @@
       bind:this={chatBox}
     >
       {#if messages.length > 0}
-        <div class="w-[75%]">
+        <div class="lg:w-[75%]">
           {#each messages as message}
             <Message {message} username={userInfo.name} />
           {/each}
         </div>
       {:else}
-        <Welcome bind:model />
+        <Welcome bind:model bind:prompt sendMessage={sendRequest} />
       {/if}
     </div>
     <div class="flex justify-center items-center md:mb-2">
@@ -216,10 +216,9 @@
         <div class="flex flex-col w-full relative items-start">
           <textarea
             bind:this={textArea}
-            disabled={isRequesting}
             draggable="false"
             rows="1"
-            class="m-0 w-full resize-none border-1 border-solid rounded-md py-[10px] min-h-[52px] md:min-h-[54px] pr-10 pl-3 md:py-3.5 md:pr-12 md:pl-4 bg-transparent focus:ring-0 focus-visible:ring-0 dark:bg-transparent dark:text-white {isPromptError
+            class="m-0 min-h-[52px] md:min-h-[54px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-none pr-10 pl-3 md:py-3.5 md:pr-12 md:pl-4 {isPromptError
               ? 'border-red-700'
               : ''}"
             style="max-height: 200px;"
@@ -230,42 +229,19 @@
           />
           {#if !isRequesting}
             <button
-              class="absolute md:right-3 md:bottom-[0.6875rem] right-2 bottom-[0.6rem] bg-blue-500 hover:bg-blue-600 dark:hover:bg-gray-200 dark:bg-white disabled:opacity-10 text-white font-bold py-2 px-2 rounded-md"
+              class="absolute md:right-3 md:bottom-[0.6875rem] right-2 bottom-[0.6rem] inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 px-2 py-2"
               on:click|preventDefault={sendRequest}
               disabled={prompt.length === 0}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                fill="currentColor"
-                class="bi bi-arrow-up dark:text-black"
-                viewBox="0 0 16 16"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5"
-                />
-              </svg>
+              <Icon name="arrow-up" class="size-4" />
             </button>
           {:else}
             <button
-              class="absolute md:right-3 md:bottom-[1rem] right-2 bottom-[0.845rem] text-white font-bold rounded-full border-2 border-gray-900 p-1 dark:border-gray-200"
+              class="absolute md:right-3 md:bottom-[0.6rem] right-2 bottom-[0.5125rem] inline-flex items-center justify-center whitespace-nowrap text-sm font-medium bg-transparent px-2 py-2"
               on:click|preventDefault={stopChat}
-              ><svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                fill="currentColor"
-                class="h-2 w-2 text-gray-900 dark:text-gray-200"
-                viewBox="0 0 16 16"
-              >
-                <path
-                  d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2z"
-                  stroke-width="0"
-                />
-              </svg></button
             >
+              <Icon name="circle-stop" class="size-5" />
+            </button>
           {/if}
         </div>
       </div>
@@ -274,22 +250,10 @@
       <button
         class="absolute z-10 text-gray-600 right-[46dvw] bottom-32 md:right-[40dvw] lg:right-[44.5dvw] md:bottom-20 {atBottom
           ? 'hidden'
-          : 'block'} bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-600 hover:bg-blue-600 text-white font-bold py-2 px-2 rounded-full"
+          : 'block'} bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-600 hover:bg-gray-200 dark:hover:bg-slate-600 text-white font-bold py-2 px-2 rounded-full"
         on:click={goDown}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          fill="currentColor"
-          class="bi bi-chevron-bar-down text-black dark:text-white"
-          viewBox="0 0 16 16"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M3.646 4.146a.5.5 0 0 1 .708 0L8 7.793l3.646-3.647a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 0-.708zM1 11.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13a.5.5 0 0 1-.5-.5"
-          />
-        </svg>
+        <Icon name="arrow-down-to-line" class="size-4 text-black dark:text-white" />
       </button>
     {/if}
   </div>

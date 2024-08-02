@@ -1,12 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { env } from '$env/dynamic/public';
-  import {
-    Alert,
-    Modal,
-    Label,
-    Input
-  } from 'flowbite-svelte';
+  import * as Dialog from "$lib/components/ui/dialog";
+  import { Button } from "$lib/components/ui/button/index.js";
+  import { Label } from "$lib/components/ui/label/index.js";
+  import { Input } from "$lib/components/ui/input";
+  import { Textarea } from "$lib/components/ui/textarea/index.js";
 
   export let id: string
   export let modalShow: boolean = false
@@ -65,30 +64,28 @@
   }
 </script>
 
-<Modal bind:open={modalShow} size="xs" autoclose={false} class="w-full">
-  <div class="flex flex-col space-y-6">
-    <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Edit the model</h3>
-      {#if error.length > 0}
-        <Alert color="red">
-          <span class="font-medium">An error occured</span>
-          {error}
-        </Alert>
-      {/if}
+<Dialog.Root bind:open={modalShow} >
+  <Dialog.Content class="md:max-w-[680px]">
+    <Dialog.Header>
+      <Dialog.Title>Edit the model</Dialog.Title>
+    </Dialog.Header>
+    <div class="flex flex-col justify-between h-full space-y-2">
       {#if !model.alternativeBackend}
         <Label class="space-y-2">
           <span>Model prompt template</span>
-          <textarea draggable="false" rows="2" class="block resize-none w-full disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg" placeholder="Model prompt template" bind:value={model.promptTemplate}></textarea>
+          <Textarea placeholder="Model prompt template" bind:value={model.promptTemplate} rows=2 draggable="false" class="resize-none" />
         </Label>
       {:else}
         <Label class="space-y-2">
           <span>Authentication</span>
-          <Input type="text" class="disabled:cursor-not-allowed disabled:opacity-50 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 border-gray-300 dark:border-gray-500 p-2.5 text-sm rounded-lg" placeholder="Authentication" bind:value={model.parameters.authentication}></Input>
+          <Input placeholder="Authentication" bind:value={model.parameters.authentication} />
         </Label>
       {/if}
-      <button
-        type="submit"
-        class="text-center font-medium focus:ring-4 focus:outline-none inline-flex items-center justify-center px-5 py-2.5 text-sm text-white bg-blue-700 hover:bg-blue-800 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 rounded-lg w-full1"
-        on:click|preventDefault={updateModel}>Update the model</button
-      >
-  </div>
-</Modal>
+      <div class="flex justify-end mt-4">
+        <Button on:click={updateModel}>
+          Update the model
+        </Button>
+      </div>
+    </div>
+  </Dialog.Content>
+</Dialog.Root>

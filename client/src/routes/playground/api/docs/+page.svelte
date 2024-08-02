@@ -56,6 +56,13 @@
       path: '/models',
       method: 'GET',
       description: 'Get all models',
+      body: [{
+        id: 'string',
+        name: 'string',
+        path: 'string',
+        alternativeBackend: false,
+        createdAt: 'string'
+      }],
       headers: [
         'Authorization: Bearer <YOUR API KEY>'
       ]
@@ -64,6 +71,15 @@
       path: '/models/:id',
       method: 'GET',
       description: 'Get model by id (not by name)',
+      body: {
+        id: 'string',
+        name: 'string',
+        createdAt: 'string',
+        parameters: {
+          authentication: 'string?'
+        },
+        alternativeBackend: false
+      },
       headers: [
         'Authorization: Bearer <YOUR API KEY>'
       ]

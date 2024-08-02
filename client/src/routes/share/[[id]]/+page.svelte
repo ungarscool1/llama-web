@@ -11,11 +11,11 @@
   </script>
 </svelte:head>
 <script lang="ts">
-  import { Spinner } from 'flowbite-svelte';
+  import { Icon } from '$lib/components/ui/icon/index.js';
   import { env } from '$env/dynamic/public';
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
-  import Message from '../../../components/chat/message.svelte';
+  import Message from '$lib/components/chat/message/message.svelte';
 
   let id = $page.params.id;
   let error = false;
@@ -81,7 +81,7 @@
         <div class="mx-auto w-full p-4 md:max-w-2xl md:px-0 lg:max-w-[38rem] xl:max-w-3xl">
           <div class="border-b border-gray-100 pb-4 pt-3 sm:mb-2 sm:pb-6 sm:pt-8">
             <h1 class="text-3xl font-semibold leading-tight text-gray-700 dark:text-gray-100 sm:text-4xl">
-              <Spinner />
+              <Icon name='loader-circle' class='size-5 animate-spin' />
             </h1>
           </div>
         </div>

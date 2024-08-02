@@ -2,8 +2,14 @@
   import { page } from '$app/stores';
   import { env } from '$env/dynamic/public';
   import { onMount } from 'svelte';
-  import { Navbar, NavBrand, NavLi, NavUl, NavHamburger, DarkMode, Dropdown, DropdownHeader, DropdownItem } from 'flowbite-svelte';
+  import * as Sheet from "$lib/components/ui/sheet";
+  import { Button } from "$lib/components/ui/button/index.js";
+  import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
+  import Menu from "lucide-svelte/icons/menu";
+  import Package2 from "lucide-svelte/icons/command";
+  import Avatar from '../../components/chat/avatar.svelte';
   import { goto } from '$app/navigation';
+  import DarkMode from '$lib/components/ui/dark-mode/dark-mode.svelte';
   
   $: activeUrl = $page.url.pathname;
   let userName = '';
@@ -18,7 +24,7 @@
       url: '/chat',
     },
     {
-      name: 'API documentation',
+      name: 'API docs',
       url: '/playground/api/docs',
     },
     {
@@ -41,42 +47,85 @@
   });
 </script>
 
-<Navbar
-  let:hidden
-  let:toggle
->
-  <NavBrand href="/playground">
-    <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">LLaMa AI</span
-    >
-  </NavBrand>
-  <NavHamburger on:click={toggle} />
-  {#if env.PUBLIC_SKIP_AUTH === 'false' || !env.PUBLIC_SKIP_AUTH}
-  <Dropdown placement="bottom" triggeredBy="#profile">
-    <DropdownHeader>
-      <span class="block text-sm"> {userName} </span>
-      <span class="block truncate text-sm font-medium"> {userEmail} </span>
-    </DropdownHeader>
-    <DropdownItem href={env.PUBLIC_SSO_ACCOUNT_SETTINGS_URL}>Settings</DropdownItem>
-    <DropdownItem href="/playground/api">API Keys</DropdownItem>
-    <DropdownItem href="/logout">Sign out</DropdownItem>
-  </Dropdown>
-  {/if}
-  <NavUl {hidden} {activeUrl}>
-    {#each links as link}
-      <NavLi href={link.url}>{link.name}</NavLi>
-    {/each}
-    {#if env.PUBLIC_SKIP_AUTH === 'false' || !env.PUBLIC_SKIP_AUTH}
-      <NavLi id="profile" style="cursor: pointer;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-fill" viewBox="0 0 16 16">
-          <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3Zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
-        </svg>
-      </NavLi>
+<header class="sticky z-50 top-0 flex h-16 items-center gap-4 border-b bg-white dark:bg-slate-950 px-4 md:px-6">
+  <nav
+    class="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6"
+  >
+    <a href="/" class="flex items-center gap-2 text-lg font-semibold md:text-base">
+      <Package2 class="h-6 w-6" />
+      <span class="sr-only">LLaMa AI</span>
+    </a>
+  </nav>
+  <Sheet.Root>
+    <Sheet.Trigger asChild let:builder>
+      <Button
+        variant="outline"
+        size="icon"
+        class="shrink-0 md:hidden"
+        builders={[builder]}
+      >
+        <Menu class="h-5 w-5" />
+        <span class="sr-only">Toggle navigation menu</span>
+      </Button>
+    </Sheet.Trigger>
+    <Sheet.Content side="left">
+      <nav class="grid gap-6 text-lg font-medium">
+        <a href="##" class="flex items-center gap-2 text-lg font-semibold">
+          <Package2 class="h-6 w-6" />
+          <span class="sr-only">LLaMa AI</span>
+        </a>
+        {#each links as link}
+        <a
+          href={link.url}
+          class="{activeUrl === link.url ? 'text-foreground' : 'text-muted-foreground'} hover:text-foreground"
+        >
+          {link.name}
+        </a>
+      {/each}
+      </nav>
+    </Sheet.Content>
+  </Sheet.Root>
+  <div class="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
+    <div class="hidden ml-auto flex-1 flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6 sm:flex-initial md:block">
+      {#each links as link}
+        <a
+          href={link.url}
+          class="{activeUrl === link.url ? 'text-foreground' : 'text-muted-foreground'} transition-colors hover:text-foreground"
+        >
+          {link.name}
+        </a>
+      {/each}
+      <DarkMode btnClass="text-muted-foreground transition-colors hover:text-foreground" />
+    </div>
+    <div class="block md:hidden ml-auto flex-1 sm:flex-initial relative"></div>
+    {#if (env.PUBLIC_SKIP_AUTH === 'false' || !env.PUBLIC_SKIP_AUTH) && userName}
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger asChild let:builder>
+          <Button
+            builders={[builder]}
+            variant="ghost"
+            size="icon"
+            class="rounded-full"
+          >
+            <div class="w-8 h-8"><Avatar username={userName} /></div>
+            <span class="sr-only">Toggle user menu</span>
+          </Button>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content align="end">
+          <DropdownMenu.Label>
+            <span class="block text-sm"> {userName} </span>
+            <span class="block truncate text-sm font-medium"> {userEmail} </span>
+          </DropdownMenu.Label>
+          <DropdownMenu.Separator />
+          <DropdownMenu.Item href={env.PUBLIC_SSO_ACCOUNT_SETTINGS_URL} class="cursor-pointer">Settings</DropdownMenu.Item>
+          <DropdownMenu.Item href="/playground/api" class="cursor-pointer">API Keys</DropdownMenu.Item>
+          <DropdownMenu.Separator />
+          <DropdownMenu.Item href="/logout" class="cursor-pointer">Sign out</DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
     {/if}
-    <NavLi>
-      <DarkMode btnClass="" />
-    </NavLi>
-  </NavUl>
-</Navbar>
+  </div>
+</header>
 <div>
   <slot />
 </div>
