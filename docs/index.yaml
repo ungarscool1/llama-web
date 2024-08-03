@@ -1,0 +1,13 @@
+apiVersion: v1
+entries:
+  llama-web:
+  - created: 2024-08-03T23:05:00.078570269+02:00
+    description: First llama-web release
+    digest: cd99842d96eec99e1ef9ddcbcf766ceccb666a6f89c607fbbc1dcbe3f1f1a6c4
+    home: https://github.com/ungarscool1/llama-web
+    name: llama-web
+    sources:
+    - https://github.com/ungarscool1/llama-web
+    urls:
+    - chart-0.1.0.tgz
+    version: 0.1.0
