@@ -1,0 +1,123 @@
+# Default values for chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+client:
+  enabled: true
+  image:
+    repository: ghcr.io/ungarscool1/llama-web
+    pullPolicy: IfNotPresent
+    tag: client
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  # fsGroup: 2000
+  securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+  livenessProbe:
+    enabled: true
+  readinessProbe:
+    enabled: true
+  authentication:
+    enabled: false
+    # sso_realm: ""
+    # sso_server: ""
+    # sso_client_id: ""
+    # sso_settings_url: ""
+  quickMessages:
+    - icon: "square-terminal"
+      message: "Make a python script to sort numbers"
+    - icon: "egg"
+      message: "How to know if an egg still eatable?"
+    - icon: "luggage"
+      message: "What can I visite in Rome?"
+    - icon: "shirt"
+      message: "What can I wear with a blue shirt?"
+    - icon: "tv"
+      message: "What can I see in the same vibe as The Office?"
+  # api:
+  #   host: ""
+  #   port: 3000
+  #   path: ""
+  #env:
+  #  - name: ""
+  #    value: ""
+  #envFrom:
+  #  - secretRef:
+  #      name: ""
+
+api:
+  enabled: true
+  image:
+    repository: ghcr.io/ungarscool1/llama-web
+    pullPolicy: IfNotPresent
+    tag: api
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  # fsGroup: 2000
+  securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+  resources: {}
+    # limits:
+    #   cpu: 4000m
+    #   memory: 16384Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 4096Mi
+  livenessProbe:
+    enabled: true
+  readinessProbe:
+    enabled: true
+  authentication:
+    enabled: false
+    # jwtKey: "" # base64 encoded key
+  alternativeComputeBackend: false
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+ingress:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  apiAnnotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  host: llama.127.0.0.1.nip.io
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+volumes:
+  database:
+    size: 1Gi
+    storageClass: "hostpath"
+    accessModes:
+      - ReadWriteOnce
+    annotations: {}
+  models:
+    size: 15Gi
+    storageClass: "hostpath"
+    accessModes:
+      - ReadWriteMany
+    annotations: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

@@ -1,0 +1,47 @@
+{{ if .Values.client.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-client-configmap
+data:
+  PUBLIC_SKIP_AUTH: {{ eq .Values.client.authentication.enabled false | quote }}
+  {{- if .Values.client.authentication.enabled }}
+    {{- if .Values.client.authentication.sso_realm }}
+  PUBLIC_SSO_REALM: {{ .Values.client.authentication.sso_realm }}
+    {{- end }}
+    {{- if .Values.client.authentication.sso_server }}
+  PUBLIC_SSO_SERVER: {{ .Values.client.authentication.sso_server }}
+    {{- end }}
+    {{- if .Values.client.authentication.sso_client_id }}
+  PUBLIC_CLIENT_ID: {{ .Values.client.authentication.sso_client_id }}
+    {{- end }}
+    {{- if .Values.client.authentication.sso_settings_url }}
+  PUBLIC_SSO_ACCOUNT_SETTINGS_URL: {{ .Values.client.authentication.sso_settings_url }}
+    {{- end }}
+  {{- end }}
+  {{- if .Values.client.quickMessages }}
+  PUBLIC_QUICK_MESSAGES: {{ .Values.client.quickMessages | toJson | quote }}
+  {{- end }}
+  {{- if .Values.client.api }}
+  PUBLIC_API_URL: {{ .Values.client.api.host }}:{{ .Values.client.api.port }}{{ .Values.client.api.path }}
+  {{- else }}
+  PUBLIC_API_URL: https://{{ .Values.ingress.host }}/api
+  {{- end }}
+{{ end }}
+---
+{{ if .Values.api.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-api-configmap
+data:
+  PORT: "3000"
+  LLAMA_PATH: "/app/llama.cpp/main"
+  LLAMA_EMBEDDING_PATH: "/app/llama.cpp/embedding"
+  MODELS_DIR: "/models"
+  DB: "mongodb://{{ .Release.Name }}-database.{{.Release.Namespace}}.svc.cluster.local:27017"
+  NODE_ENV: "production"
+  JWT_PUBLIC_KEY: "/key/jwt.pem"
+  SKIP_AUTH: {{ eq .Values.api.authentication.enabled false | quote }}
+  ALLOW_ALTERNATIVE_COMPUTE_BACKEND: {{ eq .Values.api.alternativeComputeBackend false | quote }}
+{{ end }}

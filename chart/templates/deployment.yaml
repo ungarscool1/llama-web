@@ -1,0 +1,132 @@
+{{ if .Values.client.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-client
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  replicas: 1 # No need to scale the client
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-client
+  template:
+    metadata:
+      annotations:
+        {{- with .Values.client.annotations }}
+        {{ toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        app: {{ .Release.Name }}-client
+        {{- with .Values.client.labels }}
+        {{ toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ .Release.Name }}-sa
+      containers:
+        - name: {{ .Release.Name }}-client
+          image: "{{ .Values.client.image.repository }}:{{ .Values.client.image.tag }}"
+          imagePullPolicy: {{ .Values.client.image.pullPolicy }}
+          ports:
+            - containerPort: 3000
+          env:
+          {{- with .Values.client.env }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-client-configmap
+          {{- with .Values.client.envFrom }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+{{ end }}
+---
+{{ if .Values.api.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-api
+  labels:
+    app: {{ .Release.Name }}-api
+spec:
+  replicas: 1 # Do not scale the API for now, not supported yet
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-api
+  template:
+    metadata:
+      annotations:
+        {{- with .Values.api.annotations }}
+        {{ toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        app: {{ .Release.Name }}-api
+        {{- with .Values.api.labels }}
+        {{ toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ .Release.Name }}-sa
+      containers:
+        - name: {{ .Release.Name }}-api
+          image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
+          imagePullPolicy: {{ .Values.api.image.pullPolicy }}
+          ports:
+            - containerPort: 3000
+          env:
+          {{- with .Values.api.env }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-api-configmap
+          {{- with .Values.api.envFrom }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: models
+              mountPath: /models
+            {{- if and .Values.api.authentication.enabled .Values.api.authentication.jwt }}
+            - name: key
+              mountPath: /key
+            {{- end }}
+      volumes:
+        - name: models
+          persistentVolumeClaim:
+            claimName: models-pvc
+        {{- if and .Values.api.authentication.enabled .Values.api.authentication.jwt }}
+        - name: key
+          secret:
+            secretName: {{ .Release.Name }}-jwt-key
+        {{- end }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-database
+  labels:
+    app: {{ .Release.Name }}-database
+spec:
+  replicas: 1 # Do not scale the database, not supported.
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-database
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-database
+    spec:
+      serviceAccountName: {{ .Release.Name }}-sa
+      containers:
+        - name: {{ .Release.Name }}-database
+          image: mongo:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: database
+              mountPath: /data/db
+      volumes:
+        - name: database
+          persistentVolumeClaim:
+            claimName: database-pvc
+{{ end }}

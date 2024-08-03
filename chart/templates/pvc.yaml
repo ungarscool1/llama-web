@@ -1,0 +1,20 @@
+{{ if .Values.api.enabled }}
+{{ range $key, $value := .Values.volumes }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $key }}-pvc
+  annotations:
+  {{- with $value.annotations }}
+  {{ toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  storageClassName: {{ $value.storageClass }}
+  accessModes:
+    {{- $value.accessModes | toYaml | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ $value.size }}
+---
+{{ end }}
+{{ end }}
