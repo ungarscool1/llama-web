@@ -3,7 +3,6 @@ import mongoose from 'mongoose';
 import * as yup from 'yup';
 import file from '../../utils/file';
 import compileTemplate from '../../utils/compileTemplate';
-import { getGroqModel } from '../../utils/providers/groq';
 import { Providers } from '../../types/Generation';
 
 var router = Router();
@@ -48,7 +47,6 @@ router.get('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   if (Object.values(Providers).includes(req.params.id.split('-')[0] as Providers)) {
-    const model = await getGroqModel(req.params.id.slice(5));
     return res.json({ message: `Cannot delete this model.` }).status(400);
   }
   const model = await mongoose.model('Models').findById(req.params.id);
