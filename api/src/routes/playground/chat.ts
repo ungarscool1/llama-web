@@ -76,26 +76,26 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   res.flushHeaders();
 
   let buffer = '';
-  child.data.on('data', (data) => {if (Object.values(Providers).includes(model.name.split('-')[0] as Providers)) {
-    buffer += data.toString();
-    let boundary = buffer.indexOf('\n');
-    while (boundary !== -1) {
-      const chunk = buffer.substring(0, boundary).trim();
-      buffer = buffer.substring(boundary + 1);
-      boundary = buffer.indexOf('\n');
-
-      if (chunk.startsWith('data: ')) {
-        const result = chunk.substring(6);
-        try {
-          JSON.parse(result).choices.forEach((choice: any) => {
-            res.write(choice.delta.content);
-            res.flushHeaders();
-          });
-        } catch (e) {}
+  child.data.on('data', (data) => {
+    if (Object.values(Providers).includes(model.name.split('-')[0] as Providers)) {
+      buffer += data.toString();
+      let boundary = buffer.indexOf('\n');
+      while (boundary !== -1) {
+        const chunk = buffer.substring(0, boundary).trim();
+        buffer = buffer.substring(boundary + 1);
+        boundary = buffer.indexOf('\n');
+        if (chunk.startsWith('data: ')) {
+          const result = chunk.substring(6);
+          try {
+            JSON.parse(result).choices.forEach((choice: any) => {
+              res.write(choice.delta.content);
+              res.flushHeaders();
+            });
+          } catch (e) {}
+        }
       }
+      return;
     }
-    return;
-  }
     if (model.alternativeBackend) {
       res.write(data.toString());
       res.flushHeaders();

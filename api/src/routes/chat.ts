@@ -47,19 +47,9 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     }
     messages = chat.messages;
   }
-  if (!payload.model.startsWith('groq-')) {
-    model = await mongoose.model('Models').findOne<IModel>({ name: payload.model });
-    if (!model) {
-      return res.status(400).json({ message: 'Model not found' });
-    }
-  } else {
-    model = {
-      name: payload.model,
-      createdAt: new Date(),
-      alternativeBackend: true,
-      parameters: {},
-      path: 'groq.com'
-    } as IModel;
+  model = await mongoose.model('Models').findOne<IModel>({ name: payload.model });
+  if (!model) {
+    return res.status(400).json({ message: 'Model not found' });
   }
   messages.push({ message: payload.message, role: Role.user });
   try {

@@ -215,18 +215,17 @@ export class Generation {
           const chunk = buffer.substring(0, boundary).trim();
           buffer = buffer.substring(boundary + 1);
           boundary = buffer.indexOf('\n');
-
           if (chunk.startsWith('data: ')) {
             const result = chunk.substring(6);
             try {
               JSON.parse(result).choices.forEach((choice: any) => {
+                if (choice.delta.content == undefined)
+                  return;
                 response += choice.delta.content;
                 res.write(choice.delta.content);
                 res.flushHeaders();
               });
-            } catch (e) {
-              console.error(e);
-            }
+            } catch (e) {}
           }
         }
         return;
