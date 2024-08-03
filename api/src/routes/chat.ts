@@ -32,6 +32,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   });
   let payload: yup.InferType<typeof schema>;
   let messages: Array<Message> = [];
+  let model: IModel | null = null;
 
   try {
     payload = schema.validateSync(req.body);
@@ -46,13 +47,23 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     }
     messages = chat.messages;
   }
-  const model = await mongoose.model('Models').findOne<IModel>({ name: payload.model });
-  if (!model) {
-    return res.status(400).json({ message: 'Model not found' });
+  if (!payload.model.startsWith('groq-')) {
+    model = await mongoose.model('Models').findOne<IModel>({ name: payload.model });
+    if (!model) {
+      return res.status(400).json({ message: 'Model not found' });
+    }
+  } else {
+    model = {
+      name: payload.model,
+      createdAt: new Date(),
+      alternativeBackend: true,
+      parameters: {},
+      path: 'groq.com'
+    } as IModel;
   }
   messages.push({ message: payload.message, role: Role.user });
   try {
-    generation.generationWrapper(messages, model, res, req.user, payload.id);
+    generation.generationWrapper(messages, model as IModel, res, req.user, payload.id);
   } catch (e) {
     return res.status(500).json({ message: 'Something went wrong' });
   }

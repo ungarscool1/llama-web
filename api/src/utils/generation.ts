@@ -1,15 +1,16 @@
 import { spawn, spawnSync } from 'child_process';
-import { Readable } from 'stream';
 import axios from 'axios';
 import { Message, Role } from '../types/Message';
 import { IModel } from '../models/model';
 import * as express from 'express';
 import { IUser } from '../types/express';
+import { GenerationOutput, Providers } from '../types/Generation';
 import mongoose from 'mongoose';
 
 import { createOrUpdateChat } from './createOrUpdateChat';
 import compileTemplate from './compileTemplate';
 import { IPrompt } from '../models/prompt';
+import { getGroqChatCompletion } from './providers/groq';
 
 type GenerationOptions = {
   executablePath: string;
@@ -32,12 +33,6 @@ type LaunchOptions = {
 };
 
 type LaunchOptionsLow = Omit<LaunchOptions, 'interactive'|'prompt'|'threads'>;
-
-export type GenerationOutput = {
-  data: Readable;
-  stderr?: Readable;
-  kill: () => void;
-}
 
 interface ChatProcess {
   user: string;
@@ -150,15 +145,18 @@ export class Generation {
    * @param messages The conversation history
    * @returns Buffer
    */
-  async generateCompletionAlt(messages: Message[], modelPath: string, authentication: string, system: string): Promise<GenerationOutput> {
+  async generateCompletionAlt(messages: Message[], model: IModel, system: string): Promise<GenerationOutput> {
     const cancelToken = axios.CancelToken.source();
     messages.unshift({ role: Role.system, message: system });
-    const axiosRes = await axios.post(`${modelPath}/completion`, {
+    if (model.name.startsWith('groq-')) {
+      return getGroqChatCompletion(model.name, messages);
+    }
+    const axiosRes = await axios.post(`${model.path}/completion`, {
       messages: messages.map(m => ({ role: m.role, content: m.message }))
     }, {
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authentication}`
+        'Authorization': `Bearer ${model.parameters.authentication}`
       },
       responseType: 'stream',
       cancelToken: cancelToken.token
@@ -199,7 +197,7 @@ export class Generation {
         interactive: false,
       });
     } else {
-      child = await this.generateCompletionAlt(messages, model.path, model.parameters.authentication as string, system);
+      child = await this.generateCompletionAlt(messages, model, system);
     }
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
@@ -208,7 +206,29 @@ export class Generation {
       'X-Accel-Buffering': 'no'
     });
     res.flushHeaders();
+    let buffer = '';
     child.data.on('data', (data) => {
+      if (Object.values(Providers).includes(model.name.split('-')[0] as Providers)) {
+        buffer += data.toString();
+        let boundary = buffer.indexOf('\n');
+        while (boundary !== -1) {
+          const chunk = buffer.substring(0, boundary).trim();
+          buffer = buffer.substring(boundary + 1);
+          boundary = buffer.indexOf('\n');
+
+          if (chunk.startsWith('data: ')) {
+            const result = chunk.substring(6);
+            try {
+              JSON.parse(result).choices.forEach((choice: any) => {
+                response += choice.delta.content;
+                res.write(choice.delta.content);
+                res.flushHeaders();
+              });
+            } catch (e) {}
+          }
+        }
+        return;
+      }
       if (!model.alternativeBackend && ignoreIndex < prompt.replaceAll(/<\/?s>/g, '').trim().length) {
         ignoreIndex += data.toString().length;
         return;
