@@ -3,6 +3,7 @@ import { IModel } from "../../models/model";
 import { Message } from '../../types/Message';
 import { GenerationOutput } from '../../types/Generation';
 import mongoose from 'mongoose';
+import { Readable } from 'stream';
 
 export async function getGroqModels(): Promise<Array<IModel>> {
   const models = await axios.get(`https://api.groq.com/openai/v1/models`, {
@@ -40,24 +41,34 @@ export async function getGroqModel(id: string): Promise<IModel> {
 
 export async function getGroqChatCompletion(model: string, messages: Array<Message>): Promise<GenerationOutput> {
   const cancelToken = axios.CancelToken.source();
-  const completion = await axios.post(`https://api.groq.com/openai/v1/chat/completions`, {
-    model: model.substring(5),
-    messages: messages.map(m => ({ role: m.role, content: m.message })),
-    stream: true
-  }, {
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
-    },
-    responseType: 'stream',
-  });
-  return {
-    data: completion.data,
-    stderr: undefined,
-    kill: () => (
-      cancelToken.cancel('Generation cancelled')
-    )
-  };
+  try {
+    const completion = await axios.post(`https://api.groq.com/openai/v1/chat/completions`, {
+      model: model.substring(5),
+      messages: messages.map(m => ({ role: m.role, content: m.message })),
+      stream: true
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+      },
+      responseType: 'stream',
+    });
+    return {
+      data: completion.data,
+      stderr: undefined,
+      kill: () => (
+        cancelToken.cancel('Generation cancelled')
+      )
+    };
+  } catch (e) {
+    return {
+      data: Readable.from('data: {"choices": [{"delta":{"content": "<!--ERROR: An error occured while requesting completion from groq provider-->"}}]}\n'),
+      stderr: undefined,
+      kill: () => (
+        cancelToken.cancel('Generation cancelled')
+      )
+    };
+  }
 }
 
 export async function saveGroqModels(): Promise<void> {

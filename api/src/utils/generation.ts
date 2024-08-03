@@ -224,7 +224,9 @@ export class Generation {
                 res.write(choice.delta.content);
                 res.flushHeaders();
               });
-            } catch (e) {}
+            } catch (e) {
+              console.error(e);
+            }
           }
         }
         return;
@@ -246,6 +248,10 @@ export class Generation {
     }
   
     child.data.on('close', async () => {
+      if (response.startsWith('<!--ERROR:')) {
+        res.end();
+        return;
+      }
       try {
         let newId = await createOrUpdateChat([
           messages.pop() as Message,
