@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { Generation, GenerationOutput } from '../../utils/generation';
+import { Generation } from '../../utils/generation';
+import { GenerationOutput } from '../../types/Generation';
 import * as yup from 'yup';
 import mongoose from 'mongoose';
 

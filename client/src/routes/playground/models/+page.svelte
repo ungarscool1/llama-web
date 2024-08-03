@@ -97,23 +97,27 @@
           <Table.Cell>{model.name}</Table.Cell>
           <Table.Cell>{model.path}</Table.Cell>
           <Table.Cell>{new Date(model.createdAt).toLocaleString()}</Table.Cell>
-          <Table.Cell class="flex"><button
-            class="flex btn btn-ghost btn-sm mr-2"
-            on:click|preventDefault={() => {
-              editId = model.id;
-              editModel = true;
-            }}
-          >
-          <Icon name="pen" class="size-4" />
-          </button>
-        <button
-          class="flex btn btn-ghost btn-sm"
-          on:click|preventDefault={() => {
-            deleteModel(model.id);
-          }}
-        >
-          <Icon name="trash-2" class="size-4" />
-        </button></Table.Cell>
+          <Table.Cell class="flex">
+            {#if !model.name.startsWith('groq-') }
+            <button
+              class="flex btn btn-ghost btn-sm mr-2"
+              on:click|preventDefault={() => {
+                editId = model.id;
+                editModel = true;
+              }}
+            >
+              <Icon name="pen" class="size-4" />
+            </button>
+            <button
+              class="flex btn btn-ghost btn-sm"
+              on:click|preventDefault={() => {
+                deleteModel(model.id);
+              }}
+            >
+              <Icon name="trash-2" class="size-4" />
+            </button>
+            {/if}
+          </Table.Cell>
         </Table.Row>
       {/each}
     </Table.Body>
