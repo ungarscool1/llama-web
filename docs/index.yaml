@@ -3,11 +3,11 @@ entries:
   llama-web:
   - created: 2024-08-03T23:05:00.078570269+02:00
     description: First llama-web release
-    digest: b6ba6786280f48a8fde4c2218ea2e79dcfab4a89a68dcbf609ae83ef4a23a20b
+    digest: df89b178415c7b3ce30435a467345a4d8737ee7e57e2164196d74a78370c069d
     home: https://github.com/ungarscool1/llama-web
     name: llama-web
     sources:
     - https://github.com/ungarscool1/llama-web
     urls:
-    - chart-0.1.0.tgz
+    - llama-web-0.1.0.tgz
     version: 0.1.0
