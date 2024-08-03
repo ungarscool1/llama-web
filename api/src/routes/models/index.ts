@@ -3,28 +3,31 @@ import mongoose from 'mongoose';
 import * as yup from 'yup';
 import file from '../../utils/file';
 import compileTemplate from '../../utils/compileTemplate';
+import { Providers } from '../../types/Generation';
 
 var router = Router();
 
 router.get('/', async (req, res) => {
   const models = await mongoose.model('Models').find();
+  let result = [];
   models.sort((a, b) => {
     if (a.createdAt > b.createdAt) {
-      return 1;
+      return -1;
     }
     if (a.createdAt < b.createdAt) {
-      return -1;
+      return 1;
     }
     return 0;
   });
-  res.json(models.map((model) => ({
+  result = models.map((model) => ({
     id: model._id,
     name: model.name,
     path: model.alternativeBackend ? model.path :
       `${process.env.MODELS_DIR}/${model.path}`,
     alternativeBackend: model.alternativeBackend,
     createdAt: model.createdAt
-  })));
+  }))
+  res.json(result);
 });
 
 router.get('/:id', async (req, res) => {
@@ -43,6 +46,9 @@ router.get('/:id', async (req, res) => {
 });
 
 router.delete('/:id', async (req, res) => {
+  if (Object.values(Providers).includes(req.params.id.split('-')[0] as Providers)) {
+    return res.json({ message: `Cannot delete this model.` }).status(400);
+  }
   const model = await mongoose.model('Models').findById(req.params.id);
   if (!model) {
     return res.status(404).json({ message: 'Model not found' });
@@ -66,6 +72,9 @@ router.post('/', async (req, res) => {
     payload = schema.validateSync(req.body)
   } catch (e) {
     return res.status(400).json({ message: 'Missing required fields' });
+  }
+  if (Object.values(Providers).includes(payload.name.split('-')[0] as Providers)) {
+    return res.status(400).json({ message: 'Invalid model name' });
   }
   if (!payload.alternativeBackend) {
     if (!payload.promptTemplate) {
@@ -115,6 +124,9 @@ router.patch('/:id', async (req, res) => {
   } catch (e) {
     console.error(e, req.body)
     return res.status(400).json({ message: 'Bad request' });
+  }
+  if (Object.values(Providers).includes(req.params.id.split('-')[0] as Providers)) {
+    return res.status(400).json({ message: 'Cannot update this model.' });
   }
   try {
     if (payload.promptTemplate)

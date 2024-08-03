@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { Generation, GenerationOutput } from '../../utils/generation';
+import { Generation } from '../../utils/generation';
+import { GenerationOutput, Providers } from '../../types/Generation';
 import * as yup from 'yup';
 import mongoose from 'mongoose';
 import compileTemplate from '../../utils/compileTemplate';
@@ -60,7 +61,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
         interactive: false,
       });
     } else {
-      child = await generation.generateCompletionAlt(payload.messages, model.path, model.parameters.authentication, payload.system);
+      child = await generation.generateCompletionAlt(payload.messages, model, payload.system);
     }
   } catch (e) {
     return res.status(500).json({ message: 'Something went wrong' });
@@ -74,7 +75,27 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   res.status(200);
   res.flushHeaders();
 
+  let buffer = '';
   child.data.on('data', (data) => {
+    if (Object.values(Providers).includes(model.name.split('-')[0] as Providers)) {
+      buffer += data.toString();
+      let boundary = buffer.indexOf('\n');
+      while (boundary !== -1) {
+        const chunk = buffer.substring(0, boundary).trim();
+        buffer = buffer.substring(boundary + 1);
+        boundary = buffer.indexOf('\n');
+        if (chunk.startsWith('data: ')) {
+          const result = chunk.substring(6);
+          try {
+            JSON.parse(result).choices.forEach((choice: any) => {
+              res.write(choice.delta.content);
+              res.flushHeaders();
+            });
+          } catch (e) {}
+        }
+      }
+      return;
+    }
     if (model.alternativeBackend) {
       res.write(data.toString());
       res.flushHeaders();

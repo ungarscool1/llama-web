@@ -42,7 +42,8 @@
     });
     
     if (!req.ok) return goto('/');
-    models = await req.json();
+    const result = await req.json();
+    models = result.filter((model) => !model.name.includes('whisper'));
     selectedModel = {value: models[0].name, label: models[0].name};
   }
   function takeThreeRandomQuickMessages(): Array<quickMessage> {
