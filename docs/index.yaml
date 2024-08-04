@@ -2,12 +2,12 @@ apiVersion: v1
 entries:
   llama-web:
   - apiVersion: v2
-    created: "2024-08-03T23:35:31.944747+02:00"
+    created: "2024-08-04T13:01:45.389132+02:00"
     description: Your super AI chat web application
-    digest: b8039970663d8f375906ecf3f229854492fcac366aea29a509457295ab534691
+    digest: 7d14e7beae202fa4c1cda3d0eaee874897dc33b55c85ca65c7c25264e6980ce5
     name: llama-web
     type: application
     urls:
     - llama-web-0.1.0.tgz
     version: 0.1.0
-generated: "2024-08-03T23:35:31.944082+02:00"
+generated: "2024-08-04T13:01:45.38719+02:00"

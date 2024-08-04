@@ -31,15 +31,15 @@ client:
     # sso_settings_url: ""
   quickMessages:
     - icon: "square-terminal"
-      message: "Make a python script to sort numbers"
+      text: "Make a python script to sort numbers"
     - icon: "egg"
-      message: "How to know if an egg still eatable?"
+      text: "How to know if an egg still eatable?"
     - icon: "luggage"
-      message: "What can I visite in Rome?"
+      text: "What can I visite in Rome?"
     - icon: "shirt"
-      message: "What can I wear with a blue shirt?"
+      text: "What can I wear with a blue shirt?"
     - icon: "tv"
-      message: "What can I see in the same vibe as The Office?"
+      text: "What can I see in the same vibe as The Office?"
   # api:
   #   host: ""
   #   port: 3000
