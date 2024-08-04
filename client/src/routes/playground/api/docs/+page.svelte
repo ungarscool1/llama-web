@@ -44,7 +44,7 @@
         messages: [
           {
             message: 'string',
-            role: 'human|assistant'
+            role: 'user|assistant'
           }]
       },
       headers: [
