@@ -5,6 +5,7 @@
   import Avatar from '../../../../components/chat/avatar.svelte';
   import List from './components/list.svelte';
   import Quote from './components/quote.svelte';
+  import Heading from './components/heading.svelte';
   import Bubble from './components/bubble.svelte';
   import Alert from '$lib/components/playground/alert/alert.svelte';
 
@@ -39,6 +40,7 @@
         <Alert errorMessage={message.message.replace('<!--ERROR: ', '').replace('-->', '')}/>
       {:else}
         {#each tokens as token}
+          {token.type}
           {#if token.type === "code"}
             <Codeblock code={unsanitize(token.text)} language={token.lang} />
           {:else if token.type === "table"}
@@ -47,6 +49,8 @@
             <List ordered={token.ordered} items={token.items} />
           {:else if token.type === "blockquote"}
             <Quote quote={token.text} />
+          {:else if token.type === "heading"}
+            <Heading level={token.depth} text={token.text} />
           {:else}
             {@html marked.parse(token.raw)}
           {/if}
