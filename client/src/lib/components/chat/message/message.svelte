@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as marked from 'marked';
-  import Codeblock from './components/codeblock.svelte';
+  import Codeblock from './components/codeblock/codeblock.svelte';
   import Table from './components/table.svelte';
   import Avatar from '../../../../components/chat/avatar.svelte';
   import List from './components/list.svelte';
