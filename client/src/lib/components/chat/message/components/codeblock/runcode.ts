@@ -56,3 +56,28 @@ export async function runRubyCode(code: string): Promise<RunCodeResult> {
   });
   return result;
 }
+
+export async function runPhpCode(code: string): Promise<RunCodeResult> {
+  const result = {
+    output: '',
+    error: ''
+  }
+  const runnable = await WASI.start(fetch("/public/code/php.wasm"), {
+    args: ['php', '/home/playground/index.php'],
+    stdout: (data: string) => result.output += data,
+    stderr: (data: string) => result.error += data,
+    fs: {
+      "/home/playground/index.php": {
+        path: "/home/playground/index.php",
+        timestamps: {
+          access: new Date(),
+          change: new Date(),
+          modification: new Date(),
+        },
+        mode: "string",
+        content: code,
+      }
+    },
+  });
+  return result;
+}
