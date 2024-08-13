@@ -46,7 +46,7 @@
           {:else if token.type === "list"}
             <List ordered={token.ordered} items={token.items} />
           {:else if token.type === "blockquote"}
-            <Quote quote={token.raw} />
+            <Quote quote={token.text} />
           {:else}
             {@html marked.parse(token.raw)}
           {/if}
