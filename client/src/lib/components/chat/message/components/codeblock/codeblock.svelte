@@ -3,7 +3,7 @@
   import * as Tooltip from "$lib/components/ui/tooltip/index.js";
   import Icon from "$lib/components/ui/icon/icon.svelte";
   import hljs from 'highlight.js';
-  import { runPythonCode, runLuaCode, type RunCodeResult } from './runcode';
+  import { runPythonCode, runLuaCode, runRubyCode, type RunCodeResult } from './runcode';
   
   export let code: string;
   export let language: string;
@@ -22,6 +22,10 @@
         break;
       case 'lua':
         result = await runLuaCode(code);
+        runOutput = result.error || result.output;
+        break;
+      case 'ruby':
+        result = await runRubyCode(code);
         runOutput = result.error || result.output;
         break;
       default:

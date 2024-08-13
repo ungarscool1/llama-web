@@ -12,7 +12,8 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-l
 FROM base AS build
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 RUN curl -L https://unpkg.com/@antonz/python-wasi/dist/python.wasm -o static/public/code/python.wasm && \
-    curl -L https://unpkg.com/@antonz/lua-wasi/dist/lua.wasm -o static/public/code/lua.wasm
+curl -L https://unpkg.com/@antonz/lua-wasi/dist/lua.wasm -o static/public/code/lua.wasm && \
+curl -L https://unpkg.com/@antonz/ruby-wasi/dist/ruby.wasm -o static/public/code/ruby.wasm
 RUN pnpm run build
 
 FROM base

@@ -31,16 +31,26 @@ export async function runPythonCode(code: string): Promise<RunCodeResult> {
   return result;
 }
 
-
-
 export async function runLuaCode(code: string): Promise<RunCodeResult> {
   const result = {
     output: '',
     error: ''
   }
-  const dependencies = getPythonDependencies(code);
   const runnable = await WASI.start(fetch("/public/code/lua.wasm"), {
     args: ['lua', '-e', code],
+    stdout: (data: string) => result.output += data,
+    stderr: (data: string) => result.error += data,
+  });
+  return result;
+}
+
+export async function runRubyCode(code: string): Promise<RunCodeResult> {
+  const result = {
+    output: '',
+    error: ''
+  }
+  const runnable = await WASI.start(fetch("/public/code/ruby.wasm"), {
+    args: ['ruby', '-e', code],
     stdout: (data: string) => result.output += data,
     stderr: (data: string) => result.error += data,
   });
