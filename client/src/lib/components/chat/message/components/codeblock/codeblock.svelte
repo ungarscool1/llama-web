@@ -4,6 +4,7 @@
   import Icon from "$lib/components/ui/icon/icon.svelte";
   import hljs from 'highlight.js';
   import { runPythonCode, runLuaCode, runRubyCode, runPhpCode, type RunCodeResult } from './runcode';
+  import { env } from "$env/dynamic/public";
   
   export let code: string;
   export let language: string;
@@ -38,6 +39,10 @@
     }
   }
 </script>
+
+{#if env.PUBLIC_PYTHON_ENV === 'pyodide'}
+  <script async src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
+{/if}
 
 <div class="bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md">
   <div class="flex flex-row justify-between my-2 mx-4">
