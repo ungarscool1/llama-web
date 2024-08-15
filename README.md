@@ -105,9 +105,9 @@ docker-compose up -d
 The code execution use a thing called Web assembly, who execute the code in a sandboxed environment directly in your browser.
 
 Supported languages:
-- Python (limited 3.12.0 or pyodide 0.26.2)
-- Lua (5.4.5)
-- Ruby (3.2.2)
-- PHP (8.2.6)
+- Python ([limited](https://github.com/vmware-labs/webassembly-language-runtimes/releases/download/python%2F3.12.0%2B20231211-040d5a6/python-3.12.0.wasm) 3.12.0 or pyodide 0.26.2)
+- [Lua](https://unpkg.com/@antonz/lua-wasi/dist/lua.wasm) (5.4.5)
+- [Ruby](https://github.com/vmware-labs/webassembly-language-runtimes/releases/download/ruby%2F3.2.2%2B20230714-11be424/ruby-3.2.2.wasm) (3.2.2)
+- [PHP](https://github.com/vmware-labs/webassembly-language-runtimes/releases/download/php%2F8.2.6%2B20230714-11be424/php-cgi-8.2.6.wasm) (8.2.6)
 
-You have the choice between pyodide and python. Pyodide is a python interpreter compiled to WebAssembly, it is slower than the python interpreter, because pyodide can download the python packages from the internet and pyodide is not included in the app.
+You have the choice between pyodide and python. Both are python interpreter compiled to WebAssembly, but pyodide can be slower than the other, because pyodide can download the python packages from the internet and pyodide is not included in the app.

@@ -10,12 +10,14 @@
   export let language: string;
   $: highlightedCode = hljs.highlightAuto(code);
   $: runOutput = '';
+  $: runningCode = false;
   function copyToClipboard() {
     navigator.clipboard.writeText(code);
   }
   const runnableLanguages = ['javascript', 'lua', 'php', 'python', 'ruby'];
   const runCode = async () => {
     let result: RunCodeResult;
+    runningCode = true;
     switch (language) {
       case 'python':
         result = await runPythonCode(code);
@@ -37,6 +39,7 @@
         console.error(`Language ${language} is not supported`);
         break;
     }
+    runningCode = false;
   }
 </script>
 
@@ -61,8 +64,12 @@
       {#if runnableLanguages.includes(language)}
       <Tooltip.Root>
         <Tooltip.Trigger asChild let:builder>
-          <Button on:click={runCode} builders={[builder]} variant="link" class="h-auto w-auto px-0 py-0">
-            <Icon name="play" class="w-4 h-4 text-gray-400" />
+          <Button on:click={runCode} builders={[builder]} variant="link" disabled={runningCode} class="h-auto w-auto px-0 py-0">
+            {#if runningCode}
+              <Icon name="loader" class="w-4 h-4 text-gray-400 animate-spin" />
+            {:else}
+              <Icon name="play" class="w-4 h-4 text-gray-400" />
+            {/if}
           </Button>
         </Tooltip.Trigger>
         <Tooltip.Content>
