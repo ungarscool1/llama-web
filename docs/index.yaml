@@ -2,16 +2,16 @@ apiVersion: v1
 entries:
   llama-web:
   - apiVersion: v2
-    created: "2024-08-17T22:59:33.87404+02:00"
+    created: "2024-08-17T23:06:53.874781+02:00"
     description: Your super AI chat web application
-    digest: 58de466f84ce91c38f0671325d066695002e89d9232d05a0c715cd09ae54ce54
+    digest: f9fe7fed25256a7a36e14d3cc66f8ae3b7f1e66dc39cf6bc1ce03808db280180
     name: llama-web
     type: application
     urls:
     - llama-web-0.1.2.tgz
     version: 0.1.2
   - apiVersion: v2
-    created: "2024-08-17T22:59:33.873733+02:00"
+    created: "2024-08-17T23:06:53.874455+02:00"
     description: Your super AI chat web application
     digest: 9e9c1e6d8bbe226e20bceff4d1c0dba806a3fccc3abe4bfd4bdfa99f663e5f4a
     name: llama-web
@@ -20,7 +20,7 @@ entries:
     - llama-web-0.1.1.tgz
     version: 0.1.1
   - apiVersion: v2
-    created: "2024-08-17T22:59:33.873281+02:00"
+    created: "2024-08-17T23:06:53.87403+02:00"
     description: Your super AI chat web application
     digest: 7d14e7beae202fa4c1cda3d0eaee874897dc33b55c85ca65c7c25264e6980ce5
     name: llama-web
@@ -28,4 +28,4 @@ entries:
     urls:
     - llama-web-0.1.0.tgz
     version: 0.1.0
-generated: "2024-08-17T22:59:33.869858+02:00"
+generated: "2024-08-17T23:06:53.872991+02:00"

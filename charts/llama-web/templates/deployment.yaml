@@ -85,7 +85,11 @@ spec:
           volumeMounts:
             - name: models
               mountPath: /models
-            {{- if and .Values.api.authentication.enabled .Values.api.authentication.jwt }}
+            {{- if and .Values.api.authentication.enabled .Values.api.authentication.jwtKey }}
+            - name: key
+              mountPath: /key
+            {{- end }}
+            {{- if and .Values.api.authentication.enabled .Values.api.authentication.jwtSecretName }}
             - name: key
               mountPath: /key
             {{- end }}
