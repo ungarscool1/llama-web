@@ -4,6 +4,8 @@
   import Table from './components/table.svelte';
   import Avatar from '../../../../components/chat/avatar.svelte';
   import List from './components/list.svelte';
+  import Quote from './components/quote.svelte';
+  import Heading from './components/heading.svelte';
   import Bubble from './components/bubble.svelte';
   import Alert from '$lib/components/playground/alert/alert.svelte';
 
@@ -44,6 +46,10 @@
             <Table rows={token.rows} header={token.header} />
           {:else if token.type === "list"}
             <List ordered={token.ordered} items={token.items} />
+          {:else if token.type === "blockquote"}
+            <Quote quote={token.text} />
+          {:else if token.type === "heading"}
+            <Heading level={token.depth} text={token.text} />
           {:else}
             {@html marked.parse(token.raw)}
           {/if}
