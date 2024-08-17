@@ -92,11 +92,11 @@ serviceAccount:
   name: ""
 
 ingress:
-  annotations:
-    kubernetes.io/ingress.class: nginx
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-  apiAnnotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  apiAnnotations: {}
+    # nginx.ingress.kubernetes.io/rewrite-target: /$2
   host: llama.127.0.0.1.nip.io
   tls: []
   #  - secretName: chart-example-tls
