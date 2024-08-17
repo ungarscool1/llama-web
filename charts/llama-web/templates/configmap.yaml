@@ -43,5 +43,5 @@ data:
   NODE_ENV: "production"
   JWT_PUBLIC_KEY: "/key/jwt.pem"
   SKIP_AUTH: {{ eq .Values.api.authentication.enabled false | quote }}
-  ALLOW_ALTERNATIVE_COMPUTE_BACKEND: {{ eq .Values.api.alternativeComputeBackend false | quote }}
+  ALLOW_ALTERNATIVE_COMPUTE_BACKEND: {{ eq .Values.api.alternativeComputeBackend true | quote }}
 {{ end }}
