@@ -82,6 +82,7 @@ api:
   authentication:
     enabled: false
     # jwtKey: "" # base64 encoded key
+    # jwtSecretName: "" # If jwtKey is not set and authentication enabled, the secret must contain a key named jwt.pem
   alternativeComputeBackend: false
 
 serviceAccount:

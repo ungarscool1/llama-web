@@ -93,10 +93,15 @@ spec:
         - name: models
           persistentVolumeClaim:
             claimName: models-pvc
-        {{- if and .Values.api.authentication.enabled .Values.api.authentication.jwt }}
+        {{- if and .Values.api.authentication.enabled .Values.api.authentication.jwtKey }}
         - name: key
           secret:
             secretName: {{ .Release.Name }}-jwt-key
+        {{- end }}
+        {{- if and .Values.api.authentication.enabled .Values.api.authentication.jwtSecretName }}
+        - name: key
+          secret:
+            secretName: {{ .Values.api.authentication.jwtSecretName }}
         {{- end }}
 ---
 apiVersion: apps/v1
