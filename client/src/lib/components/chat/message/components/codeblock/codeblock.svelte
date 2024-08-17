@@ -9,7 +9,7 @@
   export let code: string;
   export let language: string;
   $: highlightedCode = hljs.highlightAuto(code);
-  $: runOutput = '';
+  let runOutput: RunCodeResult;
   $: runningCode = false;
   function copyToClipboard() {
     navigator.clipboard.writeText(code);
@@ -20,20 +20,16 @@
     runningCode = true;
     switch (language) {
       case 'python':
-        result = await runPythonCode(code);
-        runOutput = result.error || result.output;
+        runOutput = await runPythonCode(code);
         break;
       case 'lua':
-        result = await runLuaCode(code);
-        runOutput = result.error || result.output;
+        runOutput = await runLuaCode(code);
         break;
       case 'ruby':
-        result = await runRubyCode(code);
-        runOutput = result.error || result.output;
+        runOutput = await runRubyCode(code);
         break;
       case 'php':
-        result = await runPhpCode(code);
-        runOutput = result.error || result.output;
+        runOutput = await runPhpCode(code);
         break;
       default:
         console.error(`Language ${language} is not supported`);
@@ -83,7 +79,10 @@
     <pre><code>{@html highlightedCode.value.trim()}</code></pre>
     {#if runOutput}
       <hr class="border-gray-700 dark:border-gray-600 my-4" />
-      <pre><code>{runOutput}</code></pre>
+      <pre><code>{runOutput.error || runOutput.output}</code></pre>
+      {#if runOutput.image}
+        <img src={`data:image/png;base64,${runOutput.image}`} alt="Output" class="w-full" />
+      {/if}
     {/if}
   </div>
 </div>
