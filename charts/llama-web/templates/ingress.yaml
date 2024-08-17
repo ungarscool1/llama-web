@@ -35,10 +35,11 @@ spec:
     - host: {{ .Values.ingress.host }}
       http:
         paths:
-          {{- if .Values.ingress.apiAnnotations.nginx.ingress.kubernetes.io/rewrite-target }}
+          {{- if (index .Values.ingress.apiAnnotations "nginx.ingress.kubernetes.io/rewrite-target") }}
           - path: /api(/|$)(.*)
           {{- else }}
           - path: /api
+          {{- end }}
             pathType: ImplementationSpecific
             backend:
               service:
