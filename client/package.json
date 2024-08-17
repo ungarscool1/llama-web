@@ -39,7 +39,6 @@
 	"type": "module",
 	"dependencies": {
 		"@popperjs/core": "^2.11.8",
-		"@tailwindcss/typography": "^0.5.14",
 		"bits-ui": "^0.21.10",
 		"classnames": "^2.3.2",
 		"clsx": "^2.1.1",
