@@ -40,7 +40,6 @@
         <Alert errorMessage={message.message.replace('<!--ERROR: ', '').replace('-->', '')}/>
       {:else}
         {#each tokens as token}
-          {token.type}
           {#if token.type === "code"}
             <Codeblock code={unsanitize(token.text)} language={token.lang} />
           {:else if token.type === "table"}
