@@ -117,7 +117,7 @@
             >
               <Select.Value placeholder="Select a model" />
             </Select.Trigger>
-            <Select.Content>
+            <Select.Content class="max-h-[50vh] overflow-scroll">
               {#if models.length === 0}
                 <Select.Item value="loading">Loading...</Select.Item>
               {/if}
