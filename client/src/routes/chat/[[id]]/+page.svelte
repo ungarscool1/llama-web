@@ -106,7 +106,7 @@
   async function sendRequest() {
     const xhr = new XMLHttpRequest();
     const id = $page.params.id;
-    if (!isError && prompt.length === 0) {
+    if (!isError && prompt.trim().length === 0) {
       isPromptError = true;
       return;
     }
