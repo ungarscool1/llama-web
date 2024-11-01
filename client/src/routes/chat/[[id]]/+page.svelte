@@ -231,7 +231,7 @@
             <button
               class="absolute md:right-3 md:bottom-[0.6875rem] right-2 bottom-[0.6rem] inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 px-2 py-2"
               on:click|preventDefault={sendRequest}
-              disabled={prompt.length === 0}
+              disabled={prompt.trim().length === 0}
             >
               <Icon name="arrow-up" class="size-4" />
             </button>
