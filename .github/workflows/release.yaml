@@ -6,7 +6,7 @@ on:
 
 jobs:
   client:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./client
