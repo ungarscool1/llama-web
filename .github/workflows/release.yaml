@@ -10,7 +10,7 @@ jobs:
     defaults:
       run:
         working-directory: ./client
-    permissions: 
+    permissions:
       packages: write
     steps:
       - name: Checkout
@@ -30,14 +30,13 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
         run: |
-          docker build . --tag ghcr.io/ungarscool1/llama-web:client
-          docker push ghcr.io/ungarscool1/llama-web:client
+          docker buildx build . --tag ghcr.io/ungarscool1/llama-web:client --platform linux/amd64,linux/arm64 --push
   api:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./api
-    permissions: 
+    permissions:
       packages: write
     steps:
       - name: Checkout
@@ -57,5 +56,4 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
         run: |
-          docker build . --tag ghcr.io/ungarscool1/llama-web:api
-          docker push ghcr.io/ungarscool1/llama-web:api
+          docker buildx build . --tag ghcr.io/ungarscool1/llama-web:api --platform linux/amd64,linux/arm64 --push
