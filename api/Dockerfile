@@ -12,7 +12,11 @@ FROM base AS build
 RUN apt-get update && \
     apt-get install git gcc g++ make cmake -y
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-RUN git clone https://github.com/ggerganov/llama.cpp && \
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "aarch64" ]; then \
+        export UNAME_M=arm64 UNAME_p=arm LLAMA_NO_METAL=1; \
+    fi && \
+    git clone https://github.com/ggerganov/llama.cpp && \
     cd llama.cpp && \
     git checkout b3505 && \
     make -j
