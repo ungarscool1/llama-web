@@ -10,6 +10,7 @@ ENV NODE_OPTIONS=--max-old-space-size=8192
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
 
 FROM base AS build
+ENV NODE_OPTIONS=--max-old-space-size=8192
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 RUN pnpm run build
 
