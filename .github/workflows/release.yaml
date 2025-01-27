@@ -39,7 +39,8 @@ jobs:
         run: pnpm run build
       - name: Build and push
         run: |
-          docker buildx build . --tag ghcr.io/ungarscool1/llama-web:client --platform linux/amd64,linux/arm64 --push
+          docker buildx build . --tags ghcr.io/ungarscool1/llama-web/client:${{ github.event.release.tag_name }},ghcr.io/ungarscool1/llama-web/client:latest --platform linux/amd64,linux/arm64 --push
+
   api:
     runs-on: ubuntu-latest
     defaults:
@@ -50,14 +51,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      -
-        name: Set up QEMU
+      - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-      -
-        name: Set up Docker Buildx
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      -
-        name: Login to GHCR
+      - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -65,4 +63,4 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
         run: |
-          docker buildx build . --tag ghcr.io/ungarscool1/llama-web:api --platform linux/amd64,linux/arm64 --push
+          docker buildx build . --tags ghcr.io/ungarscool1/llama-web/api:${{ github.event.release.tag_name }},ghcr.io/ungarscool1/llama-web/api:latest --platform linux/amd64,linux/arm64 --push
