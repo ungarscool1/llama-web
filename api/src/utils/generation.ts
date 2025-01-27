@@ -207,6 +207,7 @@ export class Generation {
     });
     res.flushHeaders();
     let buffer = '';
+    let thinking = model.name.includes('deepseek');
     child.data.on('data', (data) => {
       if (Object.values(Providers).includes(model.name.split('-')[0] as Providers)) {
         buffer += data.toString();
@@ -221,6 +222,11 @@ export class Generation {
               JSON.parse(result).choices.forEach((choice: any) => {
                 if (choice.delta.content == undefined)
                   return;
+                if (thinking) {
+                  if (choice.delta.content.includes('</think>'))
+                    thinking = false;
+                  return;
+                }
                 response += choice.delta.content;
                 res.write(choice.delta.content);
                 res.flushHeaders();
