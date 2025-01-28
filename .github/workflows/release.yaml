@@ -39,7 +39,7 @@ jobs:
         run: pnpm run build
       - name: Build and push
         run: |
-          docker buildx build . --tags ghcr.io/ungarscool1/llama-web/client:${{ github.event.release.tag_name }},ghcr.io/ungarscool1/llama-web/client:latest --platform linux/amd64,linux/arm64 --push
+          docker buildx build . -t ghcr.io/ungarscool1/llama-web/client:${{ github.event.release.tag_name }} -t ghcr.io/ungarscool1/llama-web/client:latest --platform linux/amd64,linux/arm64 --push
 
   api:
     runs-on: ubuntu-latest
