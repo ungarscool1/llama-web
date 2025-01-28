@@ -63,4 +63,4 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
         run: |
-          docker buildx build . --tags ghcr.io/ungarscool1/llama-web/api:${{ github.event.release.tag_name }},ghcr.io/ungarscool1/llama-web/api:latest --platform linux/amd64,linux/arm64 --push
+          docker buildx build . -t ghcr.io/ungarscool1/llama-web/api:${{ github.event.release.tag_name }} -t ghcr.io/ungarscool1/llama-web/api:latest --platform linux/amd64,linux/arm64 --push
