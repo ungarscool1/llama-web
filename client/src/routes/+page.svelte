@@ -3,6 +3,7 @@
   import { env } from '$env/dynamic/public';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import Icon from '$lib/components/ui/icon/icon.svelte';
 
   let keycloak: Keycloak;
   onMount(() => {
@@ -30,9 +31,13 @@
     });
   });
 </script>
-{#if env.PUBLIC_SKIP_AUTH === 'false' || !env.PUBLIC_SKIP_AUTH}
-  <div class="grid h-screen place-items-center dark:text-white">
-    <h1 class="text-4xl font-bold">Login in progress</h1>
-    <p>This app require authentication</p>
+
+<div class="grid h-screen place-items-center dark:text-white">
+  <h1 class="text-4xl font-bold">Welcome to llama web</h1>
+  <div class="flex flex-col items-center">
+    {#if env.PUBLIC_SKIP_AUTH === 'false' || !env.PUBLIC_SKIP_AUTH}
+      <p>Login in progress</p>
+    {/if}
+    <Icon name="loader-circle" class="animate-spin" />
   </div>
-{/if}
+</div>

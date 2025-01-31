@@ -249,6 +249,7 @@ export class Generation {
     child.data.on('close', async () => {
       if (response.startsWith('<!--ERROR:')) {
         res.end();
+        this.chatsProcess.splice(this.chatsProcess.findIndex(c => c.user === user?.preferred_username), 1);
         return;
       }
       try {

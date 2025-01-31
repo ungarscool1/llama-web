@@ -1,6 +1,5 @@
 import { WASI } from '@antonz/runno';
 import { env } from '$env/dynamic/public';
-import { loadPyodide } from 'pyodide';
 
 export type RunCodeResult = {
   output: string;

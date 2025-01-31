@@ -64,7 +64,7 @@
     <Select.Trigger class="w-[180px]">
       <Select.Value placeholder="Select a model" />
     </Select.Trigger>
-    <Select.Content>
+    <Select.Content class="max-h-[50vh] overflow-scroll">
       <Select.Group>
         {#each models as model}
           <Select.Item value={model.name} label={model.name}>{model.name}</Select.Item>

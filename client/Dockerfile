@@ -2,11 +2,10 @@ FROM node:20-slim AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
-COPY . /app
 WORKDIR /app
 
 FROM base AS prod-deps
-ENV NODE_OPTIONS=--max-old-space-size=8192
+COPY package.json pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
 
 FROM base AS build
@@ -18,7 +17,8 @@ curl -L https://github.com/vmware-labs/webassembly-language-runtimes/releases/do
 RUN pnpm run build
 
 FROM base
+COPY build /app
 COPY --from=prod-deps /app/node_modules /app/node_modules
-COPY --from=build /app/build /app/build
+COPY package.json /app
 EXPOSE 3000
-CMD [ "node", "build" ]
+CMD [ "node", "." ]
