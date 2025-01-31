@@ -203,8 +203,8 @@
     >
       {#if messages.length > 0}
         <div class="lg:w-[75%]">
-          {#each messages as message}
-            <Message {message} username={userInfo.name} />
+          {#each messages as message, i}
+            <Message index={i} {message} username={userInfo.name} />
           {/each}
         </div>
       {:else}

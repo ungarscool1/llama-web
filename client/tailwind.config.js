@@ -14,6 +14,17 @@ const config = {
 			}
 		},
 		extend: {
+			animation: {
+        gradient: 'animatedgradient 2s ease infinite alternate',
+      },
+			backgroundSize: {
+        '300%': '300%',
+      },
+			borderRadius: {
+				lg: "var(--radius)",
+				md: "calc(var(--radius) - 2px)",
+				sm: "calc(var(--radius) - 4px)"
+			},
 			colors: {
 				border: "hsl(var(--border) / <alpha-value>)",
 				input: "hsl(var(--input) / <alpha-value>)",
@@ -49,14 +60,16 @@ const config = {
 					foreground: "hsl(var(--card-foreground) / <alpha-value>)"
 				}
 			},
-			borderRadius: {
-				lg: "var(--radius)",
-				md: "calc(var(--radius) - 2px)",
-				sm: "calc(var(--radius) - 4px)"
-			},
+			keyframes: {
+        animatedgradient: {
+          '0%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+          '100%': { backgroundPosition: '0% 50%' },
+        },
+      },
 			fontFamily: {
 				sans: [...fontFamily.sans]
-			}
+			},
 		}
 	},
 };

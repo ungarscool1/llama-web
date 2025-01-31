@@ -99,27 +99,3 @@ docker-compose up -d
 5. Press on `Use alternative compute backend`
 6. Enter the compute backend url (e.g. `https://my-alternative-compute-backend.domain.com`)
 7. Press on `Add the alternative backend model`
-
-### Deepseek models
-
-For deepseek models, you have to remove the `<think>.*</think>` part from the chat response. If you stream the response, you have to ignore the text between and including `<think>` and `</think>` tags. \
-This is already done for groq models but not for your very own remote models.
-
-Here is an example in JavaScript:
-```javascript
-const response = "<think>Some text</think>Some other text";
-const cleanedResponse = response.replace(/<think>.*?<\/think>/gs, "");
-console.log(cleanedResponse); // Some other text
-
-/// OR With streaming ///
-
-let thinking = true;
-
-// Stream the response
-// delta is the response from the model delta
-if (thinking) {
-  if (choice.delta.content.includes('</think>'))
-    thinking = false;
-  return;
-}
-```

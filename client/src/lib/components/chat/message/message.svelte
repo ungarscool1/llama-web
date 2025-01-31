@@ -7,6 +7,7 @@
   import Quote from './components/quote.svelte';
   import Heading from './components/heading.svelte';
   import Bubble from './components/bubble.svelte';
+  import Think from './components/think.svelte';
   import Alert from '$lib/components/playground/alert/alert.svelte';
 
   function sanitize(text: string) {
@@ -21,11 +22,20 @@
 	function unsanitize(text: string) {
 		return text.replaceAll("&lt;", "<");
 	}
+  function extractThinkText(text: string): string {
+    const regex = /<think>(.*)<\/think>/s;
+    const match = regex.exec(text);
+    return match ? match[1].trim() : '';
+  }
   export let message: {
     message: string;
     role: string;
   };
-  $: tokens = marked.lexer(sanitize(message.message));
+  export let index: number;
+  $: tokens = marked.lexer(sanitize(message.message.replace(/<think>.*?<\/think>/gs, '')));
+  $: isThinking = message.message.includes('<think>') && !message.message.includes('</think>');
+  $: thinkText = extractThinkText(message.message) || (isThinking ? message.message.replace(/<think>/gs, '') : '');
+  
 </script>
 
 {#if message.role === 'user'}
@@ -36,24 +46,29 @@
       <Avatar username="llama-robot-assistant" />
     </div>
     <div class="flex-1 mb-0 ml-1 mt-2 dark:text-white text-black whitespace-pre-line w-3/4">
-      {#if message.message.startsWith('<!--ERROR:')}
-        <Alert errorMessage={message.message.replace('<!--ERROR: ', '').replace('-->', '')}/>
-      {:else}
-        {#each tokens as token}
-          {#if token.type === "code"}
-            <Codeblock code={unsanitize(token.text)} language={token.lang} />
-          {:else if token.type === "table"}
-            <Table rows={token.rows} header={token.header} />
-          {:else if token.type === "list"}
-            <List ordered={token.ordered} items={token.items} />
-          {:else if token.type === "blockquote"}
-            <Quote quote={token.text} />
-          {:else if token.type === "heading"}
-            <Heading level={token.depth} text={token.text} />
-          {:else}
-            {@html marked.parse(token.raw)}
-          {/if}
-        {/each}
+      {#if thinkText.length > 0}
+        <Think {index} thinkText={thinkText} thinking={isThinking} />
+      {/if}
+      {#if !isThinking}
+        {#if message.message.startsWith('<!--ERROR:')}
+          <Alert errorMessage={message.message.replace('<!--ERROR: ', '').replace('-->', '')}/>
+        {:else}
+          {#each tokens as token}
+            {#if token.type === "code"}
+              <Codeblock code={unsanitize(token.text)} language={token.lang} />
+            {:else if token.type === "table"}
+              <Table rows={token.rows} header={token.header} />
+            {:else if token.type === "list"}
+              <List ordered={token.ordered} items={token.items} />
+            {:else if token.type === "blockquote"}
+              <Quote quote={token.text} />
+            {:else if token.type === "heading"}
+              <Heading level={token.depth} text={token.text} />
+            {:else}
+              {@html marked.parse(token.raw)}
+            {/if}
+          {/each}
+        {/if}
       {/if}
     </div>
   </div>

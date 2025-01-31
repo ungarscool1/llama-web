@@ -11,9 +11,6 @@ importers:
       '@popperjs/core':
         specifier: ^2.11.8
         version: 2.11.8
-      bits-ui:
-        specifier: ^0.21.10
-        version: 0.21.10(svelte@4.2.8)
       classnames:
         specifier: ^2.3.2
         version: 2.3.2
@@ -26,9 +23,6 @@ importers:
       keycloak-js:
         specifier: 23.0.3
         version: 23.0.3
-      lucide-svelte:
-        specifier: ^0.379.0
-        version: 0.379.0(svelte@4.2.8)
       marked:
         specifier: ^11.2.0
         version: 11.2.0
@@ -66,6 +60,9 @@ importers:
       autoprefixer:
         specifier: ^10.4.16
         version: 10.4.16(postcss@8.4.32)
+      bits-ui:
+        specifier: ^0.21.10
+        version: 0.21.10(svelte@4.2.8)
       eslint:
         specifier: ^8.56.0
         version: 8.56.0
@@ -75,6 +72,9 @@ importers:
       eslint-plugin-svelte:
         specifier: ^2.35.1
         version: 2.35.1(eslint@8.56.0)(svelte@4.2.8)
+      lucide-svelte:
+        specifier: ^0.379.0
+        version: 0.379.0(svelte@4.2.8)
       postcss:
         specifier: ^8.4.32
         version: 8.4.32
