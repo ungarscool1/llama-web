@@ -60,7 +60,6 @@ class Model:
             model=MODEL_DIR,
             tensor_parallel_size=GPU_CONFIG.count,
             gpu_memory_utilization=0.90,
-            max_model_len=4096,
             disable_log_requests=True,
             disable_log_stats=True,
         )
@@ -92,9 +91,12 @@ class Model:
             text_delta = output.outputs[0].text[index:]
             index = len(output.outputs[0].text)
             num_tokens = len(output.outputs[0].token_ids)
+            print(f"delta: {text_delta}")
 
             yield text_delta
-        print(f"Generated {num_tokens} tokens in {time.time() - start:.2f}s ({num_tokens / (time.time() - start):.2f} tokens/s)")
+        end = time.monotonic_ns()
+        elapsed_time = (end - start) / 1e9  # Convert nanoseconds to seconds
+        print(f"Generated {num_tokens} tokens in {elapsed_time:.2f}s ({num_tokens / elapsed_time:.2f} tokens/s)")
 
 
 from modal import asgi_app
