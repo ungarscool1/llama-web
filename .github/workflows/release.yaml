@@ -92,11 +92,11 @@ jobs:
           echo "AMD Digest: $amd_digest"
           echo "ARM Digest: $arm_digest"
           docker manifest create ghcr.io/${{ github.repository }}/client:latest \
-            --amend ghcr.io/${{ github.repository }}/client:${amd_digest} \
-            --amend ghcr.io/${{ github.repository }}/client:${arm_digest}
+            --amend ghcr.io/${{ github.repository }}/client:$amd_digest \
+            --amend ghcr.io/${{ github.repository }}/client:$arm_digest
           docker manifest create ghcr.io/${{ github.repository }}/client:${{ github.event.release.tag_name }} \
-            --amend ghcr.io/${{ github.repository }}/client:${amd_digest} \
-            --amend ghcr.io/${{ github.repository }}/client:${arm_digest}
+            --amend ghcr.io/${{ github.repository }}/client:$amd_digest \
+            --amend ghcr.io/${{ github.repository }}/client:$arm_digest
           docker manifest push ghcr.io/${{ github.repository }}/client:latest
           docker manifest push ghcr.io/${{ github.repository }}/client:${{ github.event.release.tag_name }}
   api-amd64:
@@ -166,10 +166,10 @@ jobs:
           echo "AMD Digest: $amd_digest"
           echo "ARM Digest: $arm_digest"
           docker manifest create ghcr.io/${{ github.repository }}/api:latest \
-            --amend ghcr.io/${{ github.repository }}/api:${amd_digest} \
-            --amend ghcr.io/${{ github.repository }}/api:${arm_digest}
+            --amend ghcr.io/${{ github.repository }}/api:$amd_digest \
+            --amend ghcr.io/${{ github.repository }}/api:$arm_digest
           docker manifest create ghcr.io/${{ github.repository }}/api:${{ github.event.release.tag_name }} \
-            --amend ghcr.io/${{ github.repository }}/api:${amd_digest} \
-            --amend ghcr.io/${{ github.repository }}/api:${arm_digest}
+            --amend ghcr.io/${{ github.repository }}/api:$amd_digest \
+            --amend ghcr.io/${{ github.repository }}/api:$arm_digest
           docker manifest push ghcr.io/${{ github.repository }}/api:latest
           docker manifest push ghcr.io/${{ github.repository }}/api:${{ github.event.release.tag_name }}
