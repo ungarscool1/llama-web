@@ -89,6 +89,8 @@ jobs:
         run: |
           amd_digest=$(docker manifest inspect ghcr.io/ungarscool1/llama-web-ci-test/client:latest-amd64 | jq '.manifests[] | select(.platform.architecture == "amd64") | .digest' -r)
           arm_digest=$(docker manifest inspect ghcr.io/ungarscool1/llama-web-ci-test/client:latest-arm64 | jq '.manifests[] | select(.platform.architecture == "arm64") | .digest' -r)
+          echo "AMD Digest: $amd_digest"
+          echo "ARM Digest: $arm_digest"
           docker manifest create ghcr.io/${{ github.repository }}/client:latest \
             --amend ghcr.io/${{ github.repository }}/client:${amd_digest} \
             --amend ghcr.io/${{ github.repository }}/client:${arm_digest}
@@ -161,6 +163,8 @@ jobs:
         run: |
           amd_digest=$(docker manifest inspect ghcr.io/ungarscool1/llama-web-ci-test/api:latest-amd64 | jq '.manifests[] | select(.platform.architecture == "amd64") | .digest' -r)
           arm_digest=$(docker manifest inspect ghcr.io/ungarscool1/llama-web-ci-test/api:latest-arm64 | jq '.manifests[] | select(.platform.architecture == "arm64") | .digest' -r)
+          echo "AMD Digest: $amd_digest"
+          echo "ARM Digest: $arm_digest"
           docker manifest create ghcr.io/${{ github.repository }}/api:latest \
             --amend ghcr.io/${{ github.repository }}/api:${amd_digest} \
             --amend ghcr.io/${{ github.repository }}/api:${arm_digest}
