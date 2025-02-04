@@ -22,10 +22,8 @@ jobs:
         with:
           node-version: 20
       - name: Install dependencies
-        working-directory: ./client
         run: pnpm install --frozen-lockfile
       - name: Build
-        working-directory: ./client
         run: pnpm run build
       - name: Build OCI image
         uses: ./.github/actions/docker
@@ -35,6 +33,7 @@ jobs:
           tag: ${{ github.event.release.tag_name }}
           image: client
           gh-repository: ${{ github.repository }}
+          
   client-arm64:
     runs-on: macos-latest
     needs: client-amd64
@@ -53,10 +52,8 @@ jobs:
         with:
           node-version: 20
       - name: Install dependencies
-        working-directory: ./client
         run: pnpm install --frozen-lockfile
       - name: Build
-        working-directory: ./client
         run: pnpm run build
       - name: Build OCI image
         uses: ./.github/actions/docker
@@ -66,6 +63,7 @@ jobs:
           tag: ${{ github.event.release.tag_name }}
           image: client
           gh-repository: ${{ github.repository }}
+          
   client-finalizer:
     runs-on: ubuntu-latest
     needs: [client-amd64, client-arm64]
@@ -95,6 +93,7 @@ jobs:
             --amend ghcr.io/${{ github.repository }}/client:latest-arm64
           docker manifest push ghcr.io/${{ github.repository }}/client:latest
           docker manifest push ghcr.io/${{ github.repository }}/client:${{ github.event.release.tag_name }}
+          
   api-amd64:
     runs-on: ubuntu-latest
     defaults:
@@ -106,13 +105,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Build OCI image
-      uses: ./.github/actions/docker
-      with:
-        working-directory: ./api
-        platform: linux/amd64
-        tag: ${{ github.event.release.tag_name }}
-        image: api
-        gh-repository: ${{ github.repository }}
+        uses: ./.github/actions/docker
+        with:
+          working-directory: ./api
+          platform: linux/amd64
+          tag: ${{ github.event.release.tag_name }}
+          image: api
+          gh-repository: ${{ github.repository }}
+          
   api-arm64:
     runs-on: macos-latest
     needs: api-amd64
@@ -125,13 +125,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Build OCI image
-      uses: ./.github/actions/docker
-      with:
-        working-directory: ./api
-        platform: linux/arm64
-        tag: ${{ github.event.release.tag_name }}
-        image: api
-        gh-repository: ${{ github.repository }}
+        uses: ./.github/actions/docker
+        with:
+          working-directory: ./api
+          platform: linux/arm64
+          tag: ${{ github.event.release.tag_name }}
+          image: api
+          gh-repository: ${{ github.repository }}
+          
   api-finalizer:
     runs-on: ubuntu-latest
     needs: [api-amd64, api-arm64]
