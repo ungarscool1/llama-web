@@ -18,6 +18,12 @@ inputs:
   gh-repository:
     description: 'The GitHub repository to push the image to'
     required: true
+  actor:
+    description: 'The GitHub actor to use for logging in'
+    required: true
+  actor-token:
+    description: 'The GitHub actor token to use for logging in'
+    required: true
 runs:
   using: composite
   steps:
@@ -29,8 +35,8 @@ runs:
       uses: docker/login-action@v3
       with:
         registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        username: ${{ inputs.actor }}
+        password: ${{ inputs.actor-token }}
     - name: Build and push
       shell: bash
       run: |

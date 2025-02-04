@@ -33,7 +33,8 @@ jobs:
           tag: ${{ github.event.release.tag_name }}
           image: client
           gh-repository: ${{ github.repository }}
-          
+          actor: ${{ github.actor }}
+          actor-token: ${{ secrets.GITHUB_TOKEN }}
   client-arm64:
     runs-on: macos-latest
     needs: client-amd64
@@ -63,7 +64,8 @@ jobs:
           tag: ${{ github.event.release.tag_name }}
           image: client
           gh-repository: ${{ github.repository }}
-          
+          actor: ${{ github.actor }}
+          actor-token: ${{ secrets.GITHUB_TOKEN }}
   client-finalizer:
     runs-on: ubuntu-latest
     needs: [client-amd64, client-arm64]
@@ -112,7 +114,8 @@ jobs:
           tag: ${{ github.event.release.tag_name }}
           image: api
           gh-repository: ${{ github.repository }}
-          
+          actor: ${{ github.actor }}
+          actor-token: ${{ secrets.GITHUB_TOKEN }}
   api-arm64:
     runs-on: macos-latest
     needs: api-amd64
@@ -132,7 +135,8 @@ jobs:
           tag: ${{ github.event.release.tag_name }}
           image: api
           gh-repository: ${{ github.repository }}
-          
+          actor: ${{ github.actor }}
+          actor-token: ${{ secrets.GITHUB_TOKEN }}
   api-finalizer:
     runs-on: ubuntu-latest
     needs: [api-amd64, api-arm64]
