@@ -36,7 +36,7 @@ jobs:
           actor: ${{ github.actor }}
           actor-token: ${{ secrets.GITHUB_TOKEN }}
   client-arm64:
-    runs-on: macos-latest
+    runs-on: ubuntu-24.04-arm
     needs: client-amd64
     defaults:
       run:
@@ -117,7 +117,7 @@ jobs:
           actor: ${{ github.actor }}
           actor-token: ${{ secrets.GITHUB_TOKEN }}
   api-arm64:
-    runs-on: macos-latest
+    runs-on: ubuntu-24.04-arm
     needs: api-amd64
     defaults:
       run:
