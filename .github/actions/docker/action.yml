@@ -45,4 +45,5 @@ runs:
         else
           ARCH_SUFFIX="amd64"
         fi
+        cd ${{ inputs.working-directory }}
         docker buildx build . --tag ghcr.io/${{ inputs.gh-repository }}/${{ inputs.image }}:${{ inputs.tag }}-${ARCH_SUFFIX} --tag ghcr.io/${{ inputs.gh-repository }}/${{ inputs.image }}:latest-${ARCH_SUFFIX} --platform ${{ inputs.platform }} --push
