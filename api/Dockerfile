@@ -2,7 +2,7 @@ FROM node:20-slim AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 ENV NODE_OPTIONS="--max-old-space-size=8192"
-RUN corepack enable
+RUN npm install -g corepack@latest && corepack enable
 COPY . /app
 WORKDIR /app
 
