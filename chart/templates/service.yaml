@@ -1,0 +1,42 @@
+{{ if .Values.client.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-client
+  labels:
+    app: {{ .Release.Name }}-client
+spec:
+  ports:
+    - port: 80
+      targetPort: 3000
+  selector:
+    app: {{ .Release.Name }}-client
+{{ end }}
+---
+{{ if .Values.api.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-api
+  labels:
+    app: {{ .Release.Name }}-api
+spec:
+  ports:
+    - port: 80
+      targetPort: 3000
+  selector:
+    app: {{ .Release.Name }}-api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-database
+  labels:
+    app: {{ .Release.Name }}-database
+spec:
+  ports:
+    - port: 27017
+      targetPort: 27017
+  selector:
+    app: {{ .Release.Name }}-database
+{{ end }}
