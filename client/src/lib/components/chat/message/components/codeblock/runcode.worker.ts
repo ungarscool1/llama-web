@@ -1,11 +1,37 @@
 import { WASI } from '@antonz/runno';
-import { env } from '$env/dynamic/public';
+//import { env } from '$env/dynamic/public';
+import { type RunCodeResult } from '$lib/types/runcode';
 
-export type RunCodeResult = {
-  output: string;
-  error: string;
-  image?: string;
+self.onmessage = async (event) => {
+  const { language, code } = event.data;
+  let result: RunCodeResult;
+
+  switch (language) {
+    case 'python':
+      result = await runPythonCode(code);
+      break;
+    case 'lua':
+      result = await runLuaCode(code);
+      break;
+    case 'ruby':
+      result = await runRubyCode(code);
+      break;
+    case 'php':
+      result = await runPhpCode(code);
+      break;
+    default:
+      result = { output: '', error: `Language ${language} is not supported` };
+      break;
+  }
+
+  self.postMessage(result);
 };
+
+async function loadPyodideScript() {
+  if (typeof loadPyodide === 'undefined') {
+    await import('https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js');
+  }
+}
 
 export async function runPythonCode(code: string): Promise<RunCodeResult> {
   const result = {
@@ -13,7 +39,8 @@ export async function runPythonCode(code: string): Promise<RunCodeResult> {
     error: '',
     image: ''
   }
-  if (env.PUBLIC_PYTHON_ENV === 'pyodide') {
+  //if (env.PUBLIC_PYTHON_ENV === 'pyodide') {
+    await loadPyodideScript();
     // @ts-ignore - pyodide loaded in codeblock.svelte
     const pyodide = await loadPyodide({
       stdout: (data: string) => result.output += data,
@@ -22,18 +49,36 @@ export async function runPythonCode(code: string): Promise<RunCodeResult> {
       fullStdLib: false,
       packageCacheDir: 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/',
     });
-    code = code.replace('plt.show()', 'import io\nbuf = io.BytesIO()\nfig.savefig(buf, format=\'png\')\nimport base64\nbuf.seek(0)\nimg_base64 = base64.b64encode(buf.read()).decode(\'utf-8\')')
-    await pyodide.loadPackagesFromImports(code);
+    if (code.includes('matplotlib')) {
+      code = `
+import base64
+import os
+import io
+os.environ["MPLBACKEND"] = "AGG"
+import matplotlib.pyplot
+
+_old_show = matplotlib.pyplot.show
+assert _old_show, "matplotlib.pyplot.show"
+
+def show(*, block=None):
+	buf = io.BytesIO()
+	matplotlib.pyplot.savefig(buf, format="png")
+	buf.seek(0)
+	llama_web_system_img_base64 = base64.b64encode(buf.read()).decode('utf-8')
+	matplotlib.pyplot.clf()
+	buf.close()
+matplotlib.pyplot.show = show\n\n` + code;
+    }
     try {
-      const runnable = await pyodide.runPython(code);
-      console.log(runnable);
-      if (pyodide.globals.get('img_base64')) {
-        result.image = pyodide.globals.get('img_base64');
+      await pyodide.loadPackagesFromImports(code);
+      await pyodide.runPython(code);
+      if (pyodide.globals.get('llama_web_system_img_base64')) {
+        result.image = pyodide.globals.get('llama_web_system_img_base64');
       }
     } catch (error) {
       console.error(error);
     }
-  } else {
+  /*} else {
     await WASI.start(fetch("/public/code/python.wasm"), {
       args: ['python', '-c', code],
       stdout: (data: string) => result.output += data,
@@ -45,7 +90,7 @@ export async function runPythonCode(code: string): Promise<RunCodeResult> {
         'IN_BROWSER': 'true',
       },
     });
-  }
+  }*/
   return result;
 }
 
@@ -117,3 +162,5 @@ export async function runPhpCode(code: string): Promise<RunCodeResult> {
   });
   return result;
 }
+
+export {};

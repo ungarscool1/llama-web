@@ -3,7 +3,7 @@
   import * as Tooltip from "$lib/components/ui/tooltip/index.js";
   import Icon from "$lib/components/ui/icon/icon.svelte";
   import hljs from 'highlight.js';
-  import { runPythonCode, runLuaCode, runRubyCode, runPhpCode, type RunCodeResult } from './runcode';
+  import { type RunCodeResult } from '$lib/types/runcode';
   import { env } from "$env/dynamic/public";
   
   export let code: string;
@@ -11,37 +11,23 @@
   $: highlightedCode = hljs.highlightAuto(code);
   let runOutput: RunCodeResult;
   $: runningCode = false;
+  const worker = new Worker(new URL('./runcode.worker.ts', import.meta.url), { type: 'module' });
+  
+  worker.onmessage = (event) => {
+    runOutput = event.data;
+    runningCode = false;
+  };
+  
   function copyToClipboard() {
     navigator.clipboard.writeText(code);
   }
+  
   const runnableLanguages = ['javascript', 'lua', 'php', 'python', 'ruby'];
   const runCode = async () => {
-    let result: RunCodeResult;
     runningCode = true;
-    switch (language) {
-      case 'python':
-        runOutput = await runPythonCode(code);
-        break;
-      case 'lua':
-        runOutput = await runLuaCode(code);
-        break;
-      case 'ruby':
-        runOutput = await runRubyCode(code);
-        break;
-      case 'php':
-        runOutput = await runPhpCode(code);
-        break;
-      default:
-        console.error(`Language ${language} is not supported`);
-        break;
-    }
-    runningCode = false;
+    worker.postMessage({ language, code });
   }
 </script>
-
-{#if env.PUBLIC_PYTHON_ENV === 'pyodide'}
-  <script async src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
-{/if}
 
 <div class="bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md">
   <div class="flex flex-row justify-between my-2 mx-4">
