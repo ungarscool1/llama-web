@@ -14,7 +14,6 @@
 
   worker.onmessage = (event) => {
     runOutput = event.data;
-    console.log(runOutput);
     runningCode = false;
   };
 

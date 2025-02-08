@@ -1,5 +1,4 @@
 import { WASI } from '@antonz/runno';
-//import { env } from '$env/dynamic/public';
 import { type RunCodeResult } from '$lib/types/runcode';
 
 self.onmessage = async (event) => {
@@ -39,7 +38,6 @@ export async function runPythonCode(code: string): Promise<RunCodeResult> {
     error: '',
     image: ''
   }
-  //if (env.PUBLIC_PYTHON_ENV === 'pyodide') {
     await loadPyodideScript();
     // @ts-ignore - pyodide loaded in codeblock.svelte
     const pyodide = await loadPyodide({
@@ -80,19 +78,6 @@ matplotlib.pyplot.show = show\n\n` + code;
     } catch (error) {
       console.error(error);
     }
-  /*} else {
-    await WASI.start(fetch("/public/code/python.wasm"), {
-      args: ['python', '-c', code],
-      stdout: (data: string) => result.output += data,
-      stderr: (data: string) => result.error += data,
-      env: {
-        'HOME': '/home/playground',
-        'PWD': '/home/playground',
-        'USER': 'playground',
-        'IN_BROWSER': 'true',
-      },
-    });
-  }*/
   return result;
 }
 
@@ -101,8 +86,8 @@ export async function runLuaCode(code: string): Promise<RunCodeResult> {
     output: '',
     error: ''
   }
-  const runnable = await WASI.start(fetch("/public/code/lua.wasm"), {
-    args: ['lua', '-e', code],
+  await WASI.start(fetch("/public/code/lua.wasm"), {
+    args: ['lua', '/home/playground/index.lua'],
     stdout: (data: string) => result.output += data,
     stderr: (data: string) => result.error += data,
     env: {
@@ -110,6 +95,18 @@ export async function runLuaCode(code: string): Promise<RunCodeResult> {
       'PWD': '/home/playground',
       'USER': 'playground',
       'IN_BROWSER': 'true',
+    },
+    fs: {
+      "/home/playground/index.lua": {
+        path: "/home/playground/index.lua",
+        timestamps: {
+          access: new Date(),
+          change: new Date(),
+          modification: new Date(),
+        },
+        mode: "string",
+        content: code,
+      }
     },
   });
   return result;
@@ -120,8 +117,8 @@ export async function runRubyCode(code: string): Promise<RunCodeResult> {
     output: '',
     error: ''
   }
-  const runnable = await WASI.start(fetch("/public/code/ruby.wasm"), {
-    args: ['ruby', '-e', code],
+  await WASI.start(fetch("/public/code/ruby.wasm"), {
+    args: ['ruby', '/home/playground/index.rb'],
     stdout: (data: string) => result.output += data,
     stderr: (data: string) => result.error += data,
     env: {
@@ -129,6 +126,18 @@ export async function runRubyCode(code: string): Promise<RunCodeResult> {
       'PWD': '/home/playground',
       'USER': 'playground',
       'IN_BROWSER': 'true',
+    },
+    fs: {
+      "/home/playground/index.rb": {
+        path: "/home/playground/index.rb",
+        timestamps: {
+          access: new Date(),
+          change: new Date(),
+          modification: new Date(),
+        },
+        mode: "string",
+        content: code,
+      }
     },
   });
   return result;
@@ -139,7 +148,10 @@ export async function runPhpCode(code: string): Promise<RunCodeResult> {
     output: '',
     error: ''
   }
-  const runnable = await WASI.start(fetch("/public/code/php.wasm"), {
+  if (!code.startsWith('<?php')) {
+    code = '<?php\n' + code;
+  }
+  await WASI.start(fetch("/public/code/php.wasm"), {
     args: ['php', '/home/playground/index.php'],
     stdout: (data: string) => result.output += data,
     stderr: (data: string) => result.error += data,
