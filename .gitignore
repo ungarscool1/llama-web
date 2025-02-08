@@ -6,3 +6,4 @@ build
 *.pem
 *.log
 __pycache__
+client/static/public/code/*.wasm

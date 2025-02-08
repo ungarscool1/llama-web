@@ -99,3 +99,15 @@ docker-compose up -d
 5. Press on `Use alternative compute backend`
 6. Enter the compute backend url (e.g. `https://my-alternative-compute-backend.domain.com`)
 7. Press on `Add the alternative backend model`
+
+### Setup code execution
+
+The code execution use a thing called Web assembly, who execute the code in a sandboxed environment directly in your browser.
+
+Supported languages:
+- Python (pyodide 0.26.2)
+- [Lua](https://unpkg.com/@antonz/lua-wasi/dist/lua.wasm) (5.4.5)
+- [Ruby](https://github.com/vmware-labs/webassembly-language-runtimes/releases/download/ruby%2F3.2.2%2B20230714-11be424/ruby-3.2.2.wasm) (3.2.2)
+- [PHP](https://github.com/vmware-labs/webassembly-language-runtimes/releases/download/php%2F8.2.6%2B20230714-11be424/php-cgi-8.2.6.wasm) (8.2.6)
+
+You have the choice between pyodide and python. Both are python interpreter compiled to WebAssembly, but pyodide can be slower than the other, because pyodide can download the python packages from the internet and pyodide is not included in the app.

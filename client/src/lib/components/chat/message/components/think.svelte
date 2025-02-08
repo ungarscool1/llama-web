@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as Accordion from "$lib/components/ui/accordion/index.js";
-  import Quote from "./quote.svelte";
+  import Quote from "$lib/components/chat/message/components/quote.svelte";
   export let thinkText: string;
   export let thinking: boolean;
   export let index: number;

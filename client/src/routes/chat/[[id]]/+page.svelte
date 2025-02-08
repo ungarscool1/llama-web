@@ -34,6 +34,20 @@
   function checkScroll() {
     atBottom = chatBox.scrollTop >= chatBox.scrollHeight - chatBox.clientHeight - 1;
   }
+  
+  function loadCodeHighlightCss() {
+    const userTheme = localStorage.getItem('color-theme');
+		const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    document.head.appendChild(link);
+		if (userTheme === 'dark' || (!userTheme && systemPrefersDark)) {
+			link.href = 'https://unpkg.com/@highlightjs/cdn-assets/styles/github-dark.min.css';
+		} else {
+			link.href = 'https://unpkg.com/@highlightjs/cdn-assets/styles/github.min.css';
+		}
+  }
 
   onMount(() => {
     if (localStorage.getItem('userInfo')) {
@@ -48,6 +62,7 @@
       localStorage.setItem('previousPage', $page.url.pathname);
       goto('/');
     }
+    loadCodeHighlightCss()
     fetchMessage();
     pingApi();
     chatBox.addEventListener('scroll', checkScroll);
@@ -258,7 +273,3 @@
     {/if}
   </div>
 </main>
-
-<style>
-  @import 'https://unpkg.com/@highlightjs/cdn-assets/styles/github-dark.min.css';
-</style>
