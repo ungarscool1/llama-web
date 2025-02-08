@@ -43,8 +43,8 @@ export async function runPythonCode(code: string): Promise<RunCodeResult> {
     await loadPyodideScript();
     // @ts-ignore - pyodide loaded in codeblock.svelte
     const pyodide = await loadPyodide({
-      stdout: (data: string) => result.output += data,
-      stderr: (data: string) => result.error += data,
+      stdout: (data: string) => result.output += data + '\n',
+      stderr: (data: string) => result.error += data + '\n',
       indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/',
       fullStdLib: false,
       packageCacheDir: 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/',
