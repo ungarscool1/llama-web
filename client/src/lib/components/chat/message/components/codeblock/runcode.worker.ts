@@ -59,11 +59,13 @@ import matplotlib.pyplot
 
 _old_show = matplotlib.pyplot.show
 assert _old_show, "matplotlib.pyplot.show"
+llama_web_system_img_base64 = None
 
 def show(*, block=None):
 	buf = io.BytesIO()
 	matplotlib.pyplot.savefig(buf, format="png")
 	buf.seek(0)
+	global llama_web_system_img_base64
 	llama_web_system_img_base64 = base64.b64encode(buf.read()).decode('utf-8')
 	matplotlib.pyplot.clf()
 	buf.close()
