@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Release.Name }}-sa
+  labels:
+    app: {{ .Release.Name }}
+  annotations:
+    {{- with .Values.serviceAccount.annotations }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
